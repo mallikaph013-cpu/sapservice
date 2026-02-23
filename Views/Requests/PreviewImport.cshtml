@@ -1,0 +1,119 @@
+@model IEnumerable<myapp.Models.RequestItem>
+
+@{
+    ViewData["Title"] = "Preview Import";
+}
+
+<style>
+    .table-responsive {
+        max-height: 600px; 
+    }
+    th, td {
+        white-space: nowrap; 
+    }
+    .table thead th {
+        background-color: #343a40;
+        color: #fff;
+        position: sticky;
+        top: 0;
+        z-index: 1;
+    }
+    .btn-container {
+        padding: 20px 0;
+    }
+</style>
+
+<div class="container mt-4">
+    <h1>Preview Imported Data</h1>
+    <p>Please review the data below. If everything is correct, click the "Confirm & Save" button to import the requests.</p>
+
+    @if (Model != null && Model.Any())
+    {
+        <div class="table-responsive shadow-sm">
+            <table class="table table-bordered table-striped table-hover">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>Plant FG</th>
+                        <th>Description</th>
+                        <th>Item Code</th>
+                        <th>English Mat Description</th>
+                        <th>Model Name</th>
+                        <th>Base Unit</th>
+                        <th>Material Group</th>
+                        <th>Division Code</th>
+                        <th>Profit Center</th>
+                        <th>Distribution Channel</th>
+                        <th>Standard Pack</th>
+                        <th>BOI Code</th>
+                        <th>MRP Controller</th>
+                        <th>Storage Location</th>
+                        <th>Production Supervisor</th>
+                        <th>Costing Lot Size</th>
+                        <th>Valuation Class</th>
+                        <th>Price</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>@item.PlantFG</td>
+                            <td>@item.Description</td>
+                            <td>@item.ItemCode</td>
+                            <td>@item.EnglishMatDescription</td>
+                            <td>@item.ModelName</td>
+                            <td>@item.BaseUnit</td>
+                            <td>@item.MaterialGroup</td>
+                            <td>@item.DivisionCode</td>
+                            <td>@item.ProfitCenter</td>
+                            <td>@item.DistributionChannel</td>
+                            <td>@item.StandardPack</td>
+                            <td>@item.BoiCode</td>
+                            <td>@item.MrpController</td>
+                            <td>@item.StorageLocation</td>
+                            <td>@item.ProductionSupervisor</td>
+                            <td>@item.CostingLotSize</td>
+                            <td>@item.ValClass</td>
+                            <td>@item.Price</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div class="text-center btn-container">
+            <form asp-action="SaveImported" method="post">
+                @for (int i = 0; i < Model.Count(); i++)
+                {
+                    <input type="hidden" name="requests[@i].PlantFG" value="@Model.ElementAt(i).PlantFG" />
+                    <input type="hidden" name="requests[@i].Description" value="@Model.ElementAt(i).Description" />
+                    <input type="hidden" name="requests[@i].ItemCode" value="@Model.ElementAt(i).ItemCode" />
+                    <input type="hidden" name="requests[@i].EnglishMatDescription" value="@Model.ElementAt(i).EnglishMatDescription" />
+                    <input type="hidden" name="requests[@i].ModelName" value="@Model.ElementAt(i).ModelName" />
+                    <input type="hidden" name="requests[@i].BaseUnit" value="@Model.ElementAt(i).BaseUnit" />
+                    <input type="hidden" name="requests[@i].MaterialGroup" value="@Model.ElementAt(i).MaterialGroup" />
+                    <input type="hidden" name="requests[@i].DivisionCode" value="@Model.ElementAt(i).DivisionCode" />
+                    <input type="hidden" name="requests[@i].ProfitCenter" value="@Model.ElementAt(i).ProfitCenter" />
+                    <input type="hidden" name="requests[@i].DistributionChannel" value="@Model.ElementAt(i).DistributionChannel" />
+                    <input type="hidden" name="requests[@i].StandardPack" value="@Model.ElementAt(i).StandardPack" />
+                    <input type="hidden" name="requests[@i].BoiCode" value="@Model.ElementAt(i).BoiCode" />
+                    <input type="hidden" name="requests[@i].MrpController" value="@Model.ElementAt(i).MrpController" />
+                    <input type="hidden" name="requests[@i].StorageLocation" value="@Model.ElementAt(i).StorageLocation" />
+                    <input type="hidden" name="requests[@i].ProductionSupervisor" value="@Model.ElementAt(i).ProductionSupervisor" />
+                    <input type="hidden" name="requests[@i].CostingLotSize" value="@Model.ElementAt(i).CostingLotSize" />
+                    <input type="hidden" name="requests[@i].ValClass" value="@Model.ElementAt(i).ValClass" />
+                    <input type="hidden" name="requests[@i].Price" value="@Model.ElementAt(i).Price" />
+                }
+                <button type="submit" class="btn btn-success btn-lg">Confirm & Save</button>
+                <a asp-action="Create" class="btn btn-danger btn-lg">Cancel</a>
+            </form>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-warning" role="alert">
+            No data was found in the uploaded file, or the file is invalid. 
+            <a asp-action="Create" class="alert-link">Return to Create page</a>.
+        </div>
+    }
+</div>

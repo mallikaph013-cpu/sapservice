@@ -1,0 +1,62 @@
+
+@{ ViewData["Title"] = "Home Page"; }
+
+<style>
+  .hero {
+    text-align: center;
+    padding: 4rem 1rem;
+    background-color: #f8f9fa;
+    border-radius: 0.5rem;
+    margin-bottom: 2rem;
+  }
+  .hero h1 {
+    font-size: 3rem;
+    font-weight: 700;
+  }
+  .hero p {
+    font-size: 1.25rem;
+    color: #6c757d;
+  }
+  .features {
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+  }
+  .feature-card {
+    background-color: #ffffff;
+    border: 1px solid #dee2e6;
+    border-radius: 0.5rem;
+    padding: 2rem;
+    text-align: center;
+    flex: 1 1 300px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+  .feature-card h3 {
+    font-size: 1.75rem;
+    margin-bottom: 1rem;
+  }
+</style>
+
+<div class="hero">
+  <h1 class="display-4">Welcome to SAP Service</h1>
+  <p class="lead">The simplest way to manage your service requests.</p>
+  <a asp-controller="Requests" asp-action="Index" class="btn btn-primary btn-lg">View Requests</a>
+</div>
+
+<div class="features">
+  <div class="feature-card">
+    <h3><i class="fas fa-list-check"></i> Easy Tracking</h3>
+    <p>Keep track of all your requests in one place. Never lose a task again.</p>
+  </div>
+  <div class="feature-card">
+    <h3><i class="fas fa-rocket"></i> Prioritize & Organize</h3>
+    <p>Set priorities and statuses to effectively manage your workflow.</p>
+  </div>
+  <div class="feature-card">
+    <h3><i class="fas fa-users"></i> For Everyone</h3>
+    <p>A simple and intuitive interface for individuals and teams.</p>
+  </div>
+</div>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />

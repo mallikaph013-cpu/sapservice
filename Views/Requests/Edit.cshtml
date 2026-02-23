@@ -1,0 +1,231 @@
+@model myapp.Models.ViewModels.CreateRequestViewModel
+
+@{
+    ViewData["Title"] = "Edit Service Request";
+}
+
+<style>
+    /* Using the same styles as Create.cshtml */
+    body {
+        background-color: #f4f7f6;
+        color: #333;
+    }
+
+    .form-container {
+        background: #ffffff;
+        padding: 40px;
+        border-radius: 12px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        margin-top: 50px;
+        margin-bottom: 50px;
+    }
+    
+    h1, h4 {
+        font-weight: 700;
+        color: #2c3e50;
+        margin-bottom: 10px;
+    }
+
+    .subtitle {
+        color: #7f8c8d;
+        margin-bottom: 30px;
+    }
+    
+    .control-label {
+        font-weight: 600;
+        margin-bottom: .5rem;
+        color: #34495e;
+        font-size: 0.85rem; 
+    }
+
+    .form-control, .form-control:disabled, .form-control[readonly] {
+        border-radius: 8px;
+        border: 1px solid #dcdcdc;
+        padding: 10px 15px;
+        transition: all 0.3s ease;
+    }
+    
+    .form-control:focus {
+        border-color: #3498db;
+        box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+        outline: none;
+    }
+     input.form-control[readonly] {
+         background-color: #ecf0f1;
+        cursor: not-allowed;
+    }
+</style>
+
+<div class="form-container">
+    <div class="text-center">
+        <h1>Edit Service Request</h1>
+        <p class="subtitle">Update the details of your request below.</p>
+    </div>
+    <hr />
+
+    <form asp-action="Edit">
+        <input type="hidden" asp-for="Id" />
+        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+        <h4>Requester Information</h4>
+        <div class="row mb-4">
+            <div class="col-md-4"><div class="form-group"><label asp-for="RequesterName" class="control-label"></label><input asp-for="RequesterName" class="form-control" readonly /></div></div>
+            <div class="col-md-3"><div class="form-group"><label asp-for="Department" class="control-label"></label><input asp-for="Department" class="form-control" readonly /></div></div>
+            <div class="col-md-2"><div class="form-group"><label asp-for="Section" class="control-label"></label><input asp-for="Section" class="form-control" readonly /></div></div>
+            <div class="col-md-3"><div class="form-group"><label asp-for="Plant" class="control-label"></label><input asp-for="Plant" class="form-control" readonly /></div></div>
+        </div>
+
+        <hr />
+
+        <h4>Request Details</h4>
+         <div class="row mb-4">
+            <div class="col-md-6"><div class="form-group"><label asp-for="RequestType" class="control-label"></label><select asp-for="RequestType" id="RequestType" class="form-control" asp-items="Html.GetEnumSelectList<myapp.Models.RequestType>()"></select><span asp-validation-for="RequestType" class="text-danger"></span></div></div>
+             <div id="plant-fg-group" class="col-md-6" style="display: none;"><div class="form-group"><label asp-for="PlantFG" class="control-label"></label><select asp-for="PlantFG" class="form-control"><option value="">-- Select Plant --</option><option value="6021">6021 (Device)</option><option value="6031">6031 (Assembly)</option><option value="6051">6051 (Injection)</option><option value="6081">6081 (IPO)</option><option value="6060">6060</option></select><span asp-validation-for="PlantFG" class="text-danger"></span></div></div>
+            <div class="col-md-12"><div class="form-group"><label asp-for="Description" class="control-label"></label><textarea asp-for="Description" class="form-control" rows="3"></textarea><span asp-validation-for="Description" class="text-danger"></span></div></div>
+        </div>
+        
+        <!-- All Material Forms from Create.cshtml go here -->
+        <!-- The same JavaScript will be used to show/hide them -->
+        @Html.Partial("_MaterialForms", Model)
+
+
+        <div class="form-group text-center mt-5">
+            <input type="submit" value="Save Changes" class="btn btn-primary" />
+        </div>
+    </form>
+    
+    <div class="text-center">
+        <a asp-action="Index" class="back-to-list">Back to List</a>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // The script is nearly identical to Create.cshtml, but we need to populate existing BOM/Routing data.
+
+        const requestTypeSelect = document.getElementById('RequestType');
+        // ... (all other container consts are needed here as in Create.cshtml)
+        const fgFieldsContainer = document.getElementById('fg-fields-container');
+        const smFieldsContainer = document.getElementById('sm-fields-container');
+        const rmFieldsContainer = document.getElementById('rm-fields-container');
+        const toolingbFieldsContainer = document.getElementById('toolingb-fields-container');
+        const toolingbfgFieldsContainer = document.getElementById('toolingbfg-fields-container');
+        const toolingbpuFieldsContainer = document.getElementById('toolingbpu-fields-container');
+        const distributionchanelFieldsContainer = document.getElementById('distributionchanel-fields-container');
+        const addstorageFieldsContainer = document.getElementById('addstorage-fields-container');
+        const bomFieldsContainer = document.getElementById('bom-fields-container');
+        const routingFieldsContainer = document.getElementById('routing-fields-container');
+        const ipoFieldsContainer = document.getElementById('ipo-fields-container');
+        const plantFgGroup = document.getElementById('plant-fg-group');
+
+        const bomTableBody = document.getElementById('bom-items-body');
+        const routingTableBody = document.getElementById('routing-items-body');
+
+        // Enums for RequestType
+        const fgEnumValue = '0'; 
+        const smEnumValue = '1'; 
+        const rmEnumValue = '2';
+        const toolingBEnumValue = '3';
+        const toolingBFGEnumValue = '4';
+        const toolingBPUEnumValue = '5';
+        const bomEnumValue = '6';
+        const routingEnumValue = '7';
+        const addStorageEnumValue = '8';
+        const distributionChanelEnumValue = '9';
+        const ipoEnumValue = '10';
+
+        function toggleMaterialFields() {
+            const selectedValue = requestTypeSelect.value;
+            // Hide all
+            fgFieldsContainer.style.display = 'none';
+            smFieldsContainer.style.display = 'none';
+            rmFieldsContainer.style.display = 'none';
+            toolingbFieldsContainer.style.display = 'none';
+            toolingbfgFieldsContainer.style.display = 'none';
+            toolingbpuFieldsContainer.style.display = 'none';
+            distributionchanelFieldsContainer.style.display = 'none';
+            addstorageFieldsContainer.style.display = 'none';
+            bomFieldsContainer.style.display = 'none';
+            routingFieldsContainer.style.display = 'none';
+            ipoFieldsContainer.style.display = 'none';
+            plantFgGroup.style.display = 'none';
+
+            // Show selected
+            if (selectedValue === fgEnumValue) { fgFieldsContainer.style.display = 'block'; plantFgGroup.style.display = 'block'; }
+            else if (selectedValue === smEnumValue) { smFieldsContainer.style.display = 'block'; }
+            else if (selectedValue === rmEnumValue) { rmFieldsContainer.style.display = 'block'; }
+            else if (selectedValue === toolingBEnumValue) { toolingbFieldsContainer.style.display = 'block'; }
+            else if (selectedValue === toolingBFGEnumValue) { toolingbfgFieldsContainer.style.display = 'block'; }
+            else if (selectedValue === toolingBPUEnumValue) { toolingbpuFieldsContainer.style.display = 'block'; }
+            else if (selectedValue === distributionChanelEnumValue) { distributionchanelFieldsContainer.style.display = 'block'; }
+            else if (selectedValue === addStorageEnumValue) { addstorageFieldsContainer.style.display = 'block'; }
+            else if (selectedValue === bomEnumValue) { bomFieldsContainer.style.display = 'block'; }
+            else if (selectedValue === routingEnumValue) { routingFieldsContainer.style.display = 'block'; }
+            else if (selectedValue === ipoEnumValue) { ipoFieldsContainer.style.display = 'block'; }
+        }
+
+        // --- BOM, Routing, etc. logic from Create.cshtml is needed here ---
+        // (The full JS logic for adding/removing/re-indexing rows)
+
+        // ** NEW FOR EDIT **
+        // Populate existing BOM and Routing data on page load
+        function populateExistingData() {
+            const bomData = @Html.Raw(Json.Serialize(Model.Components));
+            bomData.forEach((component, index) => {
+                const newRow = createBomRow(component.level, index);
+                // Populate fields
+                newRow.querySelector('[name$=".ItemCat"]').value = component.itemCat;
+                newRow.querySelector('[name$=".ComponentNumber"]').value = component.componentNumber;
+                newRow.querySelector('[name$=".Description"]').value = component.description;
+                newRow.querySelector('[name$=".ItemQuantity"]').value = component.itemQuantity;
+                newRow.querySelector('[name$=".Unit"]').value = component.unit;
+                newRow.querySelector('[name$=".BomUsage"]').value = component.bomUsage;
+                newRow.querySelector('[name$=".Plant"]').value = component.plant;
+                newRow.querySelector('[name$=".Sloc"]').value = component.sloc;
+                bomTableBody.appendChild(newRow);
+            });
+            if(bomData.length > 0) reIndexBomTable();
+
+            const routingData = @Html.Raw(Json.Serialize(Model.Routings));
+            routingData.forEach((routing, index) => {
+                const newRow = createRoutingRow(index);
+                 // Populate fields
+                newRow.querySelector('[name$=".Material"]').value = routing.material;
+                newRow.querySelector('[name$=".Description"]').value = routing.description;
+                newRow.querySelector('[name$=".WorkCenter"]').value = routing.workCenter;
+                newRow.querySelector('[name$=".Operation"]').value = routing.operation;
+                newRow.querySelector('[name$=".BaseQty"]').value = routing.baseQty;
+                newRow.querySelector('[name$=".Unit"]').value = routing.unit;
+                newRow.querySelector('[name$=".DirectLaborCosts"]').value = routing.directLaborCosts;
+                newRow.querySelector('[name$=".DirectExpenses"]').value = routing.directExpenses;
+                newRow.querySelector('[name$=".AllocationExpense"]').value = routing.allocationExpense;
+                newRow.querySelector('[name$=".ProductionVersionCode"]').value = routing.productionVersionCode;
+                newRow.querySelector('[name$=".Version"]').value = routing.version;
+                newRow.querySelector('[name$=".ValidFrom"]').value = routing.validFrom ? routing.validFrom.split('T')[0] : '';
+                newRow.querySelector('[name$=".ValidTo"]').value = routing.validTo ? routing.validTo.split('T')[0] : '';
+                newRow.querySelector('[name$=".MaximumLotSize"]').value = routing.maximumLotSize;
+                newRow.querySelector('[name$=".Group"]').value = routing.group;
+                newRow.querySelector('[name$=".GroupCounter"]').value = routing.groupCounter;
+                routingTableBody.appendChild(newRow);
+            });
+            if(routingData.length > 0) reIndexRoutingTable();
+        }
+
+        // Paste the full row creation and re-indexing functions here
+        // from Create.cshtml, then call them.
+        // function createBomRow(...) { ... }
+        // function reIndexBomTable(...) { ... }
+        // function createRoutingRow(...) { ... }
+        // function reIndexRoutingTable(...) { ... }
+        // etc.
+        
+        // Initial Setup
+        toggleMaterialFields();
+        populateExistingData();
+        requestTypeSelect.addEventListener('change', toggleMaterialFields);
+
+    });
+    </script>
+}

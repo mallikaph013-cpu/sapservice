@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "/build/myapp/myapp.csproj": {}
+    "/home/user/sapservice/myapp.csproj": {}
   },
   "projects": {
-    "/build/myapp/myapp.csproj": {
+    "/home/user/sapservice/myapp.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/build/myapp/myapp.csproj",
+        "projectUniqueName": "/home/user/sapservice/myapp.csproj",
         "projectName": "myapp",
-        "projectPath": "/build/myapp/myapp.csproj",
+        "projectPath": "/home/user/sapservice/myapp.csproj",
         "packagesPath": "/home/user/.nuget/packages/",
-        "outputPath": "/build/myapp/obj/",
+        "outputPath": "/home/user/sapservice/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "/home/user/.nuget/NuGet/NuGet.Config"
@@ -43,6 +43,48 @@
       "frameworks": {
         "net9.0": {
           "targetAlias": "net9.0",
+          "dependencies": {
+            "BCrypt.Net-Next": {
+              "target": "Package",
+              "version": "[4.1.0, )"
+            },
+            "ClosedXML": {
+              "target": "Package",
+              "version": "[0.105.0, )"
+            },
+            "EPPlus": {
+              "target": "Package",
+              "version": "[8.4.2, )"
+            },
+            "Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore": {
+              "target": "Package",
+              "version": "[9.0.0, )"
+            },
+            "Microsoft.AspNetCore.Identity.EntityFrameworkCore": {
+              "target": "Package",
+              "version": "[9.0.0, )"
+            },
+            "Microsoft.EntityFrameworkCore.Design": {
+              "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[9.0.0, )"
+            },
+            "Microsoft.EntityFrameworkCore.SqlServer": {
+              "target": "Package",
+              "version": "[9.0.0, )"
+            },
+            "Microsoft.EntityFrameworkCore.Sqlite": {
+              "target": "Package",
+              "version": "[9.0.0, )"
+            },
+            "Microsoft.EntityFrameworkCore.Tools": {
+              "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[9.0.0, )"
+            }
+          },
           "imports": [
             "net461",
             "net462",

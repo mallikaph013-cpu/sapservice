@@ -1,0 +1,279 @@
+@model myapp.Models.ViewModels.CreateRequestViewModel
+
+<!-- FG FIELDS-->
+<div id="fg-fields-container" style="display: none;">
+    <hr />
+    <h4>Material Information (FG)</h4>
+    <div class="row mb-3"><div class="col-md-4"><div class="form-group"><label asp-for="ItemCode" class="control-label"></label><input asp-for="ItemCode" class="form-control" /><span asp-validation-for="ItemCode" class="text-danger"></span></div></div><div class="col-md-4"><div class="form-group"><label asp-for="EnglishMatDescription" class="control-label">English Mat/Description (max 40)</label><input asp-for="EnglishMatDescription" class="form-control" maxlength="40" /><span asp-validation-for="EnglishMatDescription" class="text-danger"></span></div></div><div class="col-md-4"><div class="form-group"><label asp-for="ModelName" class="control-label"></label><input asp-for="ModelName" class="form-control" /><span asp-validation-for="ModelName" class="text-danger"></span></div></div></div>
+    <div class="row mb-3"><div class="col-md-4"><div class="form-group"><label asp-for="BaseUnit" class="control-label"></label><input asp-for="BaseUnit" class="form-control" /><span asp-validation-for="BaseUnit" class="text-danger"></span></div></div><div class="col-md-4"><div class="form-group"><label asp-for="MaterialGroup" class="control-label"></label><input asp-for="MaterialGroup" class="form-control" /><span asp-validation-for="MaterialGroup" class="text-danger"></span></div></div><div class="col-md-4"><div class="form-group"><label asp-for="ExternalMaterialGroup" class="control-label"></label><input asp-for="ExternalMaterialGroup" class="form-control" /><span asp-validation-for="ExternalMaterialGroup" class="text-danger"></span></div></div></div>
+    <div class="row mb-3"><div class="col-md-4"><div class="form-group"><label asp-for="DivisionCode" class="control-label"></label><input asp-for="DivisionCode" class="form-control" /><span asp-validation-for="DivisionCode" class="text-danger"></span></div></div><div class="col-md-4"><div class="form-group"><label asp-for="ProfitCenter" class="control-label"></label><input asp-for="ProfitCenter" class="form-control" /><span asp-validation-for="ProfitCenter" class="text-danger"></span></div></div><div class="col-md-4"><div class="form-group"><label asp-for="DistributionChannel" class="control-label"></label><select asp-for="DistributionChannel" class="form-control" asp-items="Html.GetEnumSelectList<myapp.Models.DistributionChannel>()"><option value="">-- Select Channel --</option></select><span asp-validation-for="DistributionChannel" class="text-danger"></span></div></div></div>
+    <div class="row mb-3"><div class="col-md-4"><div class="form-group"><label asp-for="BoiCode" class="control-label">BOI CODE (For Dist 20, 30)</label><input asp-for="BoiCode" class="form-control" /><span asp-validation-for="BoiCode" class="text-danger"></span></div></div><div class="col-md-4"><div class="form-group"><label asp-for="MrpController" class="control-label"></label><input asp-for="MrpController" class="form-control" /><span asp-validation-for="MrpController" class="text-danger"></span></div></div><div class="col-md-4"><div class="form-group"><label asp-for="StorageLocation" class="control-label">Storage Loc (BXXX)</label><input asp-for="StorageLocation" class="form-control" /><span asp-validation-for="StorageLocation" class="text-danger"></span></div></div></div>
+    <div class="row mb-3"><div class="col-md-4"><div class="form-group"><label asp-for="ProductionSupervisor" class="control-label"></label><input asp-for="ProductionSupervisor" class="form-control" /><span asp-validation-for="ProductionSupervisor" class="text-danger"></span></div></div><div class="col-md-4"><div class="form-group"><label asp-for="CostingLotSize" class="control-label"></label><input asp-for="CostingLotSize" class="form-control" /><span asp-validation-for="CostingLotSize" class="text-danger"></span></div></div><div class="col-md-4"><div class="form-group"><label asp-for="ValClass" class="control-label"></label><input asp-for="ValClass" class="form-control" /><span asp-validation-for="ValClass" class="text-danger"></span></div></div></div>
+</div>
+
+<!-- SM FIELDS -->
+<div id="sm-fields-container" style="display: none;">
+    <hr />
+    <h4>Material Information (SM)</h4>
+    <div class="row mb-3"><div class="col-md-4"><div class="form-group"><label asp-for="ItemCode" class="control-label"></label><input asp-for="ItemCode" class="form-control" /></div></div><div class="col-md-8"><div class="form-group"><label asp-for="EnglishMatDescription" class="control-label"></label><input asp-for="EnglishMatDescription" class="form-control" /></div></div></div>
+    <div class="row mb-3"><div class="col-md-4"><div class="form-group"><label asp-for="BaseUnit" class="control-label"></label><input asp-for="BaseUnit" class="form-control" /></div></div><div class="col-md-4"><div class="form-group"><label asp-for="PlantFG" class="control-label">Plant</label><select asp-for="PlantFG" class="form-control"><option value="">-- Select Plant --</option><option value="6021">6021</option><option value="6031">6031</option><option value="6051">6051</option><option value="6081">6081</option><option value="6090">6090</option></select><span asp-validation-for="PlantFG" class="text-danger"></span></div></div><div class="col-md-4"><div class="form-group"><label asp-for="MaterialGroup" class="control-label"></label><input asp-for="MaterialGroup" class="form-control" /></div></div></div>
+    <div class="row mb-3"><div class="col-md-4"><div class="form-group"><label>External Material Group</label><input class="form-control" readonly value="SM"/></div></div><div class="col-md-4"><div class="form-group"><label asp-for="DivisionCode" class="control-label"></label><input asp-for="DivisionCode" class="form-control" /></div></div><div class="col-md-4"><div class="form-group"><label asp-for="ProfitCenter" class="control-label"></label><input asp-for="ProfitCenter" class="form-control" /></div></div></div>
+    <div class="row mb-3"><div class="col-md-4"><div class="form-group"><label asp-for="MrpController" class="control-label"></label><input asp-for="MrpController" class="form-control" /></div></div><div class="col-md-4"><div class="form-group"><label asp-for="StorageLocation" class="control-label"></label><input asp-for="StorageLocation" class="form-control" /></div></div><div class="col-md-4"><div class="form-group"><label asp-for="ProductionSupervisor" class="control-label"></label><input asp-for="ProductionSupervisor" class="form-control" /></div></div></div>
+     <div class="row mb-3"><div class="col-md-4"><div class="form-group"><label asp-for="CostingLotSize" class="control-label"></label><input asp-for="CostingLotSize" class="form-control" /></div></div><div class="col-md-4"><div class="form-group"><label asp-for="StandardPack" class="control-label"></label><input asp-for="StandardPack" class="form-control" /><span asp-validation-for="StandardPack" class="text-danger"></span></div></div></div>
+</div>
+
+<!-- RM FIELDS -->
+<div id="rm-fields-container" style="display: none;">
+    <hr />
+    <h4>Material Information (RM)</h4>
+    <div class="row mb-3"><div class="col-md-4"><div class="form-group"><label asp-for="ItemCode" class="control-label"></label><input asp-for="ItemCode" class="form-control" /></div></div><div class="col-md-4"><div class="form-group"><label asp-for="EnglishMatDescription" class="control-label">Part name</label><input asp-for="EnglishMatDescription" class="form-control" /></div></div><div class="col-md-4"><div class="form-group"><label asp-for="ModelName" class="control-label">Model</label><input asp-for="ModelName" class="form-control" /></div></div></div>
+    <div class="row mb-3"><div class="col-md-4"><div class="form-group"><label asp-for="BaseUnit" class="control-label"></label><input asp-for="BaseUnit" class="form-control" /></div></div><div class="col-md-4"><div class="form-group"><label asp-for="BoiDescription" class="control-label"></label><input asp-for="BoiDescription" class="form-control" /></div></div><div class="col-md-4"><div class="form-group"><label asp-for="PlantFG" class="control-label">Plant</label><select asp-for="PlantFG" class="form-control"><option value="">-- Select Plant --</option><option value="6021">6021 (Device)</option><option value="6031">6031 (Assembly)</option><option value="6051">6051 (Injection)</option><option value="6081">6081 (IPO)</option></select></div></div></div>
+    <div class="row mb-3"><div class="col-md-4"><div class="form-group"><label asp-for="MaterialGroup" class="control-label"></label><input asp-for="MaterialGroup" class="form-control" /></div></div><div class="col-md-4"><div class="form-group"><label asp-for="ExternalMaterialGroup" class="control-label"></label><input asp-for="ExternalMaterialGroup" class="form-control" /></div></div><div class="col-md-4"><div class="form-group"><label asp-for="DivisionCode" class="control-label"></label><input asp-for="DivisionCode" class="form-control" /></div></div></div>
+    <div class="row mb-3"><div class="col-md-4"><div class="form-group"><label asp-for="ProfitCenter" class="control-label"></label><input asp-for="ProfitCenter" class="form-control" /></div></div><div class="col-md-4"><div class="form-group"><label asp-for="PurchasingGroup" class="control-label"></label><input asp-for="PurchasingGroup" class="form-control" /></div></div><div class="col-md-4"><div class="form-group"><label asp-for="MakerMfrPartNumber" class="control-label">Maker / Mfr Part Number</label><input asp-for="MakerMfrPartNumber" class="form-control" /></div></div></div>
+    <div class="row mb-3"><div class="col-md-4"><div class="form-group"><label asp-for="CommCodeTariffCode" class="control-label">Comm Code/Tariff Code</label><input asp-for="CommCodeTariffCode" class="form-control" /></div></div><div class="col-md-4"><div class="form-group"><label asp-for="TraffCodePercentage" class="control-label">% traff code Mtl Purchasing</label><input asp-for="TraffCodePercentage" class="form-control" /></div></div><div class="col-md-4"><div class="form-group"><label asp-for="MrpController" class="control-label"></label><input asp-for="MrpController" class="form-control" /></div></div></div>
+    <div class="row mb-3"><div class="col-md-4"><div class="form-group"><label asp-for="StorageLocation" class="control-label">Storage Loc(DP**)</label><input asp-for="StorageLocation" class="form-control" /></div></div><div class="col-md-4"><div class="form-group"><label asp-for="StorageLocationB1" class="control-label">Storage Loc(B1**)</label><input asp-for="StorageLocationB1" class="form-control" /></div></div><div class="col-md-4"><div class="form-group"><label asp-for="PriceControl" class="control-label">Price Control(S/V)</label><input asp-for="PriceControl" class="form-control" /></div></div></div>
+    <div class="row mb-3"><div class="col-md-4"><div class="form-group"><label asp-for="ValClass" class="control-label"></label><input asp-for="ValClass" class="form-control" /></div></div><div class="col-md-4"><div class="form-group"><label asp-for="Price" class="control-label">Price(Quotation)</label><input asp-for="Price" class="form-control" /></div></div><div class="col-md-4"><div class="form-group"><label asp-for="Currency" class="control-label"></label><input asp-for="Currency" class="form-control" /></div></div></div>
+    <div class="row mb-3"><div class="col-md-4"><div class="form-group"><label asp-for="CostingLotSize" class="control-label">1 Price unit/Costing lot</label><input asp-for="CostingLotSize" class="form-control" /></div></div><div class="col-md-8"><div class="form-group"><label asp-for="SupplierCode" class="control-label"></label><input asp-for="SupplierCode" class="form-control" /></div></div></div>
+</div>
+
+<!-- TOOLING B FIELDS -->
+<div id="toolingb-fields-container" style="display: none;">
+    <hr />
+    <h4>Material Information (Tooling B)</h4>
+    <div class="row mb-3">
+        <div class="col-md-3">
+            <div class="form-group">
+                <label asp-for="ItemCode" class="control-label">To-Be Material Number</label>
+                <input asp-for="ItemCode" class="form-control" />
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="form-group">
+                <label asp-for="MatType" class="control-label">Mat.Type</label>
+                <input asp-for="MatType" class="form-control" />
+            </div>
+        </div>
+        <div class="col-md-1 d-flex align-items-end"><div class="form-group form-check"><input type="checkbox" asp-for="Check" class="form-check-input" /><label asp-for="Check" class="form-check-label">Check</label></div></div>
+        <div class="col-md-6">
+            <div class="form-group">
+                <label asp-for="EnglishMatDescription" class="control-label">Part Name (30 Digits)</label>
+                <input asp-for="EnglishMatDescription" class="form-control" maxlength="30" />
+            </div>
+        </div>
+    </div>
+    <div class="row mb-3">
+        <div class="col-md-3">
+            <div class="form-group">
+                <label asp-for="MaterialGroup" class="control-label"></label>
+                <input asp-for="MaterialGroup" class="form-control" />
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="form-group">
+                <label asp-for="BaseUnit" class="control-label"></label>
+                <input asp-for="BaseUnit" class="form-control" />
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="form-group">
+                <label asp-for="ExternalMaterialGroup" class="control-label"></label>
+                <input asp-for="ExternalMaterialGroup" class="form-control" />
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="form-group">
+                <label asp-for="PlantFG" class="control-label">Plant</label>
+                <select asp-for="PlantFG" class="form-control">
+                    <option value="">-- Select Plant --</option>
+                    <option value="6021">6021</option>
+                    <option value="6031">6031</option>
+                    <option value="6051">6051</option>
+                    <option value="6081">6081</option>
+                </select>
+            </div>
+        </div>
+    </div>
+    <div class="row mb-3">
+         <div class="col-md-2"><div class="form-group"><label asp-for="DevicePlant" class="control-label">Device Plant</label><input asp-for="DevicePlant" class="form-control"></div></div>
+        <div class="col-md-2"><div class="form-group"><label asp-for="AssemblyPlant" class="control-label">Assembly Plant</label><input asp-for="AssemblyPlant" class="form-control"></div></div>
+        <div class="col-md-2"><div class="form-group"><label asp-for="IpoPlant" class="control-label">IPO Plant</label><input asp-for="IpoPlant" class="form-control"></div></div>
+        <div class="col-md-2"><div class="form-group"><label asp-for="AsiOfPlant" class="control-label">ASI of Plant</label><input asp-for="AsiOfPlant" class="form-control"></div></div>
+         <div class="col-md-4"><div class="form-group"><label asp-for="PurchasingGroup" class="control-label"></label><input asp-for="PurchasingGroup" class="form-control" /></div></div>
+    </div>
+    <div class="row mb-3">
+        <div class="col-md-3"><div class="form-group"><label asp-for="DivisionCode" class="control-label">Division</label><input asp-for="DivisionCode" class="form-control" /></div></div>
+        <div class="col-md-3"><div class="form-group"><label asp-for="ProfitCenter" class="control-label"></label><input asp-for="ProfitCenter" class="form-control" /></div></div>
+        <div class="col-md-3"><div class="form-group"><label asp-for="Price" class="control-label">Moving Average Price</label><input asp-for="Price" class="form-control" /></div></div>
+        <div class="col-md-3"><div class="form-group"><label asp-for="PriceUnit" class="control-label">Price Unit (Per)</label><input asp-for="PriceUnit" class="form-control" /></div></div>
+    </div>
+    <div class="row mb-3">
+        <div class="col-md-6"><div class="form-group"><label asp-for="StorageLocationEP" class="control-label">Storage Loc. For EP</label><input asp-for="StorageLocationEP" class="form-control" /></div></div>
+        <div class="col-md-6"><div class="form-group"><label asp-for="ToolingBModel" class="control-label">Model</label><input asp-for="ToolingBModel" class="form-control" /></div></div>
+    </div>
+     <div class="row mb-3">
+        <div class="col-md-3"><div class="form-group"><label asp-for="ToolingBSection" class="control-label">Section</label><input asp-for="ToolingBSection" class="form-control" /></div></div>
+        <div class="col-md-3"><div class="form-group"><label asp-for="PoNumber" class="control-label">NO. P/O</label><input asp-for="PoNumber" class="form-control" /></div></div>
+        <div class="col-md-3"><div class="form-group"><label asp-for="StatusInA" class="control-label">STATUS IN A</label><input asp-for="StatusInA" class="form-control" /></div></div>
+        <div class="col-md-3"><div class="form-group"><label asp-for="DateIn" class="control-label">วันที่เข้า</label><input asp-for="DateIn" type="date" class="form-control" /></div></div>
+    </div>
+    <div class="row mb-3"><div class="col-md-12"><div class="form-group"><label asp-for="QuotationNumber" class="control-label">Quotation No.</label><input asp-for="QuotationNumber" class="form-control" /></div></div></div>
+</div>
+
+<!-- TOOLING B_FG FIELDS -->
+<div id="toolingbfg-fields-container" style="display: none;">
+    <hr />
+    <h4>Material Information (Tooling B_FG)</h4>
+    <div class="row mb-2"><div class="col-md-2"><div class="form-group"><label asp-for="CurrentICS" class="control-label"></label><input asp-for="CurrentICS" class="form-control" /></div></div><div class="col-md-2"><div class="form-group"><label asp-for="ItemCode" class="control-label">To-Be Material</label><input asp-for="ItemCode" class="form-control" /></div></div><div class="col-md-4"><div class="form-group"><label asp-for="EnglishMatDescription" class="control-label">English Mat Description (max 40)</label><input asp-for="EnglishMatDescription" class="form-control" maxlength="40"/></div></div><div class="col-md-1"><div class="form-group"><label asp-for="Level" class="control-label">Lev</label><input asp-for="Level" class="form-control" /></div></div><div class="col-md-1"><div class="form-group"><label asp-for="Rohs" class="control-label">RO HS</label><input asp-for="Rohs" class="form-control" /></div></div><div class="col-md-2"><div class="form-group"><label asp-for="MaterialGroup" class="control-label"></label><input asp-for="MaterialGroup" class="form-control" /></div></div></div>
+    <div class="row mb-2"><div class="col-md-1"><div class="form-group"><label asp-for="BaseUnit" class="control-label"></label><input asp-for="BaseUnit" class="form-control" /></div></div><div class="col-md-1"><div class="form-group"><label asp-for="CodenMid" class="control-label">Code mid</label><input asp-for="CodenMid" class="form-control" /></div></div><div class="col-md-1"><div class="form-group"><label asp-for="DevicePlant" class="control-label">Device</label><input asp-for="DevicePlant" class="form-control" /></div></div><div class="col-md-1"><div class="form-group"><label asp-for="AssemblyPlant" class="control-label">Assy</label><input asp-for="AssemblyPlant" class="form-control" /></div></div><div class="col-md-1"><div class="form-group"><label asp-for="IpoPlant" class="control-label">IPO</label><input asp-for="IpoPlant" class="form-control" /></div></div><div class="col-md-1"><div class="form-group"><label asp-for="AsiOfPlant" class="control-label">ASI</label><input asp-for="AsiOfPlant" class="form-control" /></div></div><div class="col-md-2"><div class="form-group"><label asp-for="PlantFG" class="control-label">Plant</label><input asp-for="PlantFG" class="form-control" /></div></div><div class="col-md-1"><div class="form-group"><label asp-for="SalesOrg" class="control-label">Sales Org</label><input asp-for="SalesOrg" class="form-control" /></div></div><div class="col-md-1"><div class="form-group"><label asp-for="DistributionChannel" class="control-label" style="font-size: 0.7rem">Distribution</label><input asp-for="DistributionChannel" class="form-control" /></div></div><div class="col-md-1"><div class="form-group"><label asp-for="DivisionCode" class="control-label">Division</label><input asp-for="DivisionCode" class="form-control" /></div></div><div class="col-md-1"><div class="form-group"><label class="control-label">Delivering Plant</label><input class="form-control" /></div></div></div>
+    <div class="row mb-2"><div class="col-md-1"><div class="form-group"><label asp-for="TaxTh" class="control-label">Tax - TH</label><input asp-for="TaxTh" class="form-control" /></div></div><div class="col-md-1"><div class="form-group"><label asp-for="MaterialStatisticsGroup" class="control-label" style="font-size: 0.7rem">Mtl Statistics Grp</label><input asp-for="MaterialStatisticsGroup" class="form-control" /></div></div><div class="col-md-1"><div class="form-group"><label asp-for="AccountAssignment" class="control-label" style="font-size: 0.7rem">Acct Assignment</label><input asp-for="AccountAssignment" class="form-control" /></div></div><div class="col-md-1"><div class="form-group"><label asp-for="GeneralItemCategory" class="control-label" style="font-size: 0.7rem">Gen Item Cat Grp</label><input asp-for="GeneralItemCategory" class="form-control" /></div></div><div class="col-md-1"><div class="form-group"><label asp-for="Availability" class="control-label">Availability</label><input asp-for="Availability" class="form-control" /></div></div><div class="col-md-1"><div class="form-group"><label asp-for="Transportation" class="control-label" style="font-size: 0.7rem">Transportation</label><input asp-for="Transportation" class="form-control" /></div></div><div class="col-md-1"><div class="form-group"><label asp-for="LoadingGroup" class="control-label">Loading Grp</label><input asp-for="LoadingGroup" class="form-control" /></div></div><div class="col-md-1"><div class="form-group"><label asp-for="BoiCode" class="control-label">BOI CODE</label><input asp-for="BoiCode" class="form-control" /></div></div><div class="col-md-1"><div class="form-group"><label asp-for="PurchasingGroup" class="control-label">Purchasing</label><input asp-for="PurchasingGroup" class="form-control" /></div></div><div class="col-md-2"><div class="form-group"><label asp-for="ProfitCenter" class="control-label">Profit Center</label><input asp-for="ProfitCenter" class="form-control" /></div></div><div class="col-md-1"><div class="form-group"><label class="control-label" style="font-size: 0.7rem">Plant-sp.matl.status</label><input class="form-control" /></div></div></div>
+    <div class="row mb-2"><div class="col-md-1"><div class="form-group"><label class="control-label">Valid from</label><input type="date" class="form-control" /></div></div><div class="col-md-1"><div class="form-group"><label asp-for="PlanDelTime" class="control-label">Plan del time</label><input asp-for="PlanDelTime" class="form-control" /></div></div><div class="col-md-1"><div class="form-group"><label asp-for="SchedMargin" class="control-label">Sched Margin</label><input asp-for="SchedMargin" class="form-control" /></div></div><div class="col-md-1"><div class="form-group"><label class="control-label">Avail. check</label><input class="form-control" /></div></div><div class="col-md-1"><div class="form-group"><label asp-for="ValClass" class="control-label">Valuation Class</label><input asp-for="ValClass" class="form-control" /></div></div><div class="col-md-2"><div class="form-group"><label asp-for="Price" class="control-label">Moving Average Price</label><input asp-for="Price" class="form-control" /></div></div><div class="col-md-1"><div class="form-group"><label class="control-label">SN</label><input class="form-control" /></div></div><div class="col-md-1"><div class="form-group"><label asp-for="PriceUnit" class="control-label">Price Unit</label><input asp-for="PriceUnit" class="form-control" /></div></div><div class="col-md-1"><div class="form-group"><label asp-for="CostingLotSize" class="control-label">Costing Lot</label><input asp-for="CostingLotSize" class="form-control" /></div></div><div class="col-md-1"><div class="form-group"><label asp-for="ValClass" class="control-label">V.cl</label><input asp-for="ValClass" class="form-control" /></div></div><div class="col-md-1"><div class="form-group"><label class="control-label">MatAC</label><input class="form-control" /></div></div></div>
+    <div class="row mb-2"><div class="col-md-1"><div class="form-group"><label class="control-label">Do.set</label><input class="form-control" /></div></div><div class="col-md-1"><div class="form-group"><label asp-for="MrpController" class="control-label">MRP Controller</label><input asp-for="MrpController" class="form-control" /></div></div><div class="col-md-1"><div class="form-group"><label asp-for="SchedMargin" class="control-label">Sc</label><input asp-for="SchedMargin" class="form-control" /></div></div><div class="col-md-1"><div class="form-group"><label asp-for="MinLot" class="control-label">MnLS</label><input asp-for="MinLot" class="form-control" /></div></div><div class="col-md-1"><div class="form-group"><label asp-for="MaxLot" class="control-label">MxLS</label><input asp-for="MaxLot" class="form-control" /></div></div><div class="col-md-1"><div class="form-group"><label asp-for="FixedLot" class="control-label">FxLS</label><input asp-for="FixedLot" class="form-control" /></div></div><div class="col-md-1"><div class="form-group"><label asp-for="Rounding" class="control-label">Rnd</label><input asp-for="Rounding" class="form-control" /></div></div><div class="col-md-1"><div class="form-group"><label asp-for="Mtlsm" class="control-label">Mtlsm</label><input asp-for="Mtlsm" class="form-control" /></div></div><div class="col-md-1"><div class="form-group"><label asp-for="Effective" class="control-label">Eff</label><input type="date" asp-for="Effective" class="form-control" /></div></div><div class="col-md-1"><div class="form-group"><label asp-for="StorageLoc" class="control-label">Storage Loc For EP</label><input asp-for="StorageLoc" class="form-control" /></div></div><div class="col-md-1"><div class="form-group"><label asp-for="ReceiveStorage" class="control-label">Receive Storage</label><input asp-for="ReceiveStorage" class="form-control" /></div></div><div class="col-md-1"><div class="form-group"><label asp-for="ProductionSupervisor" class="control-label" style="font-size: 0.7rem">Production Sup</label><input asp-for="ProductionSupervisor" class="form-control" /></div></div></div>
+    <div class="row mb-2"><div class="col-md-2"><div class="form-group"><label asp-for="QuotationNumber" class="control-label"></label><input asp-for="QuotationNumber" class="form-control" /></div></div><div class="col-md-2"><div class="form-group"><label asp-for="PoNumber" class="control-label">PO No.</label><input asp-for="PoNumber" class="form-control" /></div></div><div class="col-md-2"><div class="form-group"><label asp-for="StatusInA" class="control-label">Status</label><input asp-for="StatusInA" class="form-control" /></div></div><div class="col-md-2"><div class="form-group"><label asp-for="ToolingBSection" class="control-label">Section</label><input asp-for="ToolingBSection" class="form-control" /></div></div><div class="col-md-2"><div class="form-group"><label asp-for="DateIn" class="control-label">Date In</label><input type="date" asp-for="DateIn" class="form-control" /></div></div><div class="col-md-2"><div class="form-group"><label asp-for="ModelName" class="control-label">Model</label><input asp-for="ModelName" class="form-control" /></div></div></div>
+</div>
+
+<!-- TOOLING B_PU FIELDS -->
+<div id="toolingbpu-fields-container" style="display: none;">
+    <hr />
+    <h4>Material Information (Tooling B_PU)</h4>
+     <div class="row mb-2"><div class="col-md-2"><div class="form-group"><label asp-for="CurrentICS" class="control-label"></label><input asp-for="CurrentICS" class="form-control" /></div></div><div class="col-md-2"><div class="form-group"><label asp-for="ItemCode" class="control-label">To-Be Material Number in SAAN</label><input asp-for="ItemCode" class="form-control" /></div></div><div class="col-md-4"><div class="form-group"><label asp-for="EnglishMatDescription" class="control-label">English Mat Description (not over than 40 chars)</label><input asp-for="EnglishMatDescription" class="form-control" maxlength="40"/></div></div><div class="col-md-1"><div class="form-group"><label asp-for="Level" class="control-label">Level</label><input asp-for="Level" class="form-control" /></div></div><div class="col-md-1"><div class="form-group"><label asp-for="Rohs" class="control-label">ROHS Status</label><input asp-for="Rohs" class="form-control" /></div></div><div class="col-md-2"><div class="form-group"><label asp-for="MaterialGroup" class="control-label"></label><input asp-for="MaterialGroup" class="form-control" /></div></div></div>
+    <div class="row mb-2"><div class="col-md-1"><div class="form-group"><label asp-for="BaseUnit" class="control-label"></label><input asp-for="BaseUnit" class="form-control" /></div></div><div class="col-md-2"><div class="form-group"><label asp-for="ExternalMaterialGroup" class="control-label">External Material Group</label><input asp-for="ExternalMaterialGroup" class="form-control" /></div></div><div class="col-md-1"><div class="form-group"><label asp-for="DivisionCode" class="control-label">Division</label><input asp-for="DivisionCode" class="form-control" /></div></div><div class="col-md-1"><div class="form-group"><label asp-for="DevicePlant" class="control-label">Device</label><input asp-for="DevicePlant" class="form-control" /></div></div><div class="col-md-1"><div class="form-group"><label asp-for="AssemblyPlant" class="control-label">Assy</label><input asp-for="AssemblyPlant" class="form-control" /></div></div><div class="col-md-1"><div class="form-group"><label asp-for="IpoPlant" class="control-label">IPO</label><input asp-for="IpoPlant" class="form-control" /></div></div><div class="col-md-1"><div class="form-group"><label asp-for="AsiOfPlant" class="control-label">ASI</label><input asp-for="AsiOfPlant" class="form-control" /></div></div><div class="col-md-1"><div class="form-group"><label asp-for="PlantFG" class="control-label">Plant</label><input asp-for="PlantFG" class="form-control" /></div></div><div class="col-md-1"><div class="form-group"><label asp-for="SalesOrg" class="control-label">Sales Org</label><input asp-for="SalesOrg" class="form-control" /></div></div><div class="col-md-2"><div class="form-group"><label asp-for="DistributionChannel" class="control-label">Distribution Channel</label><input asp-for="DistributionChannel" class="form-control" /></div></div></div>
+</div>
+
+<!-- DISTRIBUTION CHANEL FIELDS -->
+<div id="distributionchanel-fields-container" style="display: none;">
+    <hr />
+    <h4>Material Information (Distribution Chanel)</h4>
+     <div class="row mb-3"><div class="col-md-3"><div class="form-group"><label asp-for="ItemCode" class="control-label"></label><input asp-for="ItemCode" class="form-control" /></div></div><div class="col-md-2"><div class="form-group"><label asp-for="PlantFG" class="control-label">New Plant</label><select asp-for="PlantFG" class="form-control"><option value="">-- Select --</option><option value="6021">6021=Device</option><option value="6031">6031=Assembly</option><option value="6081">6081=IPO</option></select></div></div><div class="col-md-2"><div class="form-group"><label asp-for="StorageLocation" class="control-label"></label><input asp-for="StorageLocation" class="form-control" /></div></div><div class="col-md-2"><div class="form-group"><label asp-for="DistributionChannel" class="control-label"></label><select asp-for="DistributionChannel" class="form-control"><option value="">-- Select --</option><option value="10">10=Domestic</option><option value="30">30=Export</option><option value="20">20=Indirect</option><option value="40">40=Subcontractor</option><option value="90">90=Other Sales</option></select></div></div><div class="col-md-3"><div class="form-group"><label asp-for="DivisionCode" class="control-label">Division</label><select asp-for="DivisionCode" class="form-control"><option value="">-- Select --</option><option value="01">01=Common</option><option value="11">11=LED</option><option value="12">12=DD</option><option value="13">13=SML</option><option value="15">15=Lighting</option><option value="16">16=STR</option><option value="17">17=DG</option><option value="18">18=PWC</option><option value="19">19=4W</option></select></div></div></div>
+    <div class="row mb-3"><div class="col-md-4"><div class="form-group"><label asp-for="AccountAssignment" class="control-label">Account Assignment Group</label><select asp-for="AccountAssignment" class="form-control"><option value="">-- Select --</option><option value="01">01=Manufacture</option><option value="11">11=Trading IPO</option><option value="12">12=Raw Material sales</option><option value="80">80=Service income</option><option value="90">90=Claim Charge</option><option value="91">91=Scrap</option><option value="92">92=Asset</option><option value="93">93=Others</option></select></div></div><div class="col-md-4"><div class="form-group"><label asp-for="ProfitCenter" class="control-label"></label><input asp-for="ProfitCenter" class="form-control" /></div></div><div class="col-md-4"><div class="form-group"><label asp-for="BoiCode" class="control-label">BOI CODE For Dist chanel 20,30 EX XXXX</label><input asp-for="BoiCode" class="form-control" /></div></div></div>
+</div>
+
+<!-- ADD STORAGE FIELDS -->
+<div id="addstorage-fields-container" style="display: none;">
+    <hr />
+    <h4>Material Information (Add Storage)</h4>
+    <div class="row mb-3">
+        <div class="col-md-4">
+            <div class="form-group">
+                <label asp-for="ItemCode" class="control-label">Material</label>
+                <input asp-for="ItemCode" class="form-control" />
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="form-group">
+                <label asp-for="PlantFG" class="control-label">Plant</label>
+                <input asp-for="PlantFG" class="form-control" />
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="form-group">
+                <label asp-for="StorageLocation" class="control-label">Storage Loc (BXXX)</label>
+                <input asp-for="StorageLocation" class="form-control" />
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- BOM FIELDS -->
+<div id="bom-fields-container" style="display: none;">
+    <hr />
+    <h4>Material Information (BOM)</h4>
+    <div class="table-responsive">
+        <table class="table table-bordered bom-table">
+            <thead>
+                 <tr>
+                    <th>Level</th>
+                    <th>Item</th>
+                    <th>Item Cat (L/T)</th>
+                    <th>Component Number</th>
+                    <th>Description</th>
+                    <th>Item quantity</th>
+                    <th>Unit</th>
+                    <th>BOM Usage</th>
+                    <th>Plant</th>
+                    <th>Sloc</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="bom-items-body">
+                <!-- Rows will be added here by JS -->
+            </tbody>
+        </table>
+    </div>
+    <div class="mt-2">
+         <button type="button" class="btn btn-info btn-sm" id="add-parent-item">+ Add Parent (Lvl 1)</button>
+         <button type="button" class="btn btn-success btn-sm" id="add-child-item">+ Add Component (Lvl 2)</button>
+    </div>
+</div>
+
+<!-- ROUTING FIELDS -->
+<div id="routing-fields-container" style="display: none;">
+    <hr />
+    <h4>Material Information (Routing)</h4>
+    <div class="table-responsive">
+        <table class="table table-bordered routing-table">
+            <thead>
+                <tr>
+                    <th>Material</th>
+                    <th>Description</th>
+                    <th>Work Center</th>
+                    <th>Operation</th>
+                    <th>Base Qty</th>
+                    <th>Unit</th>
+                    <th>Direct Labor Costs</th>
+                    <th>Direct Expenses</th>
+                    <th>Allocation Expense</th>
+                    <th>Production Version</th>
+                    <th>Version</th>
+                    <th>Valid From</th>
+                    <th>Valid To</th>
+                    <th>Maximum Lot Size</th>
+                    <th>Group</th>
+                    <th>Group Counter</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="routing-items-body">
+                <!-- Dynamic rows will be inserted here -->
+            </tbody>
+        </table>
+    </div>
+    <div class="mt-2">
+        <button type="button" class="btn btn-primary btn-sm" id="add-routing-item">+ Add Routing</button>
+    </div>
+</div>
+
+<!-- IPO FIELDS -->
+<div id="ipo-fields-container" style="display: none;">
+    <hr />
+    <h4>Material Information (IPO)</h4>
+    <div class="row mb-3">
+        <div class="col-md-4"><div class="form-group"><label asp-for="ItemCode" class="control-label"></label><input asp-for="ItemCode" class="form-control" /></div></div>
+        <div class="col-md-8"><div class="form-group"><label asp-for="EnglishMatDescription" class="control-label">English Mat/Description (not over than 40 chars)</label><input asp-for="EnglishMatDescription" class="form-control" maxlength="40"/></div></div>
+    </div>
+     <div class="row mb-3">
+        <div class="col-md-4"><div class="form-group"><label asp-for="ModelName" class="control-label">Model Name (18 Digit)</label><input asp-for="ModelName" class="form-control" maxlength="18" /></div></div>
+        <div class="col-md-4"><div class="form-group"><label asp-for="BaseUnit" class="control-label"></label><input asp-for="BaseUnit" class="form-control" /></div></div>
+        <div class="col-md-4"><div class="form-group"><label asp-for="PlantFG" class="control-label">Plant</label><select asp-for="PlantFG" class="form-control"><option value="">-- Select Plant --</option><option value="6021">6021 (Device)</option><option value="6031">6031 (Assembly)</option><option value="6051">6051 (Injection)</option><option value="6081">6081 (IPO)</option></select></div></div>
+    </div>
+     <div class="row mb-3">
+        <div class="col-md-4"><div class="form-group"><label asp-for="MaterialGroup" class="control-label"></label><input asp-for="MaterialGroup" class="form-control" /></div></div>
+        <div class="col-md-4"><div class="form-group"><label asp-for="ExternalMaterialGroup" class="control-label">External Material Group</label><input asp-for="ExternalMaterialGroup" class="form-control" /></div></div>
+        <div class="col-md-4"><div class="form-group"><label asp-for="DivisionCode" class="control-label"></label><input asp-for="DivisionCode" class="form-control" /></div></div>
+    </div>
+    <div class="row mb-3">
+        <div class="col-md-4"><div class="form-group"><label asp-for="ProfitCenter" class="control-label"></label><input asp-for="ProfitCenter" class="form-control" /></div></div>
+        <div class="col-md-4"><div class="form-group"><label asp-for="DistributionChannel" class="control-label"></label><select asp-for="DistributionChannel" class="form-control" asp-items="Html.GetEnumSelectList<myapp.Models.DistributionChannel>()"><option value="">-- Select Channel --</option></select></div></div>
+        <div class="col-md-4"><div class="form-group"><label asp-for="BoiCode" class="control-label">BOI CODE For Dist chanel 20, 30 only</label><input asp-for="BoiCode" class="form-control" /></div></div>
+    </div>
+    <div class="row mb-3">
+        <div class="col-md-3"><div class="form-group"><label asp-for="PurchasingGroup" class="control-label">Purchasing Group (From Purc. View)</label><input asp-for="PurchasingGroup" class="form-control" /></div></div>
+        <div class="col-md-3"><div class="form-group"><label asp-for="TariffCode" class="control-label"></label><input asp-for="TariffCode" class="form-control" /></div></div>
+        <div class="col-md-3"><div class="form-group"><label asp-for="MrpController" class="control-label"></label><input asp-for="MrpController" class="form-control" /></div></div>
+         <div class="col-md-3"><div class="form-group"><label asp-for="StorageLocation" class="control-label">Storage Loc (BXXX)</label><input asp-for="StorageLocation" class="form-control" /></div></div>
+    </div>
+    <div class="row mb-3">
+        <div class="col-md-4"><div class="form-group"><label asp-for="ValClass" class="control-label"></label><input asp-for="ValClass" class="form-control" /></div></div>
+        <div class="col-md-4"><div class="form-group"><label asp-for="Price" class="control-label"></label><input asp-for="Price" class="form-control" /></div></div>
+        <div class="col-md-4"><div class="form-group"><label asp-for="Planner" class="control-label"></label><input asp-for="Planner" class="form-control" /></div></div>
+    </div>
+</div>

@@ -1,0 +1,518 @@
+@model myapp.Models.ViewModels.CreateRequestViewModel
+
+@{
+    ViewData["Title"] = "Create Service Request";
+}
+
+<style>
+    body {
+        background-color: #f4f7f6;
+        color: #333;
+    }
+
+    .form-container, .import-container {
+        background: #ffffff;
+        padding: 40px;
+        border-radius: 12px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        margin-top: 50px;
+        margin-bottom: 50px;
+    }
+
+    .import-container {
+        margin-bottom: 30px;
+    }
+    
+    h1, h4, h5 {
+        font-weight: 700;
+        color: #2c3e50;
+        margin-bottom: 10px;
+    }
+
+    .subtitle {
+        color: #7f8c8d;
+        margin-bottom: 30px;
+    }
+    
+    .control-label {
+        font-weight: 600;
+        margin-bottom: .5rem;
+        color: #34495e;
+        font-size: 0.85rem; 
+    }
+
+    .form-control,
+    .form-control:disabled,
+    .form-control[readonly] {
+        border-radius: 8px;
+        border: 1px solid #dcdcdc;
+        padding: 10px 15px;
+        transition: all 0.3s ease;
+    }
+    
+    .form-control:focus {
+        border-color: #3498db;
+        box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+        outline: none;
+    }
+
+    input.form-control[readonly] {
+         background-color: #ecf0f1;
+        cursor: not-allowed;
+    }
+
+    select.form-control,
+    input.form-control:not([readonly]),
+    textarea.form-control {
+        background-color: #fff;
+        cursor: text;
+    }
+
+    select.form-control {
+        cursor: pointer;
+    }
+    
+    .btn-primary {
+        background-color: #3498db;
+        border-color: #3498db;
+        padding: 12px 30px;
+        font-size: 1rem;
+        font-weight: 600;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(52, 152, 219, 0.2);
+    }
+    
+    .btn-primary:hover {
+        background-color: #2980b9;
+        border-color: #2980b9;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(52, 152, 219, 0.3);
+    }
+
+    .btn-secondary {
+        background-color: #95a5a6;
+        border-color: #95a5a6;
+    }
+
+    .btn-danger {
+        background-color: #e74c3c;
+        border-color: #e74c3c;
+    }
+    
+    .back-to-list {
+        display: inline-block;
+        margin-top: 20px;
+        color: #3498db;
+        text-decoration: none;
+        font-weight: 500;
+    }
+
+    .back-to-list:hover {
+        text-decoration: underline;
+    }
+
+    hr {
+        margin-top: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .import-or-divider {
+        text-align: center;
+        margin: 40px 0;
+    }
+
+    .divider-text {
+        background: #f4f7f6;
+        padding: 0 20px;
+        color: #999;
+        font-weight: 500;
+        position: relative;
+        top: -28px;
+    }
+    .table-responsive {
+        margin-top: 20px;
+    }
+    .bom-table th, .bom-table td, .routing-table th, .routing-table td {
+        vertical-align: middle;
+        font-size: 0.8rem;
+    }
+    .bom-level-1 td {
+        background-color: #e9ecef;
+        font-weight: bold;
+    }
+     .bom-level-2 td:first-child {
+        padding-left: 30px;
+    }
+    .routing-table .form-control {
+        font-size: 0.8rem;
+    }
+
+</style>
+
+<div class="import-container">
+    <div class="text-center">
+        <h4>Import from Excel</h4>
+        <p class="subtitle">Quickly add multiple requests by uploading an Excel file.</p>
+    </div>
+    <form asp-action="Import" method="post" enctype="multipart/form-data">
+        <div class="mb-3">
+            <label for="excelFile" class="form-label">Select Excel File</label>
+            <input class="form-control" type="file" id="excelFile" name="file" accept=".xlsx, .xls" required>
+        </div>
+        <div class="form-group text-center mt-4">
+            <button type="submit" class="btn btn-success">Import File</button>
+        </div>
+    </form>
+</div>
+
+<div class="import-or-divider">
+    <hr>
+    <span class="divider-text">OR</span>
+</div>
+
+<div class="form-container">
+    <div class="text-center">
+        <h1>Create New Service Request</h1>
+        <p class="subtitle">Please fill in the details of your request below.</p>
+    </div>
+    <hr />
+
+    <form asp-action="Create">
+        <div asp-validation-summary="All" class="text-danger mb-3"></div>
+
+        <h4>Requester Information</h4>
+        <p class="text-muted small">Your details are pre-filled from your profile.</p>
+        <div class="row mb-4">
+            <div class="col-md-4"><div class="form-group"><label asp-for="RequesterName" class="control-label"></label><input asp-for="RequesterName" class="form-control" readonly /></div></div>
+            <div class="col-md-3"><div class="form-group"><label asp-for="Department" class="control-label"></label><input asp-for="Department" class="form-control" readonly /></div></div>
+            <div class="col-md-2"><div class="form-group"><label asp-for="Section" class="control-label"></label><input asp-for="Section" class="form-control" readonly /></div></div>
+            <div class="col-md-3"><div class="form-group"><label asp-for="Plant" class="control-label"></label><input asp-for="Plant" class="form-control" readonly /></div></div>
+        </div>
+
+        <hr />
+
+        <h4>Request Details</h4>
+         <div class="row mb-4">
+            <div class="col-md-6"><div class="form-group"><label asp-for="RequestType" class="control-label"></label><select asp-for="RequestType" id="RequestType" class="form-control" asp-items="Html.GetEnumSelectList<myapp.Models.RequestType>()"><option value="">-- Select Type --</option></select><span asp-validation-for="RequestType" class="text-danger"></span></div></div>
+             <div id="plant-fg-group" class="col-md-6" style="display: none;"><div class="form-group"><label asp-for="PlantFG" class="control-label"></label><select asp-for="PlantFG" class="form-control"><option value="">-- Select Plant --</option><option value="6021">6021 (Device)</option><option value="6031">6031 (Assembly)</option><option value="6051">6051 (Injection)</option><option value="6081">6081 (IPO)</option><option value="6060">6060</option></select><span asp-validation-for="PlantFG" class="text-danger"></span></div></div>
+            <div class="col-md-12"><div class="form-group"><label asp-for="Description" class="control-label"></label><textarea asp-for="Description" class="form-control" rows="3" placeholder="Detailed description..."></textarea><span asp-validation-for="Description" class="text-danger"></span></div></div>
+        </div>
+
+        @Html.Partial("_MaterialForms", Model)
+
+        <div class="form-group text-center mt-5">
+            <input type="submit" value="Submit Request" class="btn btn-primary" />
+        </div>
+    </form>
+    
+    <div class="text-center">
+        <a asp-action="Index" class="back-to-list">Back to List</a>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const requestTypeSelect = document.getElementById('RequestType');
+            const fgFieldsContainer = document.getElementById('fg-fields-container');
+            const smFieldsContainer = document.getElementById('sm-fields-container');
+            const rmFieldsContainer = document.getElementById('rm-fields-container');
+            const toolingbFieldsContainer = document.getElementById('toolingb-fields-container');
+            const toolingbfgFieldsContainer = document.getElementById('toolingbfg-fields-container');
+            const toolingbpuFieldsContainer = document.getElementById('toolingbpu-fields-container');
+            const distributionchanelFieldsContainer = document.getElementById('distributionchanel-fields-container');
+            const addstorageFieldsContainer = document.getElementById('addstorage-fields-container');
+            const bomFieldsContainer = document.getElementById('bom-fields-container');
+            const routingFieldsContainer = document.getElementById('routing-fields-container');
+            const ipoFieldsContainer = document.getElementById('ipo-fields-container');
+            const plantFgGroup = document.getElementById('plant-fg-group');
+            
+            const fgEnumValue = '0'; 
+            const smEnumValue = '1'; 
+            const rmEnumValue = '2';
+            const toolingBEnumValue = '3';
+            const toolingBFGEnumValue = '4';
+            const toolingBPUEnumValue = '5';
+            const bomEnumValue = '6';
+            const routingEnumValue = '7';
+            const addStorageEnumValue = '8';
+            const distributionChanelEnumValue = '9';
+            const ipoEnumValue = '10';
+
+
+            function toggleMaterialFields() {
+                const selectedValue = requestTypeSelect.value;
+
+                // Hide all containers
+                fgFieldsContainer.style.display = 'none';
+                smFieldsContainer.style.display = 'none';
+                rmFieldsContainer.style.display = 'none';
+                toolingbFieldsContainer.style.display = 'none';
+                toolingbfgFieldsContainer.style.display = 'none';
+                toolingbpuFieldsContainer.style.display = 'none';
+                distributionchanelFieldsContainer.style.display = 'none';
+                addstorageFieldsContainer.style.display = 'none';
+                bomFieldsContainer.style.display = 'none';
+                routingFieldsContainer.style.display = 'none';
+                ipoFieldsContainer.style.display = 'none';
+                plantFgGroup.style.display = 'none';
+
+                // Show the relevant container
+                if (selectedValue === fgEnumValue) {
+                    fgFieldsContainer.style.display = 'block';
+                    plantFgGroup.style.display = 'block';
+                } else if (selectedValue === smEnumValue) {
+                    smFieldsContainer.style.display = 'block';
+                } else if (selectedValue === rmEnumValue) {
+                    rmFieldsContainer.style.display = 'block';
+                } else if (selectedValue === toolingBEnumValue) {
+                    toolingbFieldsContainer.style.display = 'block';
+                } else if (selectedValue === toolingBFGEnumValue) {
+                    toolingbfgFieldsContainer.style.display = 'block';
+                } else if (selectedValue === toolingBPUEnumValue) {
+                    toolingbpuFieldsContainer.style.display = 'block';
+                } else if (selectedValue === distributionChanelEnumValue) {
+                    distributionchanelFieldsContainer.style.display = 'block';
+                } else if (selectedValue === addStorageEnumValue) {
+                    addstorageFieldsContainer.style.display = 'block';
+                } else if (selectedValue === bomEnumValue) {
+                    bomFieldsContainer.style.display = 'block';
+                } else if (selectedValue === routingEnumValue) {
+                    routingFieldsContainer.style.display = 'block';
+                } else if (selectedValue === ipoEnumValue) {
+                    ipoFieldsContainer.style.display = 'block';
+                }
+            }
+
+            // --- BOM Multi-level Logic ---
+            const bomTableBody = document.getElementById('bom-items-body');
+            const addParentBtn = document.getElementById('add-parent-item');
+            const addChildBtn = document.getElementById('add-child-item');
+
+            function findParentRow(childRow) {
+                let previousSibling = childRow.previousElementSibling;
+                while(previousSibling) {
+                    if (previousSibling.classList.contains('bom-level-1')) {
+                        return previousSibling;
+                    }
+                    previousSibling = previousSibling.previousElementSibling;
+                }
+                return null;
+            }
+
+            function reIndexBomTable() {
+                let parentCounter = 0;
+                let lastParentRow = null;
+                const childCounters = new Map();
+
+                Array.from(bomTableBody.children).forEach((row, index) => {
+                    // Update name attributes for model binding
+                    row.querySelectorAll('input, select').forEach(input => {
+                        if (input.name) {
+                            input.name = input.name.replace(/Components\\[\d+\\]/, `Components[${index}]`);
+                        }
+                    });
+
+                    const level = row.classList.contains('bom-level-1') ? 1 : 2;
+                    let itemValue = '';
+
+                    if (level === 1) {
+                        parentCounter++;
+                        itemValue = parentCounter.toString();
+                        lastParentRow = row;
+                        row.dataset.parentIndex = parentCounter;
+                        childCounters.set(parentCounter, 0);
+                    } else if (level === 2) {
+                        const parentRow = findParentRow(row);
+                        if (parentRow) {
+                            const parentIndex = parseInt(parentRow.dataset.parentIndex);
+                            let childCounter = childCounters.get(parentIndex) || 0;
+                            childCounter++;
+                            itemValue = (childCounter * 10).toString().padStart(3, '0');
+                            childCounters.set(parentIndex, childCounter);
+                            row.dataset.parentIndex = parentIndex;
+
+                            // Sync with parent
+                            const parentBomUsage = parentRow.querySelector('.bom-usage-field').value;
+                            const parentPlant = parentRow.querySelector('.plant-field').value;
+                            row.querySelector('.bom-usage-field').value = parentBomUsage;
+                            row.querySelector('.plant-field').value = parentPlant;
+                        }
+                    }
+                    row.querySelector('.item-field').value = itemValue;
+                });
+            }
+            
+            function createBomRow(level) {
+                const index = bomTableBody.children.length;
+                const newRow = document.createElement('tr');
+                newRow.classList.add(`bom-level-${level}`);
+
+                newRow.innerHTML = `
+                    <td>
+                        <input type="hidden" name="Components[${index}].Level" value="${level}" />
+                        ${level}
+                    </td>
+                    <td><input type="text" name="Components[${index}].Item" class="form-control item-field" readonly /></td>
+                    <td><input type="text" name="Components[${index}].ItemCat" class="form-control item-cat-field" value="L" /></td>
+                    <td><input type="text" name="Components[${index}].ComponentNumber" class="form-control" /></td>
+                    <td><input type="text" name="Components[${index}].Description" class="form-control" /></td>
+                    <td><input type="number" step="any" name="Components[${index}].ItemQuantity" class="form-control" /></td>
+                    <td><input type="text" name="Components[${index}].Unit" class="form-control" /></td>
+                    <td><input type="text" name="Components[${index}].BomUsage" class="form-control bom-usage-field" /></td>
+                    <td><input type="text" name="Components[${index}].Plant" class="form-control plant-field" /></td>
+                    <td><input type="text" name="Components[${index}].Sloc" class="form-control" /></td>
+                    <td><button type="button" class="btn btn-danger btn-sm remove-bom-item">X</button></td>
+                `;
+                
+                const bomUsageInput = newRow.querySelector('.bom-usage-field');
+                const plantInput = newRow.querySelector('.plant-field');
+                const itemCatInput = newRow.querySelector('.item-cat-field');
+
+                if (level === 1) { // Parent Row
+                    itemCatInput.readOnly = true;
+                    bomUsageInput.readOnly = false; // Editable
+                    plantInput.readOnly = false;    // Editable
+                } else { // Component Row
+                    itemCatInput.readOnly = false;
+                    bomUsageInput.readOnly = true; // Readonly
+                    plantInput.readOnly = true;    // Readonly
+                }
+                return newRow;
+            }
+
+            addParentBtn.addEventListener('click', () => {
+                const newRow = createBomRow(1);
+                bomTableBody.appendChild(newRow);
+                reIndexBomTable();
+            });
+
+            addChildBtn.addEventListener('click', () => {
+                const lastRow = bomTableBody.querySelector('tr:last-child');
+                if (!lastRow) {
+                    alert('Please add a Parent (Level 1) item first.');
+                    return;
+                }
+
+                const parentRowForNewChild = lastRow.classList.contains('bom-level-1') ? lastRow : findParentRow(lastRow);
+
+                if (!parentRowForNewChild) {
+                    alert('Could not find a parent for this component. Please add a Parent (Lvl 1) first.');
+                    return;
+                }
+                
+                const newRow = createBomRow(2);
+
+                const allRows = Array.from(bomTableBody.children);
+                const parentIndex = parentRowForNewChild.dataset.parentIndex;
+                let lastRowInGroup = parentRowForNewChild;
+                 for (let i = allRows.indexOf(parentRowForNewChild) + 1; i < allRows.length; i++) {
+                    if (allRows[i].dataset.parentIndex === parentIndex) {
+                        lastRowInGroup = allRows[i];
+                    } else {
+                        break;
+                    }
+                }
+                lastRowInGroup.insertAdjacentElement('afterend', newRow);
+
+                reIndexBomTable();
+            });
+
+            bomTableBody.addEventListener('click', e => {
+                if (e.target.classList.contains('remove-bom-item')) {
+                    const rowToRemove = e.target.closest('tr');
+                    const isParent = rowToRemove.classList.contains('bom-level-1');
+                    
+                    if (isParent) {
+                        const parentIndex = rowToRemove.dataset.parentIndex;
+                        const children = Array.from(bomTableBody.querySelectorAll(`.bom-level-2[data-parent-index='${parentIndex}']`));
+                        children.forEach(child => child.remove());
+                    }
+                    rowToRemove.remove();
+                    reIndexBomTable();
+                }
+            });
+
+            bomTableBody.addEventListener('input', e => {
+                const input = e.target;
+                const row = input.closest('tr');
+
+                if (row && row.classList.contains('bom-level-1')) {
+                    const parentIndex = row.dataset.parentIndex;
+                    const children = bomTableBody.querySelectorAll(`.bom-level-2[data-parent-index='${parentIndex}']`);
+
+                    if (input.classList.contains('bom-usage-field')) {
+                        children.forEach(child => {
+                            child.querySelector('.bom-usage-field').value = input.value;
+                        });
+                    } else if (input.classList.contains('plant-field')) {
+                        children.forEach(child => {
+                            child.querySelector('.plant-field').value = input.value;
+                        });
+                    }
+                }
+            });
+
+            // --- Routing Logic ---
+            const routingTableBody = document.getElementById('routing-items-body');
+            const addRoutingBtn = document.getElementById('add-routing-item');
+
+            function reIndexRoutingTable() {
+                Array.from(routingTableBody.children).forEach((row, index) => {
+                    row.querySelectorAll('input, select').forEach(input => {
+                        if (input.name) {
+                            input.name = input.name.replace(/Routings\\[\d+\\]/, `Routings[${index}]`);
+                        }
+                    });
+                });
+            }
+
+            function createRoutingRow() {
+                const index = routingTableBody.children.length;
+                const newRow = document.createElement('tr');
+                newRow.innerHTML = `
+                    <td><input type="text" name="Routings[${index}].Material" class="form-control" /></td>
+                    <td><input type="text" name="Routings[${index}].Description" class="form-control" /></td>
+                    <td><input type="text" name="Routings[${index}].WorkCenter" class="form-control" /></td>
+                    <td><input type="text" name="Routings[${index}].Operation" class="form-control" /></td>
+                    <td><input type="number" step="any" name="Routings[${index}].BaseQty" class="form-control" /></td>
+                    <td><input type="text" name="Routings[${index}].Unit" class="form-control" /></td>
+                    <td><input type="number" step="any" name="Routings[${index}].DirectLaborCosts" class="form-control" /></td>
+                    <td><input type="number" step="any" name="Routings[${index}].DirectExpenses" class="form-control" /></td>
+                    <td><input type="number" step="any" name="Routings[${index}].AllocationExpense" class="form-control" /></td>
+                    <td><input type="text" name="Routings[${index}].ProductionVersionCode" class="form-control" /></td>
+                    <td><input type="text" name="Routings[${index}].Version" class="form-control" /></td>
+                    <td><input type="date" name="Routings[${index}].ValidFrom" class="form-control" /></td>
+                    <td><input type="date" name="Routings[${index}].ValidTo" class="form-control" /></td>
+                    <td><input type="number" step="any" name="Routings[${index}].MaximumLotSize" class="form-control" /></td>
+                    <td><input type="text" name="Routings[${index}].Group" class="form-control" /></td>
+                    <td><input type="text" name="Routings[${index}].GroupCounter" class="form-control" /></td>
+                    <td><button type="button" class="btn btn-danger btn-sm remove-routing-item">X</button></td>
+                `;
+                return newRow;
+            }
+
+            addRoutingBtn.addEventListener('click', () => {
+                const newRow = createRoutingRow();
+                routingTableBody.appendChild(newRow);
+                reIndexRoutingTable();
+            });
+
+            routingTableBody.addEventListener('click', e => {
+                if (e.target.classList.contains('remove-routing-item')) {
+                    e.target.closest('tr').remove();
+                    reIndexRoutingTable();
+                }
+            });
+
+
+            // Initial call to set the correct form on page load
+            toggleMaterialFields();
+
+            // Add event listener to handle changes
+            requestTypeSelect.addEventListener('change', toggleMaterialFields);
+        });
+    </script>
+}

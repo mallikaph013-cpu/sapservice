@@ -1,0 +1,141 @@
+@model myapp.Models.RequestItem
+
+@{
+    ViewData["Title"] = "Request Details";
+}
+
+<style>
+    .details-container {
+        background: #ffffff;
+        padding: 40px;
+        border-radius: 12px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        margin-top: 50px;
+    }
+    .details-header h1 {
+        color: #2c3e50;
+        font-weight: 700;
+    }
+    .details-header .badge {
+        font-size: 1.1rem;
+        vertical-align: middle;
+        margin-left: 15px;
+    }
+    .details-section h4 {
+        color: #34495e;
+        border-bottom: 2px solid #ecf0f1;
+        padding-bottom: 10px;
+        margin-top: 30px;
+        margin-bottom: 20px;
+    }
+    .details-property {
+        margin-bottom: 15px;
+    }
+    .details-label {
+        font-weight: 600;
+        color: #7f8c8d;
+    }
+    .details-value {
+        color: #34495e;
+    }
+    .bom-table th, .routing-table th {
+        background-color: #f2f2f2;
+    }
+</style>
+
+<div class="details-container">
+    <div class="details-header mb-4">
+        <h1>Details for Request #@Model.Id</h1>
+        <span class="badge bg-info text-dark">@Model.RequestType</span>
+        <span class="badge bg-secondary">@Model.Status</span>
+    </div>
+    <hr />
+
+    <div class="details-section">
+        <h4>Requester Information</h4>
+        <div class="row">
+            <div class="col-md-3 details-property"><div class="details-label">Requester</div><div class="details-value">@Model.Requester</div></div>
+            <div class="col-md-3 details-property"><div class="details-label">Request Date</div><div class="details-value">@Model.RequestDate.ToString("g")</div></div>
+        </div>
+    </div>
+
+    <div class="details-section">
+        <h4>Request Details</h4>
+        <div class="row">
+            <div class="col-12 details-property"><div class="details-label">Description</div><div class="details-value">@Html.DisplayFor(model => model.Description)</div></div>
+        </div>
+    </div>
+
+    <div class="details-section">
+        <h4>Material Information</h4>
+        <div class="row">
+            <div class="col-md-3 details-property"><div class="details-label">Item Code</div><div class="details-value">@Model.ItemCode</div></div>
+            <div class="col-md-6 details-property"><div class="details-label">English Mat/Description</div><div class="details-value">@Model.EnglishMatDescription</div></div>
+            <div class="col-md-3 details-property"><div class="details-label">Model Name</div><div class="details-value">@Model.ModelName</div></div>
+            <div class="col-md-3 details-property"><div class="details-label">Plant</div><div class="details-value">@Model.PlantFG</div></div>
+            <div class="col-md-3 details-property"><div class="details-label">Material Group</div><div class="details-value">@Model.MaterialGroup</div></div>
+            <div class="col-md-3 details-property"><div class="details-label">Division</div><div class="details-value">@Model.DivisionCode</div></div>
+            <div class="col-md-3 details-property"><div class="details-label">Profit Center</div><div class="details-value">@Model.ProfitCenter</div></div>
+            <div class="col-md-3 details-property"><div class="details-label">MRP Controller</div><div class="details-value">@Model.MrpController</div></div>
+            <div class="col-md-3 details-property"><div class="details-label">Purchasing Group</div><div class="details-value">@Model.PurchasingGroup</div></div>
+             <div class="col-md-3 details-property"><div class="details-label">Valuation Class</div><div class="details-value">@Model.ValClass</div></div>
+            <div class="col-md-3 details-property"><div class="details-label">Price</div><div class="details-value">@Model.Price?.ToString("C")</div></div>
+             <div class="col-md-3 details-property"><div class="details-label">Distribution Channel</div><div class="details-value">@Model.DistributionChannel</div></div>
+            
+            @if(Model.RequestType == "IPO")
+            {
+                 <div class="col-md-3 details-property"><div class="details-label">Tariff Code</div><div class="details-value">@Model.TariffCode</div></div>
+                 <div class="col-md-3 details-property"><div class="details-label">Planner</div><div class="details-value">@Model.Planner</div></div>
+            }
+        </div>
+    </div>
+
+    @if (Model.BomComponents != null && Model.BomComponents.Any())
+    {
+        <div class="details-section">
+            <h4>BOM Components</h4>
+            <table class="table table-striped table-bordered bom-table">
+                <thead>
+                    <tr>
+                        <th>Level</th><th>Item</th><th>Item Cat</th><th>Component Number</th><th>Description</th><th>Quantity</th><th>Unit</th><th>Usage</th><th>Plant</th><th>Sloc</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.BomComponents.OrderBy(c => c.Level).ThenBy(c => c.Item))
+                    {
+                        <tr>
+                            <td>@item.Level</td><td>@item.Item</td><td>@item.ItemCat</td><td>@item.ComponentNumber</td><td>@item.Description</td><td>@item.ItemQuantity</td><td>@item.Unit</td><td>@item.BomUsage</td><td>@item.Plant</td><td>@item.Sloc</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+
+    @if (Model.Routings != null && Model.Routings.Any())
+    {
+        <div class="details-section">
+            <h4>Routings</h4>
+            <table class="table table-striped table-bordered routing-table">
+                <thead>
+                    <tr>
+                        <th>Material</th><th>Description</th><th>Work Center</th><th>Operation</th><th>Base Qty</th><th>Unit</th><th>Labor Costs</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.Routings)
+                    {
+                        <tr>
+                           <td>@item.Material</td><td>@item.Description</td><td>@item.WorkCenter</td><td>@item.Operation</td><td>@item.BaseQty</td><td>@item.Unit</td><td>@item.DirectLaborCosts?.ToString("C")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+
+    <div class="mt-4">
+        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Edit</a> 
+        <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+    </div>
+</div>

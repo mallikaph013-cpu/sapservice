@@ -1,0 +1,361 @@
+@model myapp.Models.ViewModels.CreateRequestViewModel
+
+@{
+    ViewData["Title"] = "Create Service Request";
+}
+
+<style>
+    body {
+        background-color: #f4f7f6;
+        color: #333;
+    }
+
+    .form-container {
+        background: #ffffff;
+        padding: 40px;
+        border-radius: 12px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        margin-top: 50px;
+        margin-bottom: 50px;
+    }
+
+    h1, h4 {
+        font-weight: 700;
+        color: #2c3e50;
+        margin-bottom: 10px;
+    }
+
+    .subtitle {
+        color: #7f8c8d;
+        margin-bottom: 30px;
+    }
+
+    .control-label {
+        font-weight: 600;
+        margin-bottom: .5rem;
+        color: #34495e;
+    }
+
+    .form-control,
+    .form-control:disabled,
+    .form-control[readonly] {
+        border-radius: 8px;
+        border: 1px solid #dcdcdc;
+        padding: 10px 15px;
+        transition: all 0.3s ease;
+    }
+    
+    .form-control:focus {
+        border-color: #3498db;
+        box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+        outline: none;
+    }
+
+    input.form-control[readonly] {
+         background-color: #ecf0f1;
+        cursor: not-allowed;
+    }
+
+    select.form-control,
+    input.form-control:not([readonly]),
+    textarea.form-control {
+        background-color: #fff;
+        cursor: text;
+    }
+
+    select.form-control {
+        cursor: pointer;
+    }
+
+    .btn-primary {
+        background-color: #3498db;
+        border-color: #3498db;
+        padding: 12px 30px;
+        font-size: 1rem;
+        font-weight: 600;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(52, 152, 219, 0.2);
+    }
+
+    .btn-primary:hover {
+        background-color: #2980b9;
+        border-color: #2980b9;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(52, 152, 219, 0.3);
+    }
+    
+    .back-to-list {
+        display: inline-block;
+        margin-top: 20px;
+        color: #3498db;
+        text-decoration: none;
+        font-weight: 500;
+    }
+
+    .back-to-list:hover {
+        text-decoration: underline;
+    }
+
+    hr {
+        margin-top: 2rem;
+        margin-bottom: 2rem;
+    }
+</style>
+
+<div class="form-container">
+    <div class="text-center">
+        <h1>Create New Service Request</h1>
+        <p class="subtitle">Please fill in the details of your request below.</p>
+    </div>
+    <hr />
+
+    <form asp-action="Create">
+        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+        <h4>Requester Information</h4>
+        <p class="text-muted small">Your details are pre-filled from your profile.</p>
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label asp-for="RequesterName" class="control-label"></label>
+                    <input asp-for="RequesterName" class="form-control" readonly />
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label asp-for="Department" class="control-label"></label>
+                    <input asp-for="Department" class="form-control" readonly />
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label asp-for="Section" class="control-label"></label>
+                    <input asp-for="Section" class="form-control" readonly />
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label asp-for="Plant" class="control-label"></label>
+                    <input asp-for="Plant" class="form-control" readonly />
+                </div>
+            </div>
+        </div>
+
+        <hr />
+
+        <h4>Request Details</h4>
+         <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label asp-for="RequestType" class="control-label"></label>
+                    <select asp-for="RequestType" class="form-control" asp-items="Html.GetEnumSelectList<myapp.Models.RequestType>()">
+                         <option value="">-- Select Type --</option>
+                    </select>
+                    <span asp-validation-for="RequestType" class="text-danger"></span>
+                </div>
+            </div>
+             <div id="plant-fg-group" class="col-md-6" style="display: none;">
+                <div class="form-group">
+                    <label asp-for="PlantFG" class="control-label"></label>
+                    <select asp-for="PlantFG" class="form-control">
+                        <option value="">-- Select Plant --</option>
+                        <option value="6021">6021</option>
+                        <option value="6031">6031</option>
+                        <option value="6051">6051</option>
+                        <option value="6081">6081</option>
+                        <option value="6060">6060</option>
+                    </select>
+                    <span asp-validation-for="PlantFG" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="col-md-12">
+                 <div class="form-group">
+                    <label asp-for="Description" class="control-label"></label>
+                    <textarea asp-for="Description" class="form-control" rows="3" placeholder="Detailed description..."></textarea>
+                    <span asp-validation-for="Description" class="text-danger"></span>
+                </div>
+            </div>
+        </div>
+
+        <div id="fg-fields-container" style="display: none;">
+            <hr />
+
+            <h4>Material Information</h4>
+            <div class="row mb-3">
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label asp-for="ItemCode" class="control-label"></label>
+                        <input asp-for="ItemCode" class="form-control" placeholder="e.g., HW-01001" />
+                        <span asp-validation-for="ItemCode" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-md-8">
+                    <div class="form-group">
+                        <label asp-for="EnglishMatDescription" class="control-label"></label>
+                        <input asp-for="EnglishMatDescription" class="form-control" placeholder="e.g., 100uF 16V Capacitor" />
+                        <span asp-validation-for="EnglishMatDescription" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label asp-for="ModelName" class="control-label"></label>
+                        <input asp-for="ModelName" class="form-control" placeholder="e.g., GRM31CR71C106KAC7L" />
+                        <span asp-validation-for="ModelName" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label asp-for="BaseUnit" class="control-label"></label>
+                        <input asp-for="BaseUnit" class="form-control" placeholder="e.g., PC, EA" />
+                        <span asp-validation-for="BaseUnit" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label asp-for="MaterialGroup" class="control-label"></label>
+                        <input asp-for="MaterialGroup" class="form-control" placeholder="e.g., Capacitors" />
+                        <span asp-validation-for="MaterialGroup" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+             <div class="row mb-3">
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label asp-for="StandardPack" class="control-label"></label>
+                        <input asp-for="StandardPack" class="form-control" placeholder="e.g., 100" />
+                        <span asp-validation-for="StandardPack" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="row mb-4">
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label asp-for="DivisionCode" class="control-label"></label>
+                        <input asp-for="DivisionCode" class="form-control" placeholder="e.g., 1000" />
+                        <span asp-validation-for="DivisionCode" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label asp-for="ProfitCenter" class="control-label"></label>
+                        <input asp-for="ProfitCenter" class="form-control" placeholder="e.g., PC-01" />
+                        <span asp-validation-for="ProfitCenter" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label asp-for="DistributionChannel" class="control-label"></label>
+                        <select asp-for="DistributionChannel" class="form-control" asp-items="Html.GetEnumSelectList<myapp.Models.DistributionChannel>()">
+                            <option value="">-- Select Channel --</option>
+                        </select>
+                        <span asp-validation-for="DistributionChannel" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+
+            <hr />
+
+            <h4>Logistics & Production</h4>
+            <div class="row mb-3">
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label asp-for="BoiCode" class="control-label"></label>
+                        <input asp-for="BoiCode" class="form-control" />
+                        <span asp-validation-for="BoiCode" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label asp-for="MrpController" class="control-label"></label>
+                        <input asp-for="MrpController" class="form-control" />
+                        <span asp-validation-for="MrpController" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label asp-for="StorageLocation" class="control-label"></label>
+                        <input asp-for="StorageLocation" class="form-control" />
+                        <span asp-validation-for="StorageLocation" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="row mb-4">
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label asp-for="ProductionSupervisor" class="control-label"></label>
+                        <input asp-for="ProductionSupervisor" class="form-control" />
+                        <span asp-validation-for="ProductionSupervisor" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+
+            <hr />
+            
+            <h4>Financial Information</h4>
+            <div class="row mb-4">
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label asp-for="CostingLotSize" class="control-label"></label>
+                        <input asp-for="CostingLotSize" class="form-control" />
+                        <span asp-validation-for="CostingLotSize" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label asp-for="ValClass" class="control-label"></label>
+                        <input asp-for="ValClass" class="form-control" />
+                        <span asp-validation-for="ValClass" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label asp-for="Price" class="control-label"></label>
+                        <input asp-for="Price" class="form-control" />
+                        <span asp-validation-for="Price" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group text-center mt-5">
+            <input type="submit" value="Submit Request" class="btn btn-primary" />
+        </div>
+    </form>
+    
+    <div class="text-center">
+        <a asp-action="Index" class="back-to-list">Back to List</a>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const requestTypeSelect = document.getElementById('RequestType');
+            const fgFieldsContainer = document.getElementById('fg-fields-container');
+            const plantFgGroup = document.getElementById('plant-fg-group');
+            
+            // The enum value for FG is 0
+            const fgEnumValue = '0'; 
+
+            function toggleFgFields() {
+                if (requestTypeSelect.value === fgEnumValue) {
+                    fgFieldsContainer.style.display = 'block';
+                    plantFgGroup.style.display = 'block';
+                } else {
+                    fgFieldsContainer.style.display = 'none';
+                    plantFgGroup.style.display = 'none';
+                }
+            }
+
+            // Check on page load
+            toggleFgFields();
+
+            // Add event listener for changes
+            requestTypeSelect.addEventListener('change', toggleFgFields);
+        });
+    </script>
+}
