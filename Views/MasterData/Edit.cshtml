@@ -1,0 +1,88 @@
+@model myapp.Models.MasterDataCombination
+
+@{
+    ViewData["Title"] = "Edit Master Data Combination";
+}
+
+<link rel="stylesheet" href="~/css/master-data.css" />
+
+<div class="card">
+    <div class="card-header">
+        <h1><i class="fas fa-edit"></i> Edit Master Data Combination</h1>
+    </div>
+    <div class="card-body">
+        <form asp-action="Edit">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="Id" />
+            <input type="hidden" asp-for="CreatedAt" />
+            <input type="hidden" asp-for="CreatedBy" />
+
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label asp-for="DepartmentName" class="control-label"><i class="fas fa-building"></i> Department</label>
+                        <input asp-for="DepartmentName" class="form-control" />
+                        <span asp-validation-for="DepartmentName" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label asp-for="SectionName" class="control-label"><i class="fas fa-sitemap"></i> Section</label>
+                        <input asp-for="SectionName" class="form-control" />
+                        <span asp-validation-for="SectionName" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label asp-for="PlantName" class="control-label"><i class="fas fa-industry"></i> Plant</label>
+                        <input asp-for="PlantName" class="form-control" />
+                        <span asp-validation-for="PlantName" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mt-3">
+                 <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="control-label">Created At</label>
+                        <input class="form-control" value="@Model.CreatedAt.ToLocalTime().ToString("g")" readonly />
+                    </div>
+                </div>
+                 <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="control-label">Created By</label>
+                        <input class="form-control" value="@Model.CreatedBy" readonly />
+                    </div>
+                </div>
+            </div>
+             <div class="row mt-3">
+                 <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="control-label">Updated At</label>
+                        <input class="form-control" value="@Model.UpdatedAt.ToLocalTime().ToString("g")" readonly />
+                    </div>
+                </div>
+                 <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="control-label">Updated By</label>
+                        <input class="form-control" value="@Model.UpdatedBy" readonly />
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="form-group text-center mt-5">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i> Save Changes
+                </button>
+                <a asp-action="Index" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Back to List
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

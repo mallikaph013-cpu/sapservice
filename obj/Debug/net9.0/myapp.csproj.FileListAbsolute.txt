@@ -260,3 +260,10 @@
 /home/user/sapservice/obj/Debug/net9.0/compressed/75ajzvsluu-zavjl8kan6.gz
 /home/user/sapservice/obj/Debug/net9.0/compressed/a0j1mzjrrq-8ok095ovw7.gz
 /home/user/sapservice/obj/Debug/net9.0/compressed/0ouiajekne-c9pl8hdirh.gz
+/home/user/sapservice/bin/Debug/net9.0/libman.json
+/home/user/sapservice/obj/Debug/net9.0/compressed/qnhzlm5hkn-fwhahm2icz.gz
+/home/user/sapservice/obj/Debug/net9.0/compressed/ixs9gx5ivh-dd6z7egasc.gz
+/home/user/sapservice/obj/Debug/net9.0/compressed/7o0ys8cnrc-jtmsrjfkua.gz
+/home/user/sapservice/obj/Debug/net9.0/compressed/o8tut46rr3-33z6q9z31h.gz
+/home/user/sapservice/obj/Debug/net9.0/compressed/eghsn3j37m-rszun4iext.gz
+/home/user/sapservice/obj/Debug/net9.0/compressed/hkk6tenumc-l5o0ocrnlv.gz

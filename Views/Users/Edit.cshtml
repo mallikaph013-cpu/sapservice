@@ -13,7 +13,7 @@
                 <h1>Edit User</h1>
                 <p class="subtitle">Update the user's details below.</p>
             </div>
-
+            
             <form asp-action="Edit">
                 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                 <input type="hidden" asp-for="Id" />
@@ -38,10 +38,10 @@
                 </div>
 
                 <div class="form-group">
-                    <label asp-for="Username" class="control-label"></label>
-                    <input asp-for="Username" class="form-control" />
-                    <i class="form-icon fas fa-at"></i>
-                    <span asp-validation-for="Username" class="text-danger"></span>
+                    <label asp-for="UserName" class="control-label"></label>
+                    <input asp-for="UserName" class="form-control" placeholder="e.g., jdoe" />
+                    <i class="form-icon fas fa-user"></i>
+                    <span asp-validation-for="UserName" class="text-danger"></span>
                 </div>
 
                 <div class="form-group">
@@ -51,7 +51,7 @@
                     <span asp-validation-for="Email" class="text-danger"></span>
                 </div>
 
-                <hr />
+                <hr/>
 
                 <div class="row">
                     <div class="col-md-4">
@@ -68,17 +68,17 @@
                         <div class="form-group">
                             <label asp-for="Section" class="control-label"></label>
                             <select id="Section" asp-for="Section" class="form-control" asp-items="@Model.SectionList">
-                                <option value="">-- Select Section --</option>
+                                 <option value="">-- Select Section --</option>
                             </select>
                             <i class="form-icon fas fa-briefcase"></i>
                             <span asp-validation-for="Section" class="text-danger"></span>
                         </div>
                     </div>
-                    <div class="col-md-4">
+                     <div class="col-md-4">
                         <div class="form-group">
                             <label asp-for="Plant" class="control-label"></label>
-                            <select id="Plant" asp-for="Plant" class="form-control" asp-items="@Model.PlantList">
-                                <option value="">-- Select Plant --</option>
+                             <select id="Plant" asp-for="Plant" class="form-control" asp-items="@Model.PlantList">
+                                 <option value="">-- Select Plant --</option>
                             </select>
                             <i class="form-icon fas fa-industry"></i>
                             <span asp-validation-for="Plant" class="text-danger"></span>
@@ -90,7 +90,7 @@
 
                 <div class="row">
                     <div class="col-md-6 mb-3">
-                        <div class="form-group form-check">
+                         <div class="form-group form-check">
                             <input class="form-check-input" asp-for="IsActive" />
                             <label class="form-check-label" asp-for="IsActive">
                                 @Html.DisplayNameFor(model => model.IsActive)
@@ -108,16 +108,16 @@
                 </div>
 
                 <div class="form-group text-center mt-5">
-                    <button type="submit" class="btn btn-primary">
+                    <button type="submit" class.cshtml"btn btn-primary">
                         Save Changes
                         <i class="fas fa-save"></i>
                     </button>
                 </div>
             </form>
             <div class="text-center">
-                <a asp-action="Index" class="back-to-list">
+                 <a asp-action="Index" class="back-to-list">
                     <i class="fas fa-arrow-left"></i> Back to List
-                </a>
+                 </a>
             </div>
         </div>
     </div>

@@ -11,9 +11,11 @@ using System.Linq;
 using System;
 using Microsoft.AspNetCore.Http;
 using System.Globalization;
+using Microsoft.AspNetCore.Authorization;
 
 namespace myapp.Controllers
 {
+    [Authorize]
     public class RequestsController : Controller
     {
         private readonly ApplicationDbContext _context;

@@ -8,9 +8,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System;
 using System.Collections.Generic;
+using Microsoft.AspNetCore.Authorization;
 
 namespace myapp.Controllers
 {
+    [Authorize]
     public class MasterDataController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -83,9 +85,88 @@ namespace myapp.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            // If model is not valid, re-populate the lists and return to the view
             var populatedViewModel = await PopulateViewModelAsync(viewModel);
             return View("Index", populatedViewModel);
+        }
+
+        // GET: MasterData/Edit/5
+        public async Task<IActionResult> Edit(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var combination = await _context.MasterDataCombinations.FindAsync(id);
+            if (combination == null)
+            {
+                return NotFound();
+            }
+            return View(combination);
+        }
+
+        // POST: MasterData/Edit/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(int id, MasterDataCombination combination)
+        {
+            if (id != combination.Id)
+            {
+                return NotFound();
+            }
+
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    combination.UpdatedAt = DateTime.UtcNow;
+                    combination.UpdatedBy = User.Identity?.Name ?? "System";
+                    _context.Update(combination);
+                    await _context.SaveChangesAsync();
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (!_context.MasterDataCombinations.Any(e => e.Id == combination.Id))
+                    {
+                        return NotFound();
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
+                return RedirectToAction(nameof(Index));
+            }
+            return View(combination);
+        }
+
+        // GET: MasterData/Delete/5
+        public async Task<IActionResult> Delete(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var combination = await _context.MasterDataCombinations
+                .FirstOrDefaultAsync(m => m.Id == id);
+            if (combination == null)
+            {
+                return NotFound();
+            }
+
+            return View(combination);
+        }
+
+        // POST: MasterData/Delete/5
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(int id)
+        {
+            var combination = await _context.MasterDataCombinations.FindAsync(id);
+            _context.MasterDataCombinations.Remove(combination);
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
         }
     }
 }

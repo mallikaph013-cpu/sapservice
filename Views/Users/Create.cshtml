@@ -35,12 +35,11 @@
                         </div>
                     </div>
                 </div>
-
-                 <div class="form-group">
-                    <label asp-for="Username" class="control-label"></label>
-                    <input asp-for="Username" class="form-control" placeholder="e.g., jdoe" />
-                    <i class="form-icon fas fa-at"></i>
-                    <span asp-validation-for="Username" class="text-danger"></span>
+                <div class="form-group">
+                    <label asp-for="UserName" class="control-label"></label>
+                    <input asp-for="UserName" class="form-control" placeholder="e.g., jdoe" />
+                    <i class="form-icon fas fa-user"></i>
+                    <span asp-validation-for="UserName" class="text-danger"></span>
                 </div>
 
                 <div class="form-group">
@@ -154,7 +153,7 @@
                             $.each(data.sections, function (i, item) {
                                 var isSelected = item.value === selectedSection;
                                 sectionDropdown.append($('<option>', {
-                                    value: item.value,
+                                    value: item..cshtml
                                     text: item.text,
                                     selected: isSelected
                                 }));

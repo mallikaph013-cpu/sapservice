@@ -76,6 +76,7 @@
                     <th><i class="fas fa-user"></i> @Html.DisplayNameFor(model => model.NewCombination.CreatedBy)</th>
                     <th><i class="fas fa-edit"></i> @Html.DisplayNameFor(model => model.NewCombination.UpdatedAt)</th>
                     <th><i class="fas fa-user-edit"></i> @Html.DisplayNameFor(model => model.NewCombination.UpdatedBy)</th>
+                    <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -91,13 +92,17 @@
                             <td>@item.CreatedBy</td>
                             <td>@item.UpdatedAt.ToLocalTime().ToString("g")</td>
                             <td>@item.UpdatedBy</td>
+                            <td>
+                                <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning"><i class="fas fa-edit"></i> Edit</a>
+                                <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger"><i class="fas fa-trash-alt"></i> Delete</a>
+                            </td>
                         </tr>
                     }
                 }
                 else
                 {
                     <tr>
-                        <td colspan="7" class="text-center">No combinations found.</td>
+                        <td colspan="8" class="text-center">No combinations found.</td>
                     </tr>
                 }
             </tbody>
