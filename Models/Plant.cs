@@ -5,18 +5,12 @@ namespace myapp.Models
 {
     public class Plant
     {
-        public int Id { get; set; }
+        [Key]
+        public int PlantId { get; set; }
+        public string PlantName { get; set; } = string.Empty;
 
-        [Required]
-        [Display(Name = "Plant Name")]
-        public string Name { get; set; } = string.Empty;
-
-        // Foreign key for Department
-        [Required]
         public int DepartmentId { get; set; }
-
-        // Navigation property
         [ForeignKey("DepartmentId")]
-        public virtual Department? Department { get; set; }
+        public Department? Department { get; set; }
     }
 }

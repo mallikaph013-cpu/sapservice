@@ -84,10 +84,7 @@
             <div class="col-md-12"><div class="form-group"><label asp-for="Description" class="control-label"></label><textarea asp-for="Description" class="form-control" rows="3"></textarea><span asp-validation-for="Description" class="text-danger"></span></div></div>
         </div>
         
-        <!-- All Material Forms from Create.cshtml go here -->
-        <!-- The same JavaScript will be used to show/hide them -->
-        @Html.Partial("_MaterialForms", Model)
-
+        <partial name="_MaterialForms" model="Model" />
 
         <div class="form-group text-center mt-5">
             <input type="submit" value="Save Changes" class="btn btn-primary" />
@@ -100,45 +97,42 @@
 </div>
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <partial name="_ValidationScriptsPartial" />
     <script>
+    // This script is intentionally minimal. 
+    // The complex dynamic logic is handled in Create.cshtml and is not needed here
+    // as the form is already populated with the correct data.
     document.addEventListener('DOMContentLoaded', function () {
-        // The script is nearly identical to Create.cshtml, but we need to populate existing BOM/Routing data.
-
         const requestTypeSelect = document.getElementById('RequestType');
-        // ... (all other container consts are needed here as in Create.cshtml)
-        const fgFieldsContainer = document.getElementById('fg-fields-container');
-        const smFieldsContainer = document.getElementById('sm-fields-container');
-        const rmFieldsContainer = document.getElementById('rm-fields-container');
-        const toolingbFieldsContainer = document.getElementById('toolingb-fields-container');
-        const toolingbfgFieldsContainer = document.getElementById('toolingbfg-fields-container');
-        const toolingbpuFieldsContainer = document.getElementById('toolingbpu-fields-container');
-        const distributionchanelFieldsContainer = document.getElementById('distributionchanel-fields-container');
-        const addstorageFieldsContainer = document.getElementById('addstorage-fields-container');
-        const bomFieldsContainer = document.getElementById('bom-fields-container');
-        const routingFieldsContainer = document.getElementById('routing-fields-container');
-        const ipoFieldsContainer = document.getElementById('ipo-fields-container');
-        const plantFgGroup = document.getElementById('plant-fg-group');
-
-        const bomTableBody = document.getElementById('bom-items-body');
-        const routingTableBody = document.getElementById('routing-items-body');
-
-        // Enums for RequestType
-        const fgEnumValue = '0'; 
-        const smEnumValue = '1'; 
-        const rmEnumValue = '2';
-        const toolingBEnumValue = '3';
-        const toolingBFGEnumValue = '4';
-        const toolingBPUEnumValue = '5';
-        const bomEnumValue = '6';
-        const routingEnumValue = '7';
-        const addStorageEnumValue = '8';
-        const distributionChanelEnumValue = '9';
-        const ipoEnumValue = '10';
-
+        
         function toggleMaterialFields() {
-            const selectedValue = requestTypeSelect.value;
-            // Hide all
+             const selectedValue = requestTypeSelect.value;
+            const fgFieldsContainer = document.getElementById('fg-fields-container');
+            const smFieldsContainer = document.getElementById('sm-fields-container');
+            const rmFieldsContainer = document.getElementById('rm-fields-container');
+            const toolingbFieldsContainer = document.getElementById('toolingb-fields-container');
+            const toolingbfgFieldsContainer = document.getElementById('toolingbfg-fields-container');
+            const toolingbpuFieldsContainer = document.getElementById('toolingbpu-fields-container');
+            const distributionchanelFieldsContainer = document.getElementById('distributionchanel-fields-container');
+            const addstorageFieldsContainer = document.getElementById('addstorage-fields-container');
+            const bomFieldsContainer = document.getElementById('bom-fields-container');
+            const routingFieldsContainer = document.getElementById('routing-fields-container');
+            const ipoFieldsContainer = document.getElementById('ipo-fields-container');
+            const plantFgGroup = document.getElementById('plant-fg-group');
+
+            const fgEnumValue = '0'; 
+            const smEnumValue = '1'; 
+            const rmEnumValue = '2';
+            const toolingBEnumValue = '3';
+            const toolingBFGEnumValue = '4';
+            const toolingBPUEnumValue = '5';
+            const bomEnumValue = '6';
+            const routingEnumValue = '7';
+            const addStorageEnumValue = '8';
+            const distributionChanelEnumValue = '9';
+            const ipoEnumValue = '10';
+
+            // Hide all containers
             fgFieldsContainer.style.display = 'none';
             smFieldsContainer.style.display = 'none';
             rmFieldsContainer.style.display = 'none';
@@ -152,7 +146,7 @@
             ipoFieldsContainer.style.display = 'none';
             plantFgGroup.style.display = 'none';
 
-            // Show selected
+            // Show the relevant container
             if (selectedValue === fgEnumValue) { fgFieldsContainer.style.display = 'block'; plantFgGroup.style.display = 'block'; }
             else if (selectedValue === smEnumValue) { smFieldsContainer.style.display = 'block'; }
             else if (selectedValue === rmEnumValue) { rmFieldsContainer.style.display = 'block'; }
@@ -166,66 +160,9 @@
             else if (selectedValue === ipoEnumValue) { ipoFieldsContainer.style.display = 'block'; }
         }
 
-        // --- BOM, Routing, etc. logic from Create.cshtml is needed here ---
-        // (The full JS logic for adding/removing/re-indexing rows)
-
-        // ** NEW FOR EDIT **
-        // Populate existing BOM and Routing data on page load
-        function populateExistingData() {
-            const bomData = @Html.Raw(Json.Serialize(Model.Components));
-            bomData.forEach((component, index) => {
-                const newRow = createBomRow(component.level, index);
-                // Populate fields
-                newRow.querySelector('[name$=".ItemCat"]').value = component.itemCat;
-                newRow.querySelector('[name$=".ComponentNumber"]').value = component.componentNumber;
-                newRow.querySelector('[name$=".Description"]').value = component.description;
-                newRow.querySelector('[name$=".ItemQuantity"]').value = component.itemQuantity;
-                newRow.querySelector('[name$=".Unit"]').value = component.unit;
-                newRow.querySelector('[name$=".BomUsage"]').value = component.bomUsage;
-                newRow.querySelector('[name$=".Plant"]').value = component.plant;
-                newRow.querySelector('[name$=".Sloc"]').value = component.sloc;
-                bomTableBody.appendChild(newRow);
-            });
-            if(bomData.length > 0) reIndexBomTable();
-
-            const routingData = @Html.Raw(Json.Serialize(Model.Routings));
-            routingData.forEach((routing, index) => {
-                const newRow = createRoutingRow(index);
-                 // Populate fields
-                newRow.querySelector('[name$=".Material"]').value = routing.material;
-                newRow.querySelector('[name$=".Description"]').value = routing.description;
-                newRow.querySelector('[name$=".WorkCenter"]').value = routing.workCenter;
-                newRow.querySelector('[name$=".Operation"]').value = routing.operation;
-                newRow.querySelector('[name$=".BaseQty"]').value = routing.baseQty;
-                newRow.querySelector('[name$=".Unit"]').value = routing.unit;
-                newRow.querySelector('[name$=".DirectLaborCosts"]').value = routing.directLaborCosts;
-                newRow.querySelector('[name$=".DirectExpenses"]').value = routing.directExpenses;
-                newRow.querySelector('[name$=".AllocationExpense"]').value = routing.allocationExpense;
-                newRow.querySelector('[name$=".ProductionVersionCode"]').value = routing.productionVersionCode;
-                newRow.querySelector('[name$=".Version"]').value = routing.version;
-                newRow.querySelector('[name$=".ValidFrom"]').value = routing.validFrom ? routing.validFrom.split('T')[0] : '';
-                newRow.querySelector('[name$=".ValidTo"]').value = routing.validTo ? routing.validTo.split('T')[0] : '';
-                newRow.querySelector('[name$=".MaximumLotSize"]').value = routing.maximumLotSize;
-                newRow.querySelector('[name$=".Group"]').value = routing.group;
-                newRow.querySelector('[name$=".GroupCounter"]').value = routing.groupCounter;
-                routingTableBody.appendChild(newRow);
-            });
-            if(routingData.length > 0) reIndexRoutingTable();
-        }
-
-        // Paste the full row creation and re-indexing functions here
-        // from Create.cshtml, then call them.
-        // function createBomRow(...) { ... }
-        // function reIndexBomTable(...) { ... }
-        // function createRoutingRow(...) { ... }
-        // function reIndexRoutingTable(...) { ... }
-        // etc.
-        
         // Initial Setup
         toggleMaterialFields();
-        populateExistingData();
         requestTypeSelect.addEventListener('change', toggleMaterialFields);
-
     });
     </script>
 }

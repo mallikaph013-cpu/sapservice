@@ -11,7 +11,6 @@ namespace myapp.Data
         {
         }
 
-        // DbSets for your models
         public DbSet<RequestItem> RequestItems { get; set; } = null!;
         public DbSet<BomComponent> BomComponents { get; set; } = null!;
         public DbSet<Routing> Routings { get; set; } = null!;

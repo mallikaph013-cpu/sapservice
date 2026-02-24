@@ -7,7 +7,7 @@ using myapp.Models; // Import the Models namespace
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string \'DefaultConnection\' not found.");
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlite(connectionString));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
@@ -26,10 +26,8 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.SlidingExpiration = true;
 });
 
+// Reverting to AddControllersWithViews for MVC projects.
 builder.Services.AddControllersWithViews();
-
-// Moved to a higher, less common port range to avoid environment conflicts
-builder.WebHost.UseUrls("http://0.0.0.0:8100");
 
 var app = builder.Build();
 
@@ -52,6 +50,7 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
+// Reverting to MapControllerRoute for MVC routing.
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
@@ -73,5 +72,4 @@ using (var scope = app.Services.CreateScope())
         logger.LogError(ex, "An error occurred while seeding the database.");
     }
 }
-
 app.Run();

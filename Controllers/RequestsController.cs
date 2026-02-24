@@ -463,7 +463,7 @@ namespace myapp.Controllers
                     await file.CopyToAsync(stream);
                     using (var package = new ExcelPackage(stream))
                     {
-                        ExcelWorksheet worksheet = package.Workbook.Worksheets.FirstOrDefault();
+                        var worksheet = package.Workbook.Worksheets.FirstOrDefault();
                         if (worksheet == null)
                         {
                             TempData["ErrorMessage"] = "The Excel file is empty or corrupted.";
@@ -475,8 +475,8 @@ namespace myapp.Controllers
                         {
                             var requestItem = new RequestItem
                             {
-                                Description = worksheet.Cells[row, 1].Value?.ToString().Trim(),
-                                Requester = worksheet.Cells[row, 2].Value?.ToString().Trim(),
+                                Description = worksheet.Cells[row, 1].Value?.ToString()?.Trim() ?? string.Empty,
+                                Requester = worksheet.Cells[row, 2].Value?.ToString()?.Trim() ?? string.Empty,
                                 Status = "Pending",
                                 RequestDate = DateTime.UtcNow
                             };

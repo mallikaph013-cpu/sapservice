@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "8S7GW2AwzhiALtYtE8WILqBq2S+QN2kCtmQ0ackt4ZA=",
+  "Hash": "VwEJr1fd/ROkWowAmgK3hAfysBsQC+44AVTcHcevNHg=",
   "Source": "myapp",
   "BasePath": "_content/myapp",
   "Mode": "Default",
@@ -36,6 +36,27 @@
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "/home/user/sapservice/wwwroot/app.css"
+    },
+    {
+      "Identity": "/home/user/sapservice/obj/Debug/net9.0/compressed/0ouiajekne-c9pl8hdirh.gz",
+      "SourceId": "myapp",
+      "SourceType": "Discovered",
+      "ContentRoot": "/home/user/sapservice/obj/Debug/net9.0/compressed/",
+      "BasePath": "_content/myapp",
+      "RelativePath": "css/create-user#[.{fingerprint=c9pl8hdirh}]?.css.gz",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Alternative",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "/home/user/sapservice/wwwroot/css/create-user.css",
+      "AssetTraitName": "Content-Encoding",
+      "AssetTraitValue": "gzip",
+      "Fingerprint": "yjtvbvrcvd",
+      "Integrity": "ouGQyCTwrYK7KhTL+vLDAgz2qyzXwmuqi55nNkuQqnA=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "/home/user/sapservice/wwwroot/css/create-user.css"
     },
     {
       "Identity": "/home/user/sapservice/obj/Debug/net9.0/compressed/0t7rnlhx5d-c2oey78nd0.gz",
@@ -248,6 +269,27 @@
       "OriginalItemSpec": "/home/user/sapservice/wwwroot/lib/bootstrap/dist/css/bootstrap-utilities.rtl.css"
     },
     {
+      "Identity": "/home/user/sapservice/obj/Debug/net9.0/compressed/75ajzvsluu-zavjl8kan6.gz",
+      "SourceId": "myapp",
+      "SourceType": "Discovered",
+      "ContentRoot": "/home/user/sapservice/obj/Debug/net9.0/compressed/",
+      "BasePath": "_content/myapp",
+      "RelativePath": "favicon#[.{fingerprint=zavjl8kan6}]?.svg.gz",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Alternative",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "/home/user/sapservice/wwwroot/favicon.svg",
+      "AssetTraitName": "Content-Encoding",
+      "AssetTraitValue": "gzip",
+      "Fingerprint": "v3vd006yen",
+      "Integrity": "u76i6MbGKkwJ4CaZxNjCgBwWSRYn0OAqbt3BcWZiqj0=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "/home/user/sapservice/wwwroot/favicon.svg"
+    },
+    {
       "Identity": "/home/user/sapservice/obj/Debug/net9.0/compressed/76fcepdrog-ausgxo2sd3.gz",
       "SourceId": "myapp",
       "SourceType": "Discovered",
@@ -288,6 +330,27 @@
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "/home/user/sapservice/wwwroot/lib/bootstrap/dist/js/bootstrap.esm.js"
+    },
+    {
+      "Identity": "/home/user/sapservice/obj/Debug/net9.0/compressed/7y606fsrgq-glp9jcn2o9.gz",
+      "SourceId": "myapp",
+      "SourceType": "Computed",
+      "ContentRoot": "/home/user/sapservice/obj/Debug/net9.0/compressed/",
+      "BasePath": "_content/myapp",
+      "RelativePath": "myapp#[.{fingerprint=glp9jcn2o9}]?.styles.css.gz",
+      "AssetKind": "All",
+      "AssetMode": "CurrentProject",
+      "AssetRole": "Alternative",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "/home/user/sapservice/obj/Debug/net9.0/scopedcss/bundle/myapp.styles.css",
+      "AssetTraitName": "Content-Encoding",
+      "AssetTraitValue": "gzip",
+      "Fingerprint": "w1brs3ie0j",
+      "Integrity": "TGfcJ5dvX+mcuOCFMCRtr1wpVDzELsVLM28IWXsZ6f4=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "/home/user/sapservice/obj/Debug/net9.0/scopedcss/bundle/myapp.styles.css"
     },
     {
       "Identity": "/home/user/sapservice/obj/Debug/net9.0/compressed/80udu14dnr-hrwsygsryq.gz",
@@ -332,6 +395,27 @@
       "OriginalItemSpec": "/home/user/sapservice/wwwroot/lib/bootstrap/dist/css/bootstrap-grid.min.css"
     },
     {
+      "Identity": "/home/user/sapservice/obj/Debug/net9.0/compressed/89a701djol-rspbzmf4g3.gz",
+      "SourceId": "myapp",
+      "SourceType": "Discovered",
+      "ContentRoot": "/home/user/sapservice/obj/Debug/net9.0/compressed/",
+      "BasePath": "_content/myapp",
+      "RelativePath": "css/master-data#[.{fingerprint=rspbzmf4g3}]?.css.gz",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Alternative",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "/home/user/sapservice/wwwroot/css/master-data.css",
+      "AssetTraitName": "Content-Encoding",
+      "AssetTraitValue": "gzip",
+      "Fingerprint": "pzk17tvn08",
+      "Integrity": "hcuTIU2nt59yWpub74BRJY1XoSkPjYwo32D9ufytwwU=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "/home/user/sapservice/wwwroot/css/master-data.css"
+    },
+    {
       "Identity": "/home/user/sapservice/obj/Debug/net9.0/compressed/9ru0uqv9zf-jj8uyg4cgr.gz",
       "SourceId": "myapp",
       "SourceType": "Discovered",
@@ -353,6 +437,27 @@
       "OriginalItemSpec": "/home/user/sapservice/wwwroot/lib/bootstrap/dist/js/bootstrap.esm.min.js"
     },
     {
+      "Identity": "/home/user/sapservice/obj/Debug/net9.0/compressed/a0j1mzjrrq-8ok095ovw7.gz",
+      "SourceId": "myapp",
+      "SourceType": "Discovered",
+      "ContentRoot": "/home/user/sapservice/obj/Debug/net9.0/compressed/",
+      "BasePath": "_content/myapp",
+      "RelativePath": "css/edit-user#[.{fingerprint=8ok095ovw7}]?.css.gz",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Alternative",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "/home/user/sapservice/wwwroot/css/edit-user.css",
+      "AssetTraitName": "Content-Encoding",
+      "AssetTraitValue": "gzip",
+      "Fingerprint": "pu1vsflzaz",
+      "Integrity": "35xHH0goAHn5Sob1iNEbywwbckgO2au1kPre8TQWwt4=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "/home/user/sapservice/wwwroot/css/edit-user.css"
+    },
+    {
       "Identity": "/home/user/sapservice/obj/Debug/net9.0/compressed/bvquconu49-jd9uben2k1.gz",
       "SourceId": "myapp",
       "SourceType": "Discovered",
@@ -372,6 +477,27 @@
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "/home/user/sapservice/wwwroot/lib/bootstrap/dist/css/bootstrap-reboot.rtl.min.css.map"
+    },
+    {
+      "Identity": "/home/user/sapservice/obj/Debug/net9.0/compressed/camuj07gqt-glp9jcn2o9.gz",
+      "SourceId": "myapp",
+      "SourceType": "Computed",
+      "ContentRoot": "/home/user/sapservice/obj/Debug/net9.0/compressed/",
+      "BasePath": "_content/myapp",
+      "RelativePath": "myapp#[.{fingerprint=glp9jcn2o9}]!.bundle.scp.css.gz",
+      "AssetKind": "All",
+      "AssetMode": "Reference",
+      "AssetRole": "Alternative",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "/home/user/sapservice/obj/Debug/net9.0/scopedcss/projectbundle/myapp.bundle.scp.css",
+      "AssetTraitName": "Content-Encoding",
+      "AssetTraitValue": "gzip",
+      "Fingerprint": "w1brs3ie0j",
+      "Integrity": "TGfcJ5dvX+mcuOCFMCRtr1wpVDzELsVLM28IWXsZ6f4=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "/home/user/sapservice/obj/Debug/net9.0/scopedcss/projectbundle/myapp.bundle.scp.css"
     },
     {
       "Identity": "/home/user/sapservice/obj/Debug/net9.0/compressed/d2vea67ciq-y7v9cxd14o.gz",
@@ -498,6 +624,27 @@
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "/home/user/sapservice/wwwroot/lib/bootstrap/dist/js/bootstrap.bundle.js.map"
+    },
+    {
+      "Identity": "/home/user/sapservice/obj/Debug/net9.0/compressed/jdrixves1g-fwpdzra598.gz",
+      "SourceId": "myapp",
+      "SourceType": "Discovered",
+      "ContentRoot": "/home/user/sapservice/obj/Debug/net9.0/compressed/",
+      "BasePath": "_content/myapp",
+      "RelativePath": "css/users#[.{fingerprint=fwpdzra598}]?.css.gz",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Alternative",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "/home/user/sapservice/wwwroot/css/users.css",
+      "AssetTraitName": "Content-Encoding",
+      "AssetTraitValue": "gzip",
+      "Fingerprint": "or8hgswxcs",
+      "Integrity": "XHmrn1XwPRHGyT+7zmhUvYM7fmZQEETv/aUvlDVIDqE=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "/home/user/sapservice/wwwroot/css/users.css"
     },
     {
       "Identity": "/home/user/sapservice/obj/Debug/net9.0/compressed/jg17ltfci9-b7pk76d08c.gz",
@@ -1004,6 +1151,48 @@
       "OriginalItemSpec": "/home/user/sapservice/wwwroot/lib/bootstrap/dist/css/bootstrap-utilities.css.map"
     },
     {
+      "Identity": "/home/user/sapservice/obj/Debug/net9.0/scopedcss/bundle/myapp.styles.css",
+      "SourceId": "myapp",
+      "SourceType": "Computed",
+      "ContentRoot": "/home/user/sapservice/obj/Debug/net9.0/scopedcss/bundle/",
+      "BasePath": "_content/myapp",
+      "RelativePath": "myapp#[.{fingerprint}]?.styles.css",
+      "AssetKind": "All",
+      "AssetMode": "CurrentProject",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "ScopedCss",
+      "AssetTraitValue": "ApplicationBundle",
+      "Fingerprint": "glp9jcn2o9",
+      "Integrity": "LIOfYV1XER2HI7+FaME564BV8WtGxz6TktPP9t8ohOE=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "/home/user/sapservice/obj/Debug/net9.0/scopedcss/bundle/myapp.styles.css"
+    },
+    {
+      "Identity": "/home/user/sapservice/obj/Debug/net9.0/scopedcss/projectbundle/myapp.bundle.scp.css",
+      "SourceId": "myapp",
+      "SourceType": "Computed",
+      "ContentRoot": "/home/user/sapservice/obj/Debug/net9.0/scopedcss/projectbundle/",
+      "BasePath": "_content/myapp",
+      "RelativePath": "myapp#[.{fingerprint}]!.bundle.scp.css",
+      "AssetKind": "All",
+      "AssetMode": "Reference",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "ScopedCss",
+      "AssetTraitValue": "ProjectBundle",
+      "Fingerprint": "glp9jcn2o9",
+      "Integrity": "LIOfYV1XER2HI7+FaME564BV8WtGxz6TktPP9t8ohOE=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "/home/user/sapservice/obj/Debug/net9.0/scopedcss/projectbundle/myapp.bundle.scp.css"
+    },
+    {
       "Identity": "/home/user/sapservice/wwwroot/app.css",
       "SourceId": "myapp",
       "SourceType": "Discovered",
@@ -1023,6 +1212,69 @@
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "wwwroot/app.css"
+    },
+    {
+      "Identity": "/home/user/sapservice/wwwroot/css/create-user.css",
+      "SourceId": "myapp",
+      "SourceType": "Discovered",
+      "ContentRoot": "/home/user/sapservice/wwwroot/",
+      "BasePath": "_content/myapp",
+      "RelativePath": "css/create-user#[.{fingerprint}]?.css",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "Fingerprint": "c9pl8hdirh",
+      "Integrity": "IK9kJXGkJuRkd5Hoz1meugvA7dJC1w2od3yt52EqGAE=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot/css/create-user.css"
+    },
+    {
+      "Identity": "/home/user/sapservice/wwwroot/css/edit-user.css",
+      "SourceId": "myapp",
+      "SourceType": "Discovered",
+      "ContentRoot": "/home/user/sapservice/wwwroot/",
+      "BasePath": "_content/myapp",
+      "RelativePath": "css/edit-user#[.{fingerprint}]?.css",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "Fingerprint": "8ok095ovw7",
+      "Integrity": "qIWrVfL3cxgLdh/BXLfiFVB7HNALt+Asx/vy/LI1d4k=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot/css/edit-user.css"
+    },
+    {
+      "Identity": "/home/user/sapservice/wwwroot/css/master-data.css",
+      "SourceId": "myapp",
+      "SourceType": "Discovered",
+      "ContentRoot": "/home/user/sapservice/wwwroot/",
+      "BasePath": "_content/myapp",
+      "RelativePath": "css/master-data#[.{fingerprint}]?.css",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "Fingerprint": "rspbzmf4g3",
+      "Integrity": "W2L6I21QG8pubBlqzAwqfqnRCLeqvtNHgI70lPlFSkc=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot/css/master-data.css"
     },
     {
       "Identity": "/home/user/sapservice/wwwroot/css/site.css",
@@ -1046,6 +1298,27 @@
       "OriginalItemSpec": "wwwroot/css/site.css"
     },
     {
+      "Identity": "/home/user/sapservice/wwwroot/css/users.css",
+      "SourceId": "myapp",
+      "SourceType": "Discovered",
+      "ContentRoot": "/home/user/sapservice/wwwroot/",
+      "BasePath": "_content/myapp",
+      "RelativePath": "css/users#[.{fingerprint}]?.css",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "Fingerprint": "fwpdzra598",
+      "Integrity": "X/MA2ZxrPasGrcuTQvulhzftGk9lJN7+MvSzFm9QFZA=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot/css/users.css"
+    },
+    {
       "Identity": "/home/user/sapservice/wwwroot/favicon.png",
       "SourceId": "myapp",
       "SourceType": "Discovered",
@@ -1065,6 +1338,27 @@
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "wwwroot/favicon.png"
+    },
+    {
+      "Identity": "/home/user/sapservice/wwwroot/favicon.svg",
+      "SourceId": "myapp",
+      "SourceType": "Discovered",
+      "ContentRoot": "/home/user/sapservice/wwwroot/",
+      "BasePath": "_content/myapp",
+      "RelativePath": "favicon#[.{fingerprint}]?.svg",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "Fingerprint": "zavjl8kan6",
+      "Integrity": "xcVnqYcLGqvoFdJCOfeqjHGQsBsSI0hB9yJYAf2Qxm8=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot/favicon.svg"
     },
     {
       "Identity": "/home/user/sapservice/wwwroot/js/site.js",
@@ -2312,6 +2606,900 @@
       ]
     },
     {
+      "Route": "css/create-user.c9pl8hdirh.css",
+      "AssetFile": "/home/user/sapservice/obj/Debug/net9.0/compressed/0ouiajekne-c9pl8hdirh.gz",
+      "Selectors": [
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip",
+          "Quality": "0.000885739593"
+        }
+      ],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "1128"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"ouGQyCTwrYK7KhTL+vLDAgz2qyzXwmuqi55nNkuQqnA=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Tue, 24 Feb 2026 03:15:46 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        },
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip"
+        },
+        {
+          "Name": "Vary",
+          "Value": "Content-Encoding"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/css"
+        },
+        {
+          "Name": "ETag",
+          "Value": "W/\"IK9kJXGkJuRkd5Hoz1meugvA7dJC1w2od3yt52EqGAE=\""
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "c9pl8hdirh"
+        },
+        {
+          "Name": "label",
+          "Value": "css/create-user.css"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-IK9kJXGkJuRkd5Hoz1meugvA7dJC1w2od3yt52EqGAE="
+        }
+      ]
+    },
+    {
+      "Route": "css/create-user.c9pl8hdirh.css",
+      "AssetFile": "/home/user/sapservice/wwwroot/css/create-user.css",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "3101"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/css"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"IK9kJXGkJuRkd5Hoz1meugvA7dJC1w2od3yt52EqGAE=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Tue, 24 Feb 2026 03:15:46 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "c9pl8hdirh"
+        },
+        {
+          "Name": "label",
+          "Value": "css/create-user.css"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-IK9kJXGkJuRkd5Hoz1meugvA7dJC1w2od3yt52EqGAE="
+        }
+      ]
+    },
+    {
+      "Route": "css/create-user.c9pl8hdirh.css.gz",
+      "AssetFile": "/home/user/sapservice/obj/Debug/net9.0/compressed/0ouiajekne-c9pl8hdirh.gz",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "1128"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/css"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"ouGQyCTwrYK7KhTL+vLDAgz2qyzXwmuqi55nNkuQqnA=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Tue, 24 Feb 2026 03:15:46 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        },
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip"
+        },
+        {
+          "Name": "Vary",
+          "Value": "Content-Encoding"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "c9pl8hdirh"
+        },
+        {
+          "Name": "label",
+          "Value": "css/create-user.css.gz"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-ouGQyCTwrYK7KhTL+vLDAgz2qyzXwmuqi55nNkuQqnA="
+        }
+      ]
+    },
+    {
+      "Route": "css/create-user.css",
+      "AssetFile": "/home/user/sapservice/obj/Debug/net9.0/compressed/0ouiajekne-c9pl8hdirh.gz",
+      "Selectors": [
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip",
+          "Quality": "0.000885739593"
+        }
+      ],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "1128"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"ouGQyCTwrYK7KhTL+vLDAgz2qyzXwmuqi55nNkuQqnA=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Tue, 24 Feb 2026 03:15:46 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        },
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip"
+        },
+        {
+          "Name": "Vary",
+          "Value": "Content-Encoding"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/css"
+        },
+        {
+          "Name": "ETag",
+          "Value": "W/\"IK9kJXGkJuRkd5Hoz1meugvA7dJC1w2od3yt52EqGAE=\""
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-IK9kJXGkJuRkd5Hoz1meugvA7dJC1w2od3yt52EqGAE="
+        }
+      ]
+    },
+    {
+      "Route": "css/create-user.css",
+      "AssetFile": "/home/user/sapservice/wwwroot/css/create-user.css",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "3101"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/css"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"IK9kJXGkJuRkd5Hoz1meugvA7dJC1w2od3yt52EqGAE=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Tue, 24 Feb 2026 03:15:46 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-IK9kJXGkJuRkd5Hoz1meugvA7dJC1w2od3yt52EqGAE="
+        }
+      ]
+    },
+    {
+      "Route": "css/create-user.css.gz",
+      "AssetFile": "/home/user/sapservice/obj/Debug/net9.0/compressed/0ouiajekne-c9pl8hdirh.gz",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "1128"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/css"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"ouGQyCTwrYK7KhTL+vLDAgz2qyzXwmuqi55nNkuQqnA=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Tue, 24 Feb 2026 03:15:46 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        },
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip"
+        },
+        {
+          "Name": "Vary",
+          "Value": "Content-Encoding"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-ouGQyCTwrYK7KhTL+vLDAgz2qyzXwmuqi55nNkuQqnA="
+        }
+      ]
+    },
+    {
+      "Route": "css/edit-user.8ok095ovw7.css",
+      "AssetFile": "/home/user/sapservice/obj/Debug/net9.0/compressed/a0j1mzjrrq-8ok095ovw7.gz",
+      "Selectors": [
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip",
+          "Quality": "0.001675041876"
+        }
+      ],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "596"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"35xHH0goAHn5Sob1iNEbywwbckgO2au1kPre8TQWwt4=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Tue, 24 Feb 2026 03:12:46 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        },
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip"
+        },
+        {
+          "Name": "Vary",
+          "Value": "Content-Encoding"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/css"
+        },
+        {
+          "Name": "ETag",
+          "Value": "W/\"qIWrVfL3cxgLdh/BXLfiFVB7HNALt+Asx/vy/LI1d4k=\""
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "8ok095ovw7"
+        },
+        {
+          "Name": "label",
+          "Value": "css/edit-user.css"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-qIWrVfL3cxgLdh/BXLfiFVB7HNALt+Asx/vy/LI1d4k="
+        }
+      ]
+    },
+    {
+      "Route": "css/edit-user.8ok095ovw7.css",
+      "AssetFile": "/home/user/sapservice/wwwroot/css/edit-user.css",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "1671"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/css"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"qIWrVfL3cxgLdh/BXLfiFVB7HNALt+Asx/vy/LI1d4k=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Tue, 24 Feb 2026 03:12:46 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "8ok095ovw7"
+        },
+        {
+          "Name": "label",
+          "Value": "css/edit-user.css"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-qIWrVfL3cxgLdh/BXLfiFVB7HNALt+Asx/vy/LI1d4k="
+        }
+      ]
+    },
+    {
+      "Route": "css/edit-user.8ok095ovw7.css.gz",
+      "AssetFile": "/home/user/sapservice/obj/Debug/net9.0/compressed/a0j1mzjrrq-8ok095ovw7.gz",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "596"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/css"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"35xHH0goAHn5Sob1iNEbywwbckgO2au1kPre8TQWwt4=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Tue, 24 Feb 2026 03:12:46 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        },
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip"
+        },
+        {
+          "Name": "Vary",
+          "Value": "Content-Encoding"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "8ok095ovw7"
+        },
+        {
+          "Name": "label",
+          "Value": "css/edit-user.css.gz"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-35xHH0goAHn5Sob1iNEbywwbckgO2au1kPre8TQWwt4="
+        }
+      ]
+    },
+    {
+      "Route": "css/edit-user.css",
+      "AssetFile": "/home/user/sapservice/obj/Debug/net9.0/compressed/a0j1mzjrrq-8ok095ovw7.gz",
+      "Selectors": [
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip",
+          "Quality": "0.001675041876"
+        }
+      ],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "596"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"35xHH0goAHn5Sob1iNEbywwbckgO2au1kPre8TQWwt4=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Tue, 24 Feb 2026 03:12:46 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        },
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip"
+        },
+        {
+          "Name": "Vary",
+          "Value": "Content-Encoding"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/css"
+        },
+        {
+          "Name": "ETag",
+          "Value": "W/\"qIWrVfL3cxgLdh/BXLfiFVB7HNALt+Asx/vy/LI1d4k=\""
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-qIWrVfL3cxgLdh/BXLfiFVB7HNALt+Asx/vy/LI1d4k="
+        }
+      ]
+    },
+    {
+      "Route": "css/edit-user.css",
+      "AssetFile": "/home/user/sapservice/wwwroot/css/edit-user.css",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "1671"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/css"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"qIWrVfL3cxgLdh/BXLfiFVB7HNALt+Asx/vy/LI1d4k=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Tue, 24 Feb 2026 03:12:46 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-qIWrVfL3cxgLdh/BXLfiFVB7HNALt+Asx/vy/LI1d4k="
+        }
+      ]
+    },
+    {
+      "Route": "css/edit-user.css.gz",
+      "AssetFile": "/home/user/sapservice/obj/Debug/net9.0/compressed/a0j1mzjrrq-8ok095ovw7.gz",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "596"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/css"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"35xHH0goAHn5Sob1iNEbywwbckgO2au1kPre8TQWwt4=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Tue, 24 Feb 2026 03:12:46 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        },
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip"
+        },
+        {
+          "Name": "Vary",
+          "Value": "Content-Encoding"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-35xHH0goAHn5Sob1iNEbywwbckgO2au1kPre8TQWwt4="
+        }
+      ]
+    },
+    {
+      "Route": "css/master-data.css",
+      "AssetFile": "/home/user/sapservice/obj/Debug/net9.0/compressed/89a701djol-rspbzmf4g3.gz",
+      "Selectors": [
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip",
+          "Quality": "0.001269035533"
+        }
+      ],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "787"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"hcuTIU2nt59yWpub74BRJY1XoSkPjYwo32D9ufytwwU=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Mon, 23 Feb 2026 09:52:33 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        },
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip"
+        },
+        {
+          "Name": "Vary",
+          "Value": "Content-Encoding"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/css"
+        },
+        {
+          "Name": "ETag",
+          "Value": "W/\"W2L6I21QG8pubBlqzAwqfqnRCLeqvtNHgI70lPlFSkc=\""
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-W2L6I21QG8pubBlqzAwqfqnRCLeqvtNHgI70lPlFSkc="
+        }
+      ]
+    },
+    {
+      "Route": "css/master-data.css",
+      "AssetFile": "/home/user/sapservice/wwwroot/css/master-data.css",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "2310"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/css"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"W2L6I21QG8pubBlqzAwqfqnRCLeqvtNHgI70lPlFSkc=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Mon, 23 Feb 2026 09:52:33 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-W2L6I21QG8pubBlqzAwqfqnRCLeqvtNHgI70lPlFSkc="
+        }
+      ]
+    },
+    {
+      "Route": "css/master-data.css.gz",
+      "AssetFile": "/home/user/sapservice/obj/Debug/net9.0/compressed/89a701djol-rspbzmf4g3.gz",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "787"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/css"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"hcuTIU2nt59yWpub74BRJY1XoSkPjYwo32D9ufytwwU=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Mon, 23 Feb 2026 09:52:33 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        },
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip"
+        },
+        {
+          "Name": "Vary",
+          "Value": "Content-Encoding"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-hcuTIU2nt59yWpub74BRJY1XoSkPjYwo32D9ufytwwU="
+        }
+      ]
+    },
+    {
+      "Route": "css/master-data.rspbzmf4g3.css",
+      "AssetFile": "/home/user/sapservice/obj/Debug/net9.0/compressed/89a701djol-rspbzmf4g3.gz",
+      "Selectors": [
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip",
+          "Quality": "0.001269035533"
+        }
+      ],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "787"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"hcuTIU2nt59yWpub74BRJY1XoSkPjYwo32D9ufytwwU=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Mon, 23 Feb 2026 09:52:33 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        },
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip"
+        },
+        {
+          "Name": "Vary",
+          "Value": "Content-Encoding"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/css"
+        },
+        {
+          "Name": "ETag",
+          "Value": "W/\"W2L6I21QG8pubBlqzAwqfqnRCLeqvtNHgI70lPlFSkc=\""
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "rspbzmf4g3"
+        },
+        {
+          "Name": "label",
+          "Value": "css/master-data.css"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-W2L6I21QG8pubBlqzAwqfqnRCLeqvtNHgI70lPlFSkc="
+        }
+      ]
+    },
+    {
+      "Route": "css/master-data.rspbzmf4g3.css",
+      "AssetFile": "/home/user/sapservice/wwwroot/css/master-data.css",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "2310"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/css"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"W2L6I21QG8pubBlqzAwqfqnRCLeqvtNHgI70lPlFSkc=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Mon, 23 Feb 2026 09:52:33 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "rspbzmf4g3"
+        },
+        {
+          "Name": "label",
+          "Value": "css/master-data.css"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-W2L6I21QG8pubBlqzAwqfqnRCLeqvtNHgI70lPlFSkc="
+        }
+      ]
+    },
+    {
+      "Route": "css/master-data.rspbzmf4g3.css.gz",
+      "AssetFile": "/home/user/sapservice/obj/Debug/net9.0/compressed/89a701djol-rspbzmf4g3.gz",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "787"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/css"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"hcuTIU2nt59yWpub74BRJY1XoSkPjYwo32D9ufytwwU=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Mon, 23 Feb 2026 09:52:33 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        },
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip"
+        },
+        {
+          "Name": "Vary",
+          "Value": "Content-Encoding"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "rspbzmf4g3"
+        },
+        {
+          "Name": "label",
+          "Value": "css/master-data.css.gz"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-hcuTIU2nt59yWpub74BRJY1XoSkPjYwo32D9ufytwwU="
+        }
+      ]
+    },
+    {
       "Route": "css/site.cj6ds4z6ug.css",
       "AssetFile": "/home/user/sapservice/obj/Debug/net9.0/compressed/srsdvfsejk-cj6ds4z6ug.gz",
       "Selectors": [
@@ -2610,6 +3798,304 @@
       ]
     },
     {
+      "Route": "css/users.css",
+      "AssetFile": "/home/user/sapservice/obj/Debug/net9.0/compressed/jdrixves1g-fwpdzra598.gz",
+      "Selectors": [
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip",
+          "Quality": "0.001213592233"
+        }
+      ],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "823"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"XHmrn1XwPRHGyT+7zmhUvYM7fmZQEETv/aUvlDVIDqE=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Mon, 23 Feb 2026 09:56:25 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        },
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip"
+        },
+        {
+          "Name": "Vary",
+          "Value": "Content-Encoding"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/css"
+        },
+        {
+          "Name": "ETag",
+          "Value": "W/\"X/MA2ZxrPasGrcuTQvulhzftGk9lJN7+MvSzFm9QFZA=\""
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-X/MA2ZxrPasGrcuTQvulhzftGk9lJN7+MvSzFm9QFZA="
+        }
+      ]
+    },
+    {
+      "Route": "css/users.css",
+      "AssetFile": "/home/user/sapservice/wwwroot/css/users.css",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "2370"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/css"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"X/MA2ZxrPasGrcuTQvulhzftGk9lJN7+MvSzFm9QFZA=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Mon, 23 Feb 2026 09:56:25 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-X/MA2ZxrPasGrcuTQvulhzftGk9lJN7+MvSzFm9QFZA="
+        }
+      ]
+    },
+    {
+      "Route": "css/users.css.gz",
+      "AssetFile": "/home/user/sapservice/obj/Debug/net9.0/compressed/jdrixves1g-fwpdzra598.gz",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "823"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/css"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"XHmrn1XwPRHGyT+7zmhUvYM7fmZQEETv/aUvlDVIDqE=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Mon, 23 Feb 2026 09:56:25 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        },
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip"
+        },
+        {
+          "Name": "Vary",
+          "Value": "Content-Encoding"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-XHmrn1XwPRHGyT+7zmhUvYM7fmZQEETv/aUvlDVIDqE="
+        }
+      ]
+    },
+    {
+      "Route": "css/users.fwpdzra598.css",
+      "AssetFile": "/home/user/sapservice/obj/Debug/net9.0/compressed/jdrixves1g-fwpdzra598.gz",
+      "Selectors": [
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip",
+          "Quality": "0.001213592233"
+        }
+      ],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "823"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"XHmrn1XwPRHGyT+7zmhUvYM7fmZQEETv/aUvlDVIDqE=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Mon, 23 Feb 2026 09:56:25 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        },
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip"
+        },
+        {
+          "Name": "Vary",
+          "Value": "Content-Encoding"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/css"
+        },
+        {
+          "Name": "ETag",
+          "Value": "W/\"X/MA2ZxrPasGrcuTQvulhzftGk9lJN7+MvSzFm9QFZA=\""
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "fwpdzra598"
+        },
+        {
+          "Name": "label",
+          "Value": "css/users.css"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-X/MA2ZxrPasGrcuTQvulhzftGk9lJN7+MvSzFm9QFZA="
+        }
+      ]
+    },
+    {
+      "Route": "css/users.fwpdzra598.css",
+      "AssetFile": "/home/user/sapservice/wwwroot/css/users.css",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "2370"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/css"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"X/MA2ZxrPasGrcuTQvulhzftGk9lJN7+MvSzFm9QFZA=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Mon, 23 Feb 2026 09:56:25 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "fwpdzra598"
+        },
+        {
+          "Name": "label",
+          "Value": "css/users.css"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-X/MA2ZxrPasGrcuTQvulhzftGk9lJN7+MvSzFm9QFZA="
+        }
+      ]
+    },
+    {
+      "Route": "css/users.fwpdzra598.css.gz",
+      "AssetFile": "/home/user/sapservice/obj/Debug/net9.0/compressed/jdrixves1g-fwpdzra598.gz",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "823"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/css"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"XHmrn1XwPRHGyT+7zmhUvYM7fmZQEETv/aUvlDVIDqE=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Mon, 23 Feb 2026 09:56:25 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        },
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip"
+        },
+        {
+          "Name": "Vary",
+          "Value": "Content-Encoding"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "fwpdzra598"
+        },
+        {
+          "Name": "label",
+          "Value": "css/users.css.gz"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-XHmrn1XwPRHGyT+7zmhUvYM7fmZQEETv/aUvlDVIDqE="
+        }
+      ]
+    },
+    {
       "Route": "favicon.ifv42okdf2.png",
       "AssetFile": "/home/user/sapservice/wwwroot/favicon.png",
       "Selectors": [],
@@ -2688,6 +4174,304 @@
         {
           "Name": "integrity",
           "Value": "sha256-4mWsDy3aHl36ZbGt8zByK7Pvd4kRUoNgTYzRnwmPHwg="
+        }
+      ]
+    },
+    {
+      "Route": "favicon.svg",
+      "AssetFile": "/home/user/sapservice/obj/Debug/net9.0/compressed/75ajzvsluu-zavjl8kan6.gz",
+      "Selectors": [
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip",
+          "Quality": "0.005235602094"
+        }
+      ],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "190"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"u76i6MbGKkwJ4CaZxNjCgBwWSRYn0OAqbt3BcWZiqj0=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Tue, 24 Feb 2026 02:35:46 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        },
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip"
+        },
+        {
+          "Name": "Vary",
+          "Value": "Content-Encoding"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "image/svg+xml"
+        },
+        {
+          "Name": "ETag",
+          "Value": "W/\"xcVnqYcLGqvoFdJCOfeqjHGQsBsSI0hB9yJYAf2Qxm8=\""
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-xcVnqYcLGqvoFdJCOfeqjHGQsBsSI0hB9yJYAf2Qxm8="
+        }
+      ]
+    },
+    {
+      "Route": "favicon.svg",
+      "AssetFile": "/home/user/sapservice/wwwroot/favicon.svg",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "233"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "image/svg+xml"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"xcVnqYcLGqvoFdJCOfeqjHGQsBsSI0hB9yJYAf2Qxm8=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Tue, 24 Feb 2026 02:35:46 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=3600, must-revalidate"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-xcVnqYcLGqvoFdJCOfeqjHGQsBsSI0hB9yJYAf2Qxm8="
+        }
+      ]
+    },
+    {
+      "Route": "favicon.svg.gz",
+      "AssetFile": "/home/user/sapservice/obj/Debug/net9.0/compressed/75ajzvsluu-zavjl8kan6.gz",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "190"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "image/svg+xml"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"u76i6MbGKkwJ4CaZxNjCgBwWSRYn0OAqbt3BcWZiqj0=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Tue, 24 Feb 2026 02:35:46 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        },
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip"
+        },
+        {
+          "Name": "Vary",
+          "Value": "Content-Encoding"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-u76i6MbGKkwJ4CaZxNjCgBwWSRYn0OAqbt3BcWZiqj0="
+        }
+      ]
+    },
+    {
+      "Route": "favicon.zavjl8kan6.svg",
+      "AssetFile": "/home/user/sapservice/obj/Debug/net9.0/compressed/75ajzvsluu-zavjl8kan6.gz",
+      "Selectors": [
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip",
+          "Quality": "0.005235602094"
+        }
+      ],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "190"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"u76i6MbGKkwJ4CaZxNjCgBwWSRYn0OAqbt3BcWZiqj0=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Tue, 24 Feb 2026 02:35:46 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        },
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip"
+        },
+        {
+          "Name": "Vary",
+          "Value": "Content-Encoding"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "image/svg+xml"
+        },
+        {
+          "Name": "ETag",
+          "Value": "W/\"xcVnqYcLGqvoFdJCOfeqjHGQsBsSI0hB9yJYAf2Qxm8=\""
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "zavjl8kan6"
+        },
+        {
+          "Name": "label",
+          "Value": "favicon.svg"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-xcVnqYcLGqvoFdJCOfeqjHGQsBsSI0hB9yJYAf2Qxm8="
+        }
+      ]
+    },
+    {
+      "Route": "favicon.zavjl8kan6.svg",
+      "AssetFile": "/home/user/sapservice/wwwroot/favicon.svg",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "233"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "image/svg+xml"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"xcVnqYcLGqvoFdJCOfeqjHGQsBsSI0hB9yJYAf2Qxm8=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Tue, 24 Feb 2026 02:35:46 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "zavjl8kan6"
+        },
+        {
+          "Name": "label",
+          "Value": "favicon.svg"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-xcVnqYcLGqvoFdJCOfeqjHGQsBsSI0hB9yJYAf2Qxm8="
+        }
+      ]
+    },
+    {
+      "Route": "favicon.zavjl8kan6.svg.gz",
+      "AssetFile": "/home/user/sapservice/obj/Debug/net9.0/compressed/75ajzvsluu-zavjl8kan6.gz",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "190"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "image/svg+xml"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"u76i6MbGKkwJ4CaZxNjCgBwWSRYn0OAqbt3BcWZiqj0=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Tue, 24 Feb 2026 02:35:46 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        },
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip"
+        },
+        {
+          "Name": "Vary",
+          "Value": "Content-Encoding"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "zavjl8kan6"
+        },
+        {
+          "Name": "label",
+          "Value": "favicon.svg.gz"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-u76i6MbGKkwJ4CaZxNjCgBwWSRYn0OAqbt3BcWZiqj0="
         }
       ]
     },
@@ -16098,6 +17882,602 @@
         {
           "Name": "integrity",
           "Value": "sha256-4mjnv8wEsIPqFZ44yOygGYlGftJdqqFxCTXXzEYGCTs="
+        }
+      ]
+    },
+    {
+      "Route": "myapp.bundle.scp.css",
+      "AssetFile": "/home/user/sapservice/obj/Debug/net9.0/compressed/camuj07gqt-glp9jcn2o9.gz",
+      "Selectors": [
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip",
+          "Quality": "0.003875968992"
+        }
+      ],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "257"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"TGfcJ5dvX+mcuOCFMCRtr1wpVDzELsVLM28IWXsZ6f4=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Tue, 24 Feb 2026 02:31:17 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        },
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip"
+        },
+        {
+          "Name": "Vary",
+          "Value": "Content-Encoding"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/css"
+        },
+        {
+          "Name": "ETag",
+          "Value": "W/\"LIOfYV1XER2HI7+FaME564BV8WtGxz6TktPP9t8ohOE=\""
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-LIOfYV1XER2HI7+FaME564BV8WtGxz6TktPP9t8ohOE="
+        }
+      ]
+    },
+    {
+      "Route": "myapp.bundle.scp.css",
+      "AssetFile": "/home/user/sapservice/obj/Debug/net9.0/scopedcss/projectbundle/myapp.bundle.scp.css",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "331"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/css"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"LIOfYV1XER2HI7+FaME564BV8WtGxz6TktPP9t8ohOE=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Tue, 24 Feb 2026 02:31:17 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-LIOfYV1XER2HI7+FaME564BV8WtGxz6TktPP9t8ohOE="
+        }
+      ]
+    },
+    {
+      "Route": "myapp.bundle.scp.css.gz",
+      "AssetFile": "/home/user/sapservice/obj/Debug/net9.0/compressed/camuj07gqt-glp9jcn2o9.gz",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "257"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/css"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"TGfcJ5dvX+mcuOCFMCRtr1wpVDzELsVLM28IWXsZ6f4=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Tue, 24 Feb 2026 02:31:17 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        },
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip"
+        },
+        {
+          "Name": "Vary",
+          "Value": "Content-Encoding"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-TGfcJ5dvX+mcuOCFMCRtr1wpVDzELsVLM28IWXsZ6f4="
+        }
+      ]
+    },
+    {
+      "Route": "myapp.glp9jcn2o9.bundle.scp.css",
+      "AssetFile": "/home/user/sapservice/obj/Debug/net9.0/compressed/camuj07gqt-glp9jcn2o9.gz",
+      "Selectors": [
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip",
+          "Quality": "0.003875968992"
+        }
+      ],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "257"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"TGfcJ5dvX+mcuOCFMCRtr1wpVDzELsVLM28IWXsZ6f4=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Tue, 24 Feb 2026 02:31:17 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        },
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip"
+        },
+        {
+          "Name": "Vary",
+          "Value": "Content-Encoding"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/css"
+        },
+        {
+          "Name": "ETag",
+          "Value": "W/\"LIOfYV1XER2HI7+FaME564BV8WtGxz6TktPP9t8ohOE=\""
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "glp9jcn2o9"
+        },
+        {
+          "Name": "label",
+          "Value": "myapp.bundle.scp.css"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-LIOfYV1XER2HI7+FaME564BV8WtGxz6TktPP9t8ohOE="
+        }
+      ]
+    },
+    {
+      "Route": "myapp.glp9jcn2o9.bundle.scp.css",
+      "AssetFile": "/home/user/sapservice/obj/Debug/net9.0/scopedcss/projectbundle/myapp.bundle.scp.css",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "331"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/css"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"LIOfYV1XER2HI7+FaME564BV8WtGxz6TktPP9t8ohOE=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Tue, 24 Feb 2026 02:31:17 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "glp9jcn2o9"
+        },
+        {
+          "Name": "label",
+          "Value": "myapp.bundle.scp.css"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-LIOfYV1XER2HI7+FaME564BV8WtGxz6TktPP9t8ohOE="
+        }
+      ]
+    },
+    {
+      "Route": "myapp.glp9jcn2o9.bundle.scp.css.gz",
+      "AssetFile": "/home/user/sapservice/obj/Debug/net9.0/compressed/camuj07gqt-glp9jcn2o9.gz",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "257"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/css"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"TGfcJ5dvX+mcuOCFMCRtr1wpVDzELsVLM28IWXsZ6f4=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Tue, 24 Feb 2026 02:31:17 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        },
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip"
+        },
+        {
+          "Name": "Vary",
+          "Value": "Content-Encoding"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "glp9jcn2o9"
+        },
+        {
+          "Name": "label",
+          "Value": "myapp.bundle.scp.css.gz"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-TGfcJ5dvX+mcuOCFMCRtr1wpVDzELsVLM28IWXsZ6f4="
+        }
+      ]
+    },
+    {
+      "Route": "myapp.glp9jcn2o9.styles.css",
+      "AssetFile": "/home/user/sapservice/obj/Debug/net9.0/compressed/7y606fsrgq-glp9jcn2o9.gz",
+      "Selectors": [
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip",
+          "Quality": "0.003875968992"
+        }
+      ],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "257"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"TGfcJ5dvX+mcuOCFMCRtr1wpVDzELsVLM28IWXsZ6f4=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Tue, 24 Feb 2026 02:31:17 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        },
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip"
+        },
+        {
+          "Name": "Vary",
+          "Value": "Content-Encoding"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/css"
+        },
+        {
+          "Name": "ETag",
+          "Value": "W/\"LIOfYV1XER2HI7+FaME564BV8WtGxz6TktPP9t8ohOE=\""
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "glp9jcn2o9"
+        },
+        {
+          "Name": "label",
+          "Value": "myapp.styles.css"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-LIOfYV1XER2HI7+FaME564BV8WtGxz6TktPP9t8ohOE="
+        }
+      ]
+    },
+    {
+      "Route": "myapp.glp9jcn2o9.styles.css",
+      "AssetFile": "/home/user/sapservice/obj/Debug/net9.0/scopedcss/bundle/myapp.styles.css",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "331"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/css"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"LIOfYV1XER2HI7+FaME564BV8WtGxz6TktPP9t8ohOE=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Tue, 24 Feb 2026 02:31:17 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "glp9jcn2o9"
+        },
+        {
+          "Name": "label",
+          "Value": "myapp.styles.css"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-LIOfYV1XER2HI7+FaME564BV8WtGxz6TktPP9t8ohOE="
+        }
+      ]
+    },
+    {
+      "Route": "myapp.glp9jcn2o9.styles.css.gz",
+      "AssetFile": "/home/user/sapservice/obj/Debug/net9.0/compressed/7y606fsrgq-glp9jcn2o9.gz",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "257"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/css"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"TGfcJ5dvX+mcuOCFMCRtr1wpVDzELsVLM28IWXsZ6f4=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Tue, 24 Feb 2026 02:31:17 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        },
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip"
+        },
+        {
+          "Name": "Vary",
+          "Value": "Content-Encoding"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "glp9jcn2o9"
+        },
+        {
+          "Name": "label",
+          "Value": "myapp.styles.css.gz"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-TGfcJ5dvX+mcuOCFMCRtr1wpVDzELsVLM28IWXsZ6f4="
+        }
+      ]
+    },
+    {
+      "Route": "myapp.styles.css",
+      "AssetFile": "/home/user/sapservice/obj/Debug/net9.0/compressed/7y606fsrgq-glp9jcn2o9.gz",
+      "Selectors": [
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip",
+          "Quality": "0.003875968992"
+        }
+      ],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "257"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"TGfcJ5dvX+mcuOCFMCRtr1wpVDzELsVLM28IWXsZ6f4=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Tue, 24 Feb 2026 02:31:17 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        },
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip"
+        },
+        {
+          "Name": "Vary",
+          "Value": "Content-Encoding"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/css"
+        },
+        {
+          "Name": "ETag",
+          "Value": "W/\"LIOfYV1XER2HI7+FaME564BV8WtGxz6TktPP9t8ohOE=\""
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-LIOfYV1XER2HI7+FaME564BV8WtGxz6TktPP9t8ohOE="
+        }
+      ]
+    },
+    {
+      "Route": "myapp.styles.css",
+      "AssetFile": "/home/user/sapservice/obj/Debug/net9.0/scopedcss/bundle/myapp.styles.css",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "331"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/css"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"LIOfYV1XER2HI7+FaME564BV8WtGxz6TktPP9t8ohOE=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Tue, 24 Feb 2026 02:31:17 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-LIOfYV1XER2HI7+FaME564BV8WtGxz6TktPP9t8ohOE="
+        }
+      ]
+    },
+    {
+      "Route": "myapp.styles.css.gz",
+      "AssetFile": "/home/user/sapservice/obj/Debug/net9.0/compressed/7y606fsrgq-glp9jcn2o9.gz",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "257"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/css"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"TGfcJ5dvX+mcuOCFMCRtr1wpVDzELsVLM28IWXsZ6f4=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Tue, 24 Feb 2026 02:31:17 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        },
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip"
+        },
+        {
+          "Name": "Vary",
+          "Value": "Content-Encoding"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-TGfcJ5dvX+mcuOCFMCRtr1wpVDzELsVLM28IWXsZ6f4="
         }
       ]
     }

@@ -1,16 +1,40 @@
 {
   "Files": [
     {
+      "Id": "/home/user/sapservice/obj/Debug/net9.0/scopedcss/projectbundle/myapp.bundle.scp.css",
+      "PackagePath": "staticwebassets/myapp.glp9jcn2o9.bundle.scp.css"
+    },
+    {
       "Id": "/home/user/sapservice/wwwroot/app.css",
       "PackagePath": "staticwebassets/app.css"
+    },
+    {
+      "Id": "/home/user/sapservice/wwwroot/css/create-user.css",
+      "PackagePath": "staticwebassets/css/create-user.css"
+    },
+    {
+      "Id": "/home/user/sapservice/wwwroot/css/edit-user.css",
+      "PackagePath": "staticwebassets/css/edit-user.css"
+    },
+    {
+      "Id": "/home/user/sapservice/wwwroot/css/master-data.css",
+      "PackagePath": "staticwebassets/css/master-data.css"
     },
     {
       "Id": "/home/user/sapservice/wwwroot/css/site.css",
       "PackagePath": "staticwebassets/css/site.css"
     },
     {
+      "Id": "/home/user/sapservice/wwwroot/css/users.css",
+      "PackagePath": "staticwebassets/css/users.css"
+    },
+    {
       "Id": "/home/user/sapservice/wwwroot/favicon.png",
       "PackagePath": "staticwebassets/favicon.png"
+    },
+    {
+      "Id": "/home/user/sapservice/wwwroot/favicon.svg",
+      "PackagePath": "staticwebassets/favicon.svg"
     },
     {
       "Id": "/home/user/sapservice/wwwroot/js/site.js",

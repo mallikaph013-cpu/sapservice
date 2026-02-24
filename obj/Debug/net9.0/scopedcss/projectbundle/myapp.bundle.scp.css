@@ -1,0 +1,13 @@
+/* _content/myapp/Views/Shared/_Layout.cshtml.rz.scp.css */
+/*
+This is a scoped CSS file for the main layout.
+Styles defined here will be bundled into myapp.styles.css
+*/
+
+body[b-h41dwzzbbm] {
+    background-color: #f8f9fa; /* A very light grey background */
+}
+
+.navbar[b-h41dwzzbbm] {
+    box-shadow: 0 2px 4px rgba(0,0,0,.04);
+}

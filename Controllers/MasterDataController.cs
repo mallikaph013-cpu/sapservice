@@ -1,17 +1,16 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
+using myapp.Data;
 using myapp.Models;
 using myapp.Models.ViewModels;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using System;
-using myapp.Data;
+using System.Collections.Generic;
 
 namespace myapp.Controllers
 {
-    [Authorize]
     public class MasterDataController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -21,29 +20,25 @@ namespace myapp.Controllers
             _context = context;
         }
 
+        private async Task<MasterDataViewModel> PopulateViewModelAsync(MasterDataViewModel? viewModel = null)
+        {
+            viewModel ??= new MasterDataViewModel();
+
+            var departments = await _context.Departments.Select(d => d.DepartmentName).Distinct().ToListAsync();
+            var sections = await _context.Sections.Select(s => s.SectionName).Distinct().ToListAsync();
+            var plants = await _context.Plants.Select(p => p.PlantName).Distinct().ToListAsync();
+
+            viewModel.MasterDataCombinations = await _context.MasterDataCombinations.OrderByDescending(c => c.CreatedAt).ToListAsync();
+            viewModel.DepartmentList = new SelectList(departments);
+            viewModel.SectionList = new SelectList(sections);
+            viewModel.PlantList = new SelectList(plants);
+
+            return viewModel;
+        }
+
         public async Task<IActionResult> Index()
         {
-            var viewModel = new MasterDataViewModel
-            {
-                MasterDataCombinations = await _context.MasterDataCombinations.ToListAsync(),
-                DepartmentList = await _context.MasterDataCombinations
-                                               .Select(m => m.DepartmentName)
-                                               .Distinct()
-                                               .Select(d => new SelectListItem { Text = d, Value = d })
-                                               .ToListAsync(),
-                SectionList = await _context.MasterDataCombinations
-                                            .Select(m => m.SectionName)
-                                            .Distinct()
-                                            .Select(s => new SelectListItem { Text = s, Value = s })
-                                            .ToListAsync(),
-                PlantList = await _context.MasterDataCombinations
-                                          .Select(m => m.PlantName)
-                                          .Distinct()
-                                          .Select(p => new SelectListItem { Text = p, Value = p })
-                                          .ToListAsync(),
-                NewCombination = new MasterDataCombination()
-            };
-
+            var viewModel = await PopulateViewModelAsync();
             return View(viewModel);
         }
 
@@ -51,55 +46,46 @@ namespace myapp.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CreateMasterData(MasterDataViewModel viewModel)
         {
-            // Check if the viewModel or NewCombination is null, which is good practice.
-            if (viewModel?.NewCombination == null)
-            {
-                // Optionally handle this case, maybe return a bad request
-                return BadRequest("Invalid master data submitted.");
-            }
-
-            // Since the form only submits NewCombination, we don't need to check the full model state
-            // if we are only concerned with the new item. A more robust way is to use a specific model for creation.
-            if (string.IsNullOrEmpty(viewModel.NewCombination.DepartmentName) ||
-                string.IsNullOrEmpty(viewModel.NewCombination.SectionName) ||
-                string.IsNullOrEmpty(viewModel.NewCombination.PlantName))
-            {
-                 ModelState.AddModelError("NewCombination", "Department, Section, and Plant names are required.");
-            }
-
             if (ModelState.IsValid)
             {
-                var combinationExists = await _context.MasterDataCombinations.AnyAsync(m =>
-                    m.DepartmentName == viewModel.NewCombination.DepartmentName &&
-                    m.SectionName == viewModel.NewCombination.SectionName &&
-                    m.PlantName == viewModel.NewCombination.PlantName);
+                var combination = viewModel.NewCombination;
 
-                if (combinationExists)
+                var department = await _context.Departments.FirstOrDefaultAsync(d => d.DepartmentName == combination.DepartmentName);
+                if (department == null)
                 {
-                    ModelState.AddModelError("", "This combination already exists.");
+                    department = new Department { DepartmentName = combination.DepartmentName };
+                    _context.Departments.Add(department);
                 }
-                else
+
+                var section = await _context.Sections.FirstOrDefaultAsync(s => s.SectionName == combination.SectionName);
+                if (section == null)
                 {
-                    var username = User.Identity?.Name ?? "System"; // Null check
-
-                    viewModel.NewCombination.CreatedAt = DateTime.UtcNow;
-                    viewModel.NewCombination.UpdatedAt = DateTime.UtcNow;
-                    viewModel.NewCombination.CreatedBy = username;
-                    viewModel.NewCombination.UpdatedBy = username;
-
-                    _context.MasterDataCombinations.Add(viewModel.NewCombination);
-                    await _context.SaveChangesAsync(true);
-
-                    return RedirectToAction(nameof(Index));
+                    section = new Section { SectionName = combination.SectionName, Department = department };
+                    _context.Sections.Add(section);
                 }
+
+                var plant = await _context.Plants.FirstOrDefaultAsync(p => p.PlantName == combination.PlantName);
+                if (plant == null)
+                {
+                    plant = new Plant { PlantName = combination.PlantName, Department = department };
+                    _context.Plants.Add(plant);
+                }
+
+                combination.CreatedAt = DateTime.UtcNow;
+                combination.UpdatedAt = DateTime.UtcNow;
+                combination.CreatedBy = User.Identity?.Name ?? "System";
+                combination.UpdatedBy = User.Identity?.Name ?? "System";
+
+                _context.MasterDataCombinations.Add(combination);
+                await _context.SaveChangesAsync();
+
+                TempData["SuccessMessage"] = "Master data combination created successfully!";
+                return RedirectToAction(nameof(Index));
             }
 
-            // If we got here, something went wrong. Re-populate the necessary data for the view.
-            viewModel.MasterDataCombinations = await _context.MasterDataCombinations.ToListAsync();
-            viewModel.DepartmentList = await _context.MasterDataCombinations.Select(m => m.DepartmentName).Distinct().Select(d => new SelectListItem { Text = d, Value = d }).ToListAsync();
-            viewModel.SectionList = await _context.MasterDataCombinations.Select(m => m.SectionName).Distinct().Select(s => new SelectListItem { Text = s, Value = s }).ToListAsync();
-            viewModel.PlantList = await _context.MasterDataCombinations.Select(m => m.PlantName).Distinct().Select(p => new SelectListItem { Text = p, Value = p }).ToListAsync();
-            return View("Index", viewModel);
+            // If model is not valid, re-populate the lists and return to the view
+            var populatedViewModel = await PopulateViewModelAsync(viewModel);
+            return View("Index", populatedViewModel);
         }
     }
 }

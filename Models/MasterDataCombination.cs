@@ -5,30 +5,31 @@ namespace myapp.Models
 {
     public class MasterDataCombination
     {
+        [Key]
         public int Id { get; set; }
 
-        [Required]
-        [Display(Name = "ฝ่าย")]
+        [Required(ErrorMessage = "The Department field is required.")]
+        [Display(Name = "Department")]
         public string DepartmentName { get; set; } = string.Empty;
 
-        [Required]
-        [Display(Name = "แผนก")]
+        [Required(ErrorMessage = "The Section field is required.")]
+        [Display(Name = "Section")]
         public string SectionName { get; set; } = string.Empty;
 
-        [Required]
+        [Required(ErrorMessage = "The Plant field is required.")]
         [Display(Name = "Plant")]
         public string PlantName { get; set; } = string.Empty;
 
-        [Display(Name = "วันที่สร้าง")]
+        [Display(Name = "Created At")]
         public DateTime CreatedAt { get; set; }
 
-        [Display(Name = "วันที่อัพเดท")]
-        public DateTime UpdatedAt { get; set; }
-
-        [Display(Name = "ผู้สร้าง")]
+        [Display(Name = "Created By")]
         public string CreatedBy { get; set; } = string.Empty;
 
-        [Display(Name = "ผู้ที่อัพเดท")]
+        [Display(Name = "Updated At")]
+        public DateTime UpdatedAt { get; set; }
+
+        [Display(Name = "Updated By")]
         public string UpdatedBy { get; set; } = string.Empty;
     }
 }

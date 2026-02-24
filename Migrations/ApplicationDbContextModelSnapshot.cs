@@ -157,6 +157,12 @@ namespace myapp.Migrations
                         .IsConcurrencyToken()
                         .HasColumnType("TEXT");
 
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Department")
                         .HasColumnType("TEXT");
 
@@ -213,6 +219,12 @@ namespace myapp.Migrations
 
                     b.Property<bool>("TwoFactorEnabled")
                         .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("UserName")
                         .HasMaxLength(256)
@@ -278,15 +290,15 @@ namespace myapp.Migrations
 
             modelBuilder.Entity("myapp.Models.Department", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<int>("DepartmentId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("Name")
+                    b.Property<string>("DepartmentName")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.HasKey("Id");
+                    b.HasKey("DepartmentId");
 
                     b.ToTable("Departments");
                 });
@@ -330,18 +342,18 @@ namespace myapp.Migrations
 
             modelBuilder.Entity("myapp.Models.Plant", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<int>("PlantId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("DepartmentId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("Name")
+                    b.Property<string>("PlantName")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.HasKey("Id");
+                    b.HasKey("PlantId");
 
                     b.HasIndex("DepartmentId");
 
@@ -639,18 +651,18 @@ namespace myapp.Migrations
 
             modelBuilder.Entity("myapp.Models.Section", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<int>("SectionId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("DepartmentId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("Name")
+                    b.Property<string>("SectionName")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.HasKey("Id");
+                    b.HasKey("SectionId");
 
                     b.HasIndex("DepartmentId");
 
@@ -722,7 +734,7 @@ namespace myapp.Migrations
             modelBuilder.Entity("myapp.Models.Plant", b =>
                 {
                     b.HasOne("myapp.Models.Department", "Department")
-                        .WithMany("Plants")
+                        .WithMany()
                         .HasForeignKey("DepartmentId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -744,19 +756,12 @@ namespace myapp.Migrations
             modelBuilder.Entity("myapp.Models.Section", b =>
                 {
                     b.HasOne("myapp.Models.Department", "Department")
-                        .WithMany("Sections")
+                        .WithMany()
                         .HasForeignKey("DepartmentId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Department");
-                });
-
-            modelBuilder.Entity("myapp.Models.Department", b =>
-                {
-                    b.Navigation("Plants");
-
-                    b.Navigation("Sections");
                 });
 
             modelBuilder.Entity("myapp.Models.RequestItem", b =>
