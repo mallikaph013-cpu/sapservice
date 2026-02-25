@@ -2,95 +2,61 @@
 
 @{
     ViewData["Title"] = "Service Requests";
+
+    // Helper to get status badge color class
+    Func<string, string> GetStatusClass = (status) => {
+        switch (status?.ToLower()) {
+            case "approved": return "status-approved";
+            case "rejected": return "status-rejected";
+            case "processing": return "status-processing";
+            default: return "status-pending";
+        }
+    };
 }
 
-<style>
-    .table-hover tbody tr:hover {
-        background-color: #f8f9fa;
-    }
-    .table th {
-        font-weight: 600;
-    }
-    .action-buttons a {
-        margin: 0 4px;
-    }
-    .page-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 2rem;
-        padding-bottom: 1rem;
-        border-bottom: 1px solid #dee2e6;
-    }
-    .badge {
-        font-size: 0.8rem;
-        padding: 0.5em 0.8em;
-    }
-</style>
-
-<div class="page-header">
-    <h1>Service Requests</h1>
-    <a asp-action="Create" class="btn btn-primary shadow-sm">Create New Request</a>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="mb-0">Service Requests</h1>
+    <a asp-action="Create" class="btn btn-primary">Create New Request</a>
 </div>
-
-@if (TempData["SuccessMessage"] != null)
-{
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
-        @TempData["SuccessMessage"]
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-}
-@if (TempData["ErrorMessage"] != null)
-{
-    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-        @TempData["ErrorMessage"]
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-}
-
 
 @if (Model.Any())
 {
-    <div class="table-responsive shadow-sm rounded">
-        <table class="table table-hover align-middle mb-0">
-            <thead class="table-light">
-                <tr>
-                    <th>@Html.DisplayNameFor(model => model.RequestType)</th>
-                    <th>@Html.DisplayNameFor(model => model.Description)</th>
-                    <th>@Html.DisplayNameFor(model => model.Requester)</th>
-                    <th>@Html.DisplayNameFor(model => model.RequestDate)</th>
-                    <th>@Html.DisplayNameFor(model => model.Status)</th>
-                    <th class="text-end">Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-        @foreach (var item in Model) {
-                <tr>
-                    <td>
-                        <span class="badge bg-info text-dark">@Html.DisplayFor(modelItem => item.RequestType)</span>
-                    </td>
-                    <td>@Html.DisplayFor(modelItem => item.Description)</td>
-                    <td>@Html.DisplayFor(modelItem => item.Requester)</td>
-                    <td>@item.RequestDate.ToString("g")</td>
-                    <td>
-                        <span class="badge bg-warning text-dark">@Html.DisplayFor(modelItem => item.Status)</span>
-                    </td>
-                    <td class="text-end action-buttons">
-                        <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-info">Details</a>
-                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary">Edit</a>
-                        <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-outline-danger">Delete</a>
-                    </td>
-                </tr>
+    <div class="request-card-grid">
+        @foreach (var item in Model)
+        {
+            <div class="request-card">
+                <div class="request-card-header">
+                    <div>
+                        <p class="request-card-title">@Html.DisplayFor(modelItem => item.RequestType) Request</p>
+                        <p class="request-card-requester">by @Html.DisplayFor(modelItem => item.Requester)</p>
+                    </div>
+                    <span class="request-status @GetStatusClass(item.Status)">@Html.DisplayFor(modelItem => item.Status)</span>
+                </div>
+
+                <div class="request-card-body">
+                    <p>
+                        <strong>Description:</strong>
+                        <span>@Html.DisplayFor(modelItem => item.Description)</span>
+                    </p>
+                    <p>
+                        <strong>Date:</strong>
+                        <span>@item.RequestDate.ToString("MMM dd, yyyy")</span>
+                    </p>
+                </div>
+
+                <div class="request-card-footer">
+                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-secondary">Details</a>
+                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-primary">Edit</a>
+                </div>
+            </div>
         }
-            </tbody>
-        </table>
     </div>
 }
 else
 {
-    <div class="text-center p-5 border rounded bg-light">
-        <h4>No requests found.</h4>
-        <p>Get started by creating a new service request.</p>
-        <a asp-action="Create" class="btn btn-primary mt-2">Create First Request</a>
+    <div class="text-center main-content-card">
+        <h4 class="text-dark">No requests found.</h4>
+        <p class="text-light">Get started by creating a new service request.</p>
+        <a asp-action="Create" class="btn btn-primary mt-3">Create Your First Request</a>
     </div>
 }

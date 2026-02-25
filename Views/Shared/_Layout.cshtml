@@ -8,37 +8,45 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - SAP Service</title>
+    <title>@ViewData["Title"] - SAP Portal</title>
     <link rel="icon" href="~/favicon.png" type="image/png">
+
+    <!-- Google Fonts: Poppins -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Stylesheets -->
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+    <link rel="stylesheet" href="~/css/orange-theme.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/myapp.styles.css" asp-append-version="true" />
 </head>
 <body>
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+        <nav class="navbar navbar-expand-lg">
             <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">SAP Service</a>
+                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">SAP Portal</a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                <div class="navbar-collapse collapse d-lg-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Requests" asp-action="Index">Requests</a>
+                            <a class="nav-link" asp-area="" asp-controller="Requests" asp-action="Index">Requests</a>
                         </li>
 
                         @if (SignInManager.IsSignedIn(User) && User.IsInRole("IT"))
                         {
                             <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle text-dark" href="#" id="navbarDropdownAdmin" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownAdmin" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                     Management
-                                </a>
+                                a>
                                 <div class="dropdown-menu" aria-labelledby="navbarDropdownAdmin">
                                     <a class="dropdown-item" asp-controller="Users" asp-action="Index">Manage Users</a>
                                     <a class="dropdown-item" asp-controller="Departments" asp-action="Index">Manage Departments</a>
@@ -48,7 +56,7 @@
                         }
 
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="DocumentRouting" asp-action="Index">Document Routing</a>
+                            <a class="nav-link" asp-area="" asp-controller="DocumentRouting" asp-action="Index">Document Routing</a>
                         </li>
                     </ul>
                     <partial name="_LoginPartial" />
@@ -56,24 +64,30 @@
             </div>
         </nav>
     </header>
-    <div class="container">
+
+    <div class="container-fluid">
+         @if (TempData["SuccessMessage"] != null || TempData["ErrorMessage"] != null)
+        {
+             <!-- TempData messages will be handled by the SweetAlert2 script below -->
+        }
         <main role="main" class="pb-3">
             @RenderBody()
         </main>
     </div>
 
-    <footer class="border-top footer text-muted">
+    <footer class="footer text-muted text-center py-3">
         <div class="container">
-            &copy; 2024 - SAP Service - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+            &copy; 2024 - SAP Portal - All Rights Reserved
         </div>
     </footer>
+
     <script src="~/lib/jquery/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
 
     <script>
-        // Display TempData messages using SweetAlert2
+        // Display TempData messages using SweetAlert2 with the new theme color
         document.addEventListener('DOMContentLoaded', function () {
             const successMessage = '@TempData["SuccessMessage"]';
             const errorMessage = '@TempData["ErrorMessage"]';
@@ -83,7 +97,7 @@
                     title: 'Success!',
                     text: successMessage,
                     icon: 'success',
-                    confirmButtonColor: '#3498db'
+                    confirmButtonColor: '#F97316' // Primary Orange
                 });
             }
 
@@ -92,7 +106,7 @@
                     title: 'Error!',
                     text: errorMessage,
                     icon: 'error',
-                    confirmButtonColor: '#e74c3c'
+                    confirmButtonColor: '#F97316' // Primary Orange
                 });
             }
         });

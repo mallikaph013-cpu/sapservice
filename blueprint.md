@@ -1,43 +1,66 @@
-# Blueprint: SAP Service Web App
 
-## Overview
+# Project Blueprint
 
-This document outlines the blueprint for a .NET-based web application designed to streamline SAP service requests. The application will provide a user-friendly interface for creating, tracking, and managing service requests, with a focus on clear separation of concerns and a robust, scalable architecture.
+## 1. Overview
 
-## Project Outline
+This project is a full-stack web application built with .NET for managing internal company requests (e.g., new materials, BOM changes). It features user authentication, role-based permissions, and a request-approval workflow.
 
-### Style and Design
+## 2. Core Features & Design (As of Initial Implementation)
 
-*   **Framework:** Bootstrap 5 for a responsive, mobile-first layout.
-*   **Font:** "Poppins" from Google Fonts for a clean, modern aesthetic.
-*   **Icons:** Font Awesome for intuitive user interface elements.
-*   **Color Palette:** A professional and visually balanced color scheme will be implemented.
+*   **Framework:** ASP.NET Core MVC with Entity Framework Core.
+*   **Database:** SQLite for local development.
+*   **Authentication:** ASP.NET Core Identity for user login and registration.
+*   **Functionality:**
+    *   Users can create, view, edit, and delete material requests.
+    *   Requests have different types (FG, SM, RM, etc.).
+    *   Dynamic forms that adapt to the selected request type.
+    *   Excel data import for creating requests in bulk.
+    *   A document routing system for multi-step approvals based on department and section.
+    *   Role-based access control:
+        *   Standard users can create requests with a "Pending" status.
+        *   "IT" role users can set the status of a request upon creation and edit the status of existing requests.
+*   **Initial Design:**
+    *   Default Bootstrap 5 styling.
+    *   Standard table-based layout for lists.
+    *   Basic form layouts.
+    *   Default color scheme.
 
-### Features
+---
 
-*   **User Authentication:** Secure user login and registration based on the `Users` table.
-*   **Request Management:** Create, view, edit, and delete service requests.
-*   **Master Data Management:** A dedicated section for managing master data related to requests.
-*   **User Management:** An administrative interface for managing user accounts.
-*   **Document Routing:** A new section for managing the document routing sequence based on document type, department, section, and plant.
+## 3. Current Task: Orange/White Modern UI Redesign
 
-## Implemented Features
+### Plan Overview
 
-*   **Replaced ASP.NET Core Identity with a custom cookie-based authentication system.**
-*   **Switched to Username-based Authentication.**
-*   **Improved User Deletion.**
-*   **Added Auditing to User Management.**
-*   **Enhanced Master Data Management.**
-*   **Added Document Routing Feature.**
-    *   Created the `DocumentType` and `DocumentRouting` models and updated the database.
-    *   Developed the `DocumentRoutingController` with `Create`, `Edit`, and `Delete` actions.
-    *   Created the `Index`, `Edit`, and `Delete` views for document routing management.
-    *   Added a navigation link to the "Document Routing" page.
-    *   Refactored the `DocumentRoutingViewModel` and `Create` action to prevent null reference exceptions.
-    *   Updated the `DocumentRoutingController` to use the `RequestType` enum for the "Document Type" dropdown, ensuring consistency with the `Create Request` page.
-    *   Resolved a validation issue on the Document Routing creation form by initializing list properties in the `DocumentRoutingViewModel`.
-    *   Refactored the `Create` action in the `DocumentRoutingController` to use a specific `CreateDocumentRoutingViewModel` for form binding, resolving validation errors.
+The goal is to transform the application's visual identity into a modern, smooth, and aesthetically pleasing interface with a vibrant orange and clean white color scheme. This involves a full overhaul of the layout, typography, and component styling.
 
-## Current Plan
+### Actionable Steps
 
-(No active plan)
+1.  **Establish Color Palette & Fonts:**
+    *   **Primary Color:** Vibrant Orange (`#F97316`) for interactive elements.
+    *   **Background Color:** Light Gray (`#F9FAFB`) for the main body and White (`#FFFFFF`) for content cards/containers.
+    *   **Text Color:** Dark Gray (`#1F2937`) for high readability.
+    *   **Font:** Implement 'Poppins' from Google Fonts for a clean, modern feel.
+
+2.  **Create a New Stylesheet:**
+    *   Create `wwwroot/css/orange-theme.css` to house all the new design rules, keeping them separate and manageable.
+
+3.  **Update Master Layout (`_Layout.cshtml`):**
+    *   Link the new Google Font and the `orange-theme.css` file.
+    *   Restructure the `<nav>` bar for a cleaner look.
+    *   Add a simple, clean `<footer>`.
+    *   Apply the new background color to the `<body>`.
+
+4.  **Redesign Core Pages:**
+    *   **Index Page (`Index.cshtml`):**
+        *   Transform the request list from a standard table into a grid of "cards".
+        *   Each card will represent a request, displaying key information and action buttons (`Edit`, `Details`, `Delete`).
+        *   Style action buttons with the new orange theme.
+    *   **Create/Edit Pages (`Create.cshtml`, `Edit.cshtml`):**
+        *   Restyle all form elements (`<input>`, `<select>`, `<textarea>`, `<button>`) for a consistent and modern look.
+        *   Organize the form layout into a clean, centered card.
+        *   Ensure the dynamic form sections are styled correctly.
+    *   **Details Page (`Details.cshtml`):**
+        *   Present the request details in a well-structured and styled card format for easy reading.
+
+5.  **Push to GitHub:**
+    *   Once the redesign is complete and verified, commit and push all changes to the remote repository.
