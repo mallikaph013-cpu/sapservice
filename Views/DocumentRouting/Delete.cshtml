@@ -1,0 +1,37 @@
+@model myapp.Models.DocumentRouting
+
+@{ 
+    ViewData["Title"] = "Delete Document Routing";
+}
+
+<h1 class="mb-4">Delete Document Routing</h1>
+
+<h3>Are you sure you want to delete this?</h3>
+<div class="card">
+    <div class="card-body">
+        <h4 class="card-title">Document Routing Sequence</h4>
+        <hr />
+        <dl class="row">
+            <dt class="col-sm-3">Document Type</dt>
+            <dd class="col-sm-9">@Model.DocumentType.Name</dd>
+
+            <dt class="col-sm-3">Department</dt>
+            <dd class="col-sm-9">@Model.Department.DepartmentName</dd>
+
+            <dt class="col-sm-3">Section</dt>
+            <dd class="col-sm-9">@Model.Section.SectionName</dd>
+
+            <dt class="col-sm-3">Plant</dt>
+            <dd class="col-sm-9">@Model.Plant.PlantName</dd>
+
+            <dt class="col-sm-3">Step</dt>
+            <dd class="col-sm-9">@Model.Step</dd>
+        </dl>
+
+        <form asp-action="Delete">
+            <input type="hidden" asp-for="Id" />
+            <button type="submit" class="btn btn-danger">Delete</button>
+            <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+        </form>
+    </div>
+</div>

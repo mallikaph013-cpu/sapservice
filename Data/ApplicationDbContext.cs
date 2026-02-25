@@ -18,6 +18,8 @@ namespace myapp.Data
         public DbSet<Section> Sections { get; set; } = null!;
         public DbSet<Plant> Plants { get; set; } = null!;
         public DbSet<MasterDataCombination> MasterDataCombinations { get; set; } = null!;
+        public DbSet<DocumentType> DocumentTypes { get; set; } = null!;
+        public DbSet<DocumentRouting> DocumentRoutings { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

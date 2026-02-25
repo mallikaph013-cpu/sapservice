@@ -164,8 +164,16 @@ namespace myapp.Controllers
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var combination = await _context.MasterDataCombinations.FindAsync(id);
-            _context.MasterDataCombinations.Remove(combination);
-            await _context.SaveChangesAsync();
+            if (combination != null)
+            {
+                _context.MasterDataCombinations.Remove(combination);
+                await _context.SaveChangesAsync();
+                TempData["SuccessMessage"] = "Master data combination deleted successfully!";
+            }
+            else
+            {
+                TempData["ErrorMessage"] = "Master data combination not found.";
+            }
             return RedirectToAction(nameof(Index));
         }
     }

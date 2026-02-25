@@ -193,13 +193,56 @@
         <hr />
 
         <h4>Request Details</h4>
-         <div class="row mb-4">
-            <div class="col-md-6"><div class="form-group"><label asp-for="RequestType" class="control-label"></label><select asp-for="RequestType" id="RequestType" class="form-control" asp-items="Html.GetEnumSelectList<myapp.Models.RequestType>()"><option value="">-- Select Type --</option></select><span asp-validation-for="RequestType" class="text-danger"></span></div></div>
-             <div id="plant-fg-group" class="col-md-6" style="display: none;"><div class="form-group"><label asp-for="PlantFG" class="control-label"></label><select asp-for="PlantFG" class="form-control"><option value="">-- Select Plant --</option><option value="6021">6021 (Device)</option><option value="6031">6031 (Assembly)</option><option value="6051">6051 (Injection)</option><option value="6081">6081 (IPO)</option><option value="6060">6060</option></select><span asp-validation-for="PlantFG" class="text-danger"></span></div></div>
-            <div class="col-md-12"><div class="form-group"><label asp-for="Description" class="control-label"></label><textarea asp-for="Description" class="form-control" rows="3" placeholder="Detailed description..."></textarea><span asp-validation-for="Description" class="text-danger"></span></div></div>
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label asp-for="RequestType" class="control-label"></label>
+                    <select asp-for="RequestType" id="RequestType" class="form-control" asp-items="Html.GetEnumSelectList<myapp.Models.RequestType>()">
+                        <option value="">-- Select Type --</option>
+                    </select>
+                    <span asp-validation-for="RequestType" class="text-danger"></span>
+                </div>
+            </div>
+            <div id="plant-fg-group" class="col-md-6" style="display: none;">
+                <div class="form-group">
+                    <label asp-for="PlantFG" class="control-label"></label>
+                    <select asp-for="PlantFG" class="form-control">
+                        <option value="">-- Select Plant --</option>
+                        <option value="6021">6021 (Device)</option>
+                        <option value="6031">6031 (Assembly)</option>
+                        <option value="6051">6051 (Injection)</option>
+                        <option value="6081">6081 (IPO)</option>
+                        <option value="6060">6060</option>
+                    </select>
+                    <span asp-validation-for="PlantFG" class="text-danger"></span>
+                </div>
+            </div>
+        </div>
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <div class="form-group">
+                    <label asp-for="Description" class="control-label"></label>
+                    <textarea asp-for="Description" class="form-control" rows="3" placeholder="Detailed description..."></textarea>
+                    <span asp-validation-for="Description" class="text-danger"></span>
+                </div>
+            </div>
         </div>
 
         <partial name="_MaterialForms" model="Model" />
+
+        <hr />
+
+        <h4>Approver</h4>
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="NextResponsibleUserId" class="control-label">ชื่อผู้รับผิดชอบลำดับถัดไป</label>
+                    <select name="NextResponsibleUserId" id="NextResponsibleUserId" class="form-control">
+                        <option value="">-- กรุณาเลือกประเภทคำขอก่อน --</option>
+                    </select>
+                </div>
+            </div>
+        </div>
 
         <div class="form-group text-center mt-5">
             <input type="submit" value="Submit Request" class="btn btn-primary" />
@@ -228,6 +271,7 @@
             const routingFieldsContainer = document.getElementById('routing-fields-container');
             const ipoFieldsContainer = document.getElementById('ipo-fields-container');
             const plantFgGroup = document.getElementById('plant-fg-group');
+            const nextResponsibleUserSelect = document.getElementById('NextResponsibleUserId');
             
             const fgEnumValue = '0'; 
             const smEnumValue = '1'; 
@@ -283,6 +327,38 @@
                     routingFieldsContainer.style.display = 'block';
                 } else if (selectedValue === ipoEnumValue) {
                     ipoFieldsContainer.style.display = 'block';
+                }
+            }
+            
+            function fetchNextApprovers() {
+                const requestTypeValue = requestTypeSelect.value;
+                nextResponsibleUserSelect.innerHTML = '<option value="">-- กำลังโหลด... --</option>';
+
+                if (requestTypeValue) {
+                    fetch(`/Requests/GetNextApprovers?requestType=${requestTypeValue}`)
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error(`HTTP error! status: ${response.status}`);
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            nextResponsibleUserSelect.innerHTML = '<option value="">-- กรุณาเลือกผู้รับผิดชอบ --</option>';
+                            if (data && data.length > 0) {
+                                data.forEach(user => {
+                                    const option = new Option(user.fullName, user.id);
+                                    nextResponsibleUserSelect.add(option);
+                                });
+                            } else {
+                                nextResponsibleUserSelect.innerHTML = '<option value="">-- ไม่พบผู้ใช้ในแผนกที่กำหนด --</option>';
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error fetching approvers:', error);
+                            nextResponsibleUserSelect.innerHTML = '<option value="">-- เกิดข้อผิดพลาดในการโหลดข้อมูล --</option>';
+                        });
+                } else {
+                    nextResponsibleUserSelect.innerHTML = '<option value="">-- กรุณาเลือกประเภทคำขอก่อน --</option>';
                 }
             }
 
@@ -512,7 +588,10 @@
             toggleMaterialFields();
 
             // Add event listener to handle changes
-            requestTypeSelect.addEventListener('change', toggleMaterialFields);
+            requestTypeSelect.addEventListener('change', () => {
+                toggleMaterialFields();
+                fetchNextApprovers();
+            });
         });
     </script>
 }

@@ -303,6 +303,56 @@ namespace myapp.Migrations
                     b.ToTable("Departments");
                 });
 
+            modelBuilder.Entity("myapp.Models.DocumentRouting", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("DepartmentId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("DocumentTypeId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("PlantId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("SectionId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Step")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DepartmentId");
+
+                    b.HasIndex("DocumentTypeId");
+
+                    b.HasIndex("PlantId");
+
+                    b.HasIndex("SectionId");
+
+                    b.ToTable("DocumentRoutings");
+                });
+
+            modelBuilder.Entity("myapp.Models.DocumentType", b =>
+                {
+                    b.Property<int>("DocumentTypeId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("DocumentTypeId");
+
+                    b.ToTable("DocumentTypes");
+                });
+
             modelBuilder.Entity("myapp.Models.MasterDataCombination", b =>
                 {
                     b.Property<int>("Id")
@@ -473,6 +523,9 @@ namespace myapp.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Mtlsm")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("NextApproverId")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("PlanDelTime")
@@ -731,6 +784,41 @@ namespace myapp.Migrations
                     b.Navigation("RequestItem");
                 });
 
+            modelBuilder.Entity("myapp.Models.DocumentRouting", b =>
+                {
+                    b.HasOne("myapp.Models.Department", "Department")
+                        .WithMany()
+                        .HasForeignKey("DepartmentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("myapp.Models.DocumentType", "DocumentType")
+                        .WithMany("DocumentRoutings")
+                        .HasForeignKey("DocumentTypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("myapp.Models.Plant", "Plant")
+                        .WithMany()
+                        .HasForeignKey("PlantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("myapp.Models.Section", "Section")
+                        .WithMany()
+                        .HasForeignKey("SectionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Department");
+
+                    b.Navigation("DocumentType");
+
+                    b.Navigation("Plant");
+
+                    b.Navigation("Section");
+                });
+
             modelBuilder.Entity("myapp.Models.Plant", b =>
                 {
                     b.HasOne("myapp.Models.Department", "Department")
@@ -762,6 +850,11 @@ namespace myapp.Migrations
                         .IsRequired();
 
                     b.Navigation("Department");
+                });
+
+            modelBuilder.Entity("myapp.Models.DocumentType", b =>
+                {
+                    b.Navigation("DocumentRoutings");
                 });
 
             modelBuilder.Entity("myapp.Models.RequestItem", b =>

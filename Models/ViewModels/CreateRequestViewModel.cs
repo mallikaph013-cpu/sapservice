@@ -20,6 +20,9 @@ namespace myapp.Models.ViewModels
         public string Section { get; set; } = string.Empty;
         public string Plant { get; set; } = string.Empty;
 
+        // To capture the selected next approver from the dropdown
+        public string? NextResponsibleUserId { get; set; }
+
         // FG, SM, RM Common Fields
         public string? PlantFG { get; set; }
         public string? ItemCode { get; set; }

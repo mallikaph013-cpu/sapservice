@@ -1,15 +1,16 @@
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
 using myapp.Models;
-using myapp.Models.ViewModels;
-using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
 using myapp.Data;
+using System.Linq;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace myapp.Controllers
 {
+    [Authorize(Roles = "IT")]
     public class UsersController : Controller
     {
         private readonly UserManager<ApplicationUser> _userManager;
@@ -21,83 +22,72 @@ namespace myapp.Controllers
             _context = context;
         }
 
-        // GET: Users
         public async Task<IActionResult> Index()
         {
             var users = await _userManager.Users.ToListAsync();
             return View(users);
         }
 
-        // GET: Users/Details/5
-        public async Task<IActionResult> Details(string id)
+        public IActionResult Create()
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var user = await _userManager.FindByIdAsync(id);
-            if (user == null)
-            {
-                return NotFound();
-            }
-
-            return View(user);
+            ViewBag.Departments = new SelectList(_context.Departments.OrderBy(d => d.DepartmentName).ToList(), "DepartmentId", "DepartmentName");
+            ViewBag.Sections = new SelectList(Enumerable.Empty<SelectListItem>(), "Value", "Text"); // Start with empty list
+            return View();
         }
 
-        // GET: Users/Create
-        public async Task<IActionResult> Create()
+        [HttpGet]
+        public async Task<JsonResult> GetSections(int departmentId)
         {
-            var viewModel = new CreateUserViewModel
-            {
-                DepartmentList = new SelectList(await _context.Departments.ToListAsync(), "DepartmentName", "DepartmentName"),
-                SectionList = new SelectList(await _context.Sections.ToListAsync(), "SectionName", "SectionName"),
-                PlantList = new SelectList(await _context.Plants.ToListAsync(), "PlantName", "PlantName")
-            };
-            return View(viewModel);
+            var sections = await _context.Sections
+                                       .Where(s => s.DepartmentId == departmentId)
+                                       .OrderBy(s => s.SectionName)
+                                       .Select(s => new { s.SectionId, s.SectionName })
+                                       .ToListAsync();
+            return Json(new SelectList(sections, "SectionId", "SectionName"));
         }
 
-        // POST: Users/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(CreateUserViewModel model)
         {
             if (ModelState.IsValid)
             {
-                var user = new ApplicationUser
+                var department = await _context.Departments.FindAsync(model.DepartmentId);
+                var section = await _context.Sections.FindAsync(model.SectionId);
+
+                if (department == null || section == null || section.DepartmentId != department.DepartmentId)
                 {
-                    UserName = model.UserName,
-                    Email = model.Email,
-                    FirstName = model.FirstName,
-                    LastName = model.LastName,
-                    Department = model.Department,
-                    Section = model.Section,
-                    Plant = model.Plant,
-                    IsActive = model.IsActive,
-                    IsIT = model.IsIT,
-                    CreatedBy = User.Identity.Name, // Set the creator
-                    UpdatedBy = User.Identity.Name, // Set the updater
-                    CreatedAt = DateTime.UtcNow,
-                    UpdatedAt = DateTime.UtcNow
-                };
-                var result = await _userManager.CreateAsync(user, model.Password);
-                if (result.Succeeded)
-                {
-                    return RedirectToAction(nameof(Index));
+                    ModelState.AddModelError("", "Invalid Department or Section selection.");
                 }
-                foreach (var error in result.Errors)
+                else
                 {
-                    ModelState.AddModelError(string.Empty, error.Description);
+                    var user = new ApplicationUser 
+                    {
+                        UserName = model.Email, 
+                        Email = model.Email,
+                        FirstName = model.FirstName,
+                        LastName = model.LastName,
+                        Department = department.DepartmentName,
+                        Section = section.SectionName,
+                        IsIT = model.IsIT
+                    };
+                    var result = await _userManager.CreateAsync(user, model.Password);
+                    if (result.Succeeded)
+                    {
+                        TempData["SuccessMessage"] = "User created successfully!";
+                        return RedirectToAction(nameof(Index));
+                    }
+                    foreach (var error in result.Errors)
+                    {
+                        ModelState.AddModelError(string.Empty, error.Description);
+                    }
                 }
             }
-
-            model.DepartmentList = new SelectList(await _context.Departments.ToListAsync(), "DepartmentName", "DepartmentName");
-            model.SectionList = new SelectList(await _context.Sections.ToListAsync(), "SectionName", "SectionName");
-            model.PlantList = new SelectList(await _context.Plants.ToListAsync(), "PlantName", "PlantName");
+            ViewBag.Departments = new SelectList(_context.Departments.OrderBy(d => d.DepartmentName).ToList(), "DepartmentId", "DepartmentName", model.DepartmentId);
+            ViewBag.Sections = new SelectList(await _context.Sections.Where(s => s.DepartmentId == model.DepartmentId).OrderBy(s => s.SectionName).ToListAsync(), "SectionId", "SectionName", model.SectionId);
             return View(model);
         }
 
-        // GET: Users/Edit/5
         public async Task<IActionResult> Edit(string id)
         {
             if (id == null)
@@ -110,26 +100,28 @@ namespace myapp.Controllers
             {
                 return NotFound();
             }
+
+            var department = await _context.Departments.FirstOrDefaultAsync(d => d.DepartmentName == user.Department);
+            var section = await _context.Sections
+                                        .Include(s => s.Department)
+                                        .FirstOrDefaultAsync(s => s.SectionName == user.Section && s.Department != null && s.Department.DepartmentName == user.Department);
+
             var model = new EditUserViewModel
             {
                 Id = user.Id,
-                UserName = user.UserName ?? string.Empty,
                 Email = user.Email ?? string.Empty,
-                FirstName = user.FirstName ?? string.Empty,
-                LastName = user.LastName ?? string.Empty,
-                Department = user.Department ?? string.Empty,
-                Section = user.Section ?? string.Empty,
-                Plant = user.Plant ?? string.Empty,
-                IsActive = user.IsActive,
-                IsIT = user.IsIT,
-                DepartmentList = new SelectList(await _context.Departments.ToListAsync(), "DepartmentName", "DepartmentName"),
-                SectionList = new SelectList(await _context.Sections.ToListAsync(), "SectionName", "SectionName"),
-                PlantList = new SelectList(await _context.Plants.ToListAsync(), "PlantName", "PlantName")
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                DepartmentId = department?.DepartmentId ?? 0,
+                SectionId = section?.SectionId ?? 0,
+                IsIT = user.IsIT
             };
+
+            ViewBag.Departments = new SelectList(_context.Departments.OrderBy(d => d.DepartmentName).ToList(), "DepartmentId", "DepartmentName", model.DepartmentId);
+            ViewBag.Sections = new SelectList(await _context.Sections.Where(s => s.DepartmentId == model.DepartmentId).OrderBy(s => s.SectionName).ToListAsync(), "SectionId", "SectionName", model.SectionId);
             return View(model);
         }
 
-        // POST: Users/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(string id, EditUserViewModel model)
@@ -142,41 +134,45 @@ namespace myapp.Controllers
             if (ModelState.IsValid)
             {
                 var user = await _userManager.FindByIdAsync(id);
-                if (user == null)
-                {
+                if (user == null) {
                     return NotFound();
                 }
 
-                user.UserName = model.UserName;
-                user.Email = model.Email;
-                user.FirstName = model.FirstName;
-                user.LastName = model.LastName;
-                user.Department = model.Department;
-                user.Section = model.Section;
-                user.Plant = model.Plant;
-                user.IsActive = model.IsActive;
-                user.IsIT = model.IsIT;
-                user.UpdatedBy = User.Identity.Name; // Set the updater
-                user.UpdatedAt = DateTime.UtcNow;
+                var department = await _context.Departments.FindAsync(model.DepartmentId);
+                var section = await _context.Sections.FindAsync(model.SectionId);
 
-                var result = await _userManager.UpdateAsync(user);
-                if (result.Succeeded)
+                if (department == null || section == null || section.DepartmentId != department.DepartmentId)
                 {
-                    return RedirectToAction(nameof(Index));
-                }
-                foreach (var error in result.Errors)
+                     ModelState.AddModelError("", "Invalid Department or Section selection.");
+                } 
+                else 
                 {
-                    ModelState.AddModelError(string.Empty, error.Description);
+                    user.Email = model.Email;
+                    user.UserName = model.Email;
+                    user.FirstName = model.FirstName;
+                    user.LastName = model.LastName;
+                    user.Department = department.DepartmentName;
+                    user.Section = section.SectionName;
+                    user.IsIT = model.IsIT;
+
+                    var result = await _userManager.UpdateAsync(user);
+
+                    if (result.Succeeded)
+                    {
+                        TempData["SuccessMessage"] = "User updated successfully!";
+                        return RedirectToAction(nameof(Index));
+                    }
+                     foreach (var error in result.Errors)
+                    {
+                        ModelState.AddModelError(string.Empty, error.Description);
+                    }
                 }
             }
-
-            model.DepartmentList = new SelectList(await _context.Departments.ToListAsync(), "DepartmentName", "DepartmentName");
-            model.SectionList = new SelectList(await _context.Sections.ToListAsync(), "SectionName", "SectionName");
-            model.PlantList = new SelectList(await _context.Plants.ToListAsync(), "PlantName", "PlantName");
+            ViewBag.Departments = new SelectList(_context.Departments.OrderBy(d => d.DepartmentName).ToList(), "DepartmentId", "DepartmentName", model.DepartmentId);
+            ViewBag.Sections = new SelectList(await _context.Sections.Where(s => s.DepartmentId == model.DepartmentId).OrderBy(s => s.SectionName).ToListAsync(), "SectionId", "SectionName", model.SectionId);
             return View(model);
         }
 
-        // GET: Users/Delete/5
         public async Task<IActionResult> Delete(string id)
         {
             if (id == null)
@@ -193,46 +189,25 @@ namespace myapp.Controllers
             return View(user);
         }
 
-        // POST: Users/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(string id)
         {
             var user = await _userManager.FindByIdAsync(id);
-            if (user == null)
-            {
-                return NotFound();
+            if (user != null) {
+                var result = await _userManager.DeleteAsync(user);
+                if (result.Succeeded)
+                {
+                    TempData["SuccessMessage"] = "User deleted successfully!";
+                    return RedirectToAction(nameof(Index));
+                }
+                foreach (var error in result.Errors)
+                {
+                    ModelState.AddModelError(string.Empty, error.Description);
+                }
+                return View(user);
             }
-
-            var result = await _userManager.DeleteAsync(user);
-
-            if (result.Succeeded)
-            {
-                return RedirectToAction(nameof(Index));
-            }
-
-            foreach (var error in result.Errors)
-            {
-                ModelState.AddModelError(string.Empty, error.Description);
-            }
-
-            return View(user);
-        }
-
-        [HttpGet]
-        public async Task<JsonResult> GetSectionsAndPlants(string department)
-        {
-            var sections = await _context.Sections
-                .Where(s => s.Department != null && s.Department.DepartmentName == department)
-                .Select(s => new { value = s.SectionName, text = s.SectionName })
-                .ToListAsync();
-
-            var plants = await _context.Plants
-                .Where(p => p.Department != null && p.Department.DepartmentName == department)
-                .Select(p => new { value = p.PlantName, text = p.PlantName })
-                .ToListAsync();
-
-            return Json(new { sections, plants });
+            return NotFound();
         }
     }
 }

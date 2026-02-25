@@ -19,32 +19,24 @@ This document outlines the blueprint for a .NET-based web application designed t
 *   **Request Management:** Create, view, edit, and delete service requests.
 *   **Master Data Management:** A dedicated section for managing master data related to requests.
 *   **User Management:** An administrative interface for managing user accounts.
+*   **Document Routing:** A new section for managing the document routing sequence based on document type, department, section, and plant.
 
 ## Implemented Features
 
 *   **Replaced ASP.NET Core Identity with a custom cookie-based authentication system.**
-    *   Created a `Login` view and `AccountController` to handle user login.
-    *   Configured cookie authentication in `Program.cs`.
-    *   Updated the layout to dynamically show "Login" and "Logout" links.
-    *   Secured all controllers using the `[Authorize]` attribute.
-    *   Refactored the `UsersController` to remove dependencies on the old Identity system.
-    *   Removed unused files and dependencies from the old Identity system.
 *   **Switched to Username-based Authentication.**
-    *   Added `UserName` to the `ApplicationUser` model.
-    *   Updated the `CreateUserViewModel` and `EditUserViewModel` to include `UserName`.
-    *   Updated the `Create.cshtml` and `Edit.cshtml` views to include a `UserName` field.
-    *   Modified the `UsersController` to handle the `UserName` when creating and editing users.
-    *   Updated the `LoginViewModel` to use `UserName` instead of `Email`.
-    *   Updated the `Login.cshtml` view to ask for a `UserName`.
-    *   Modified the `AccountController` to use `UserName` for authentication.
 *   **Improved User Deletion.**
-    *   Updated the `DeleteConfirmed` action in the `UsersController` to properly handle deletion errors and provide feedback to the user.
 *   **Added Auditing to User Management.**
-    *   The `UsersController` now automatically records the creator and updater of a user, along with timestamps for creation and updates.
 *   **Enhanced Master Data Management.**
-    *   Added `Edit` and `Delete` functionality to the `MasterDataController`.
-    *   Created `Edit` and `Delete` views for master data combinations.
-    *   Added "Edit" and "Delete" buttons to the master data management page, allowing for direct management of combinations.
+*   **Added Document Routing Feature.**
+    *   Created the `DocumentType` and `DocumentRouting` models and updated the database.
+    *   Developed the `DocumentRoutingController` with `Create`, `Edit`, and `Delete` actions.
+    *   Created the `Index`, `Edit`, and `Delete` views for document routing management.
+    *   Added a navigation link to the "Document Routing" page.
+    *   Refactored the `DocumentRoutingViewModel` and `Create` action to prevent null reference exceptions.
+    *   Updated the `DocumentRoutingController` to use the `RequestType` enum for the "Document Type" dropdown, ensuring consistency with the `Create Request` page.
+    *   Resolved a validation issue on the Document Routing creation form by initializing list properties in the `DocumentRoutingViewModel`.
+    *   Refactored the `Create` action in the `DocumentRoutingController` to use a specific `CreateDocumentRoutingViewModel` for form binding, resolving validation errors.
 
 ## Current Plan
 

@@ -1,0 +1,111 @@
+@model myapp.Models.ViewModels.DocumentRoutingViewModel
+
+@{ 
+    ViewData["Title"] = "Document Routing";
+}
+
+<h1 class="mb-4">Document Routing Management</h1>
+
+<div class="card mb-4">
+    <div class="card-header">
+        <h2 class="card-title mb-0">Create New Document Routing</h2>
+    </div>
+    <div class="card-body">
+        <form asp-action="Create" method="post">
+            <div asp-validation-summary="All" class="text-danger"></div>
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label asp-for="CreateForm.NewDocumentTypeName" class="control-label">Document Type</label>
+                        <select asp-for="CreateForm.NewDocumentTypeName" asp-items="Model.DocumentTypeList" class="form-control">
+                            <option value="">-- Select Document Type --</option>
+                        </select>
+                        <span asp-validation-for="CreateForm.NewDocumentTypeName" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label asp-for="CreateForm.DepartmentId" class="control-label"></label>
+                        <select asp-for="CreateForm.DepartmentId" asp-items="Model.DepartmentList" class="form-control">
+                             <option value="">-- Select Department --</option>
+                        </select>
+                        <span asp-validation-for="CreateForm.DepartmentId" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="form-group">
+                        <label asp-for="CreateForm.NewSectionName" class="control-label"></label>
+                        <select asp-for="CreateForm.NewSectionName" asp-items="Model.SectionList" class="form-control">
+                             <option value="">-- Select Section --</option>
+                        </select>
+                        <span asp-validation-for="CreateForm.NewSectionName" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="form-group">
+                        <label asp-for="CreateForm.NewPlantName" class="control-label"></label>
+                        <select asp-for="CreateForm.NewPlantName" asp-items="Model.PlantList" class="form-control">
+                             <option value="">-- Select Plant --</option>
+                        </select>
+                        <span asp-validation-for="CreateForm.NewPlantName" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-md-1">
+                    <div class="form-group">
+                        <label asp-for="CreateForm.Step" class="control-label"></label>
+                        <input asp-for="CreateForm.Step" class="form-control" />
+                        <span asp-validation-for="CreateForm.Step" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-md-1 align-self-end">
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-primary">Create</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">
+        @TempData["SuccessMessage"]
+    </div>
+}
+
+<div class="card">
+    <div class="card-header">
+        <h2 class="card-title mb-0">Document Routing Sequences</h2>
+    </div>
+    <div class="card-body">
+        <table class="table table-striped table-bordered">
+            <thead>
+                <tr>
+                    <th>Document Type</th>
+                    <th>Department</th>
+                    <th>Section</th>
+                    <th>Plant</th>
+                    <th>Step</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.DocumentRoutings)
+                {
+                    <tr>
+                        <td>@item.DocumentType.Name</td>
+                        <td>@item.Department.DepartmentName</td>
+                        <td>@item.Section.SectionName</td>
+                        <td>@item.Plant.PlantName</td>
+                        <td>@item.Step</td>
+                        <td>
+                            <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning">Edit</a>
+                            <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger">Delete</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

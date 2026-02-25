@@ -1,0 +1,51 @@
+@model myapp.Models.DocumentRouting
+
+@{ 
+    ViewData["Title"] = "Edit Document Routing";
+}
+
+<h1 class="mb-4">Edit Document Routing</h1>
+
+<div class="card">
+    <div class="card-body">
+        <form asp-action="Edit">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="Id" />
+            <input type="hidden" asp-for="DocumentTypeId" />
+
+            <div class="form-group mb-3">
+                <label class="control-label">Document Type</label>
+                <input class="form-control" value="@Model.DocumentType.Name" disabled />
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="DepartmentId" class="control-label">Department</label>
+                <select asp-for="DepartmentId" class="form-control" asp-items="ViewBag.DepartmentId"></select>
+                <span asp-validation-for="DepartmentId" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="SectionId" class="control-label">Section</label>
+                <select asp-for="SectionId" class="form-control" asp-items="ViewBag.SectionId"></select>
+                <span asp-validation-for="SectionId" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="PlantId" class="control-label">Plant</label>
+                <select asp-for="PlantId" class="form-control" asp-items="ViewBag.PlantId"></select>
+                <span asp-validation-for="PlantId" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="Step" class="control-label">Step</label>
+                <input asp-for="Step" class="form-control" />
+                <span asp-validation-for="Step" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <button type="submit" class="btn btn-primary">Save</button>
+                <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>

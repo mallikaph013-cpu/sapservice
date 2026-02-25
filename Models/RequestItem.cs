@@ -23,6 +23,9 @@ namespace myapp.Models
         [DataType(DataType.Date)]
         public DateTime RequestDate { get; set; } = DateTime.UtcNow;
 
+        // ID of the next person responsible for approval
+        public string? NextApproverId { get; set; }
+
         // All fields from CreateRequestViewModel
         public string? PlantFG { get; set; }
         public string? ItemCode { get; set; }

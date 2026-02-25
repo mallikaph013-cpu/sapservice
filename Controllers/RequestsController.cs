@@ -12,6 +12,7 @@ using System;
 using Microsoft.AspNetCore.Http;
 using System.Globalization;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 
 namespace myapp.Controllers
 {
@@ -19,10 +20,12 @@ namespace myapp.Controllers
     public class RequestsController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public RequestsController(ApplicationDbContext context)
+        public RequestsController(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
 
         public async Task<IActionResult> Index()
@@ -51,15 +54,22 @@ namespace myapp.Controllers
             return View(requestItem);
         }
 
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return Challenge(); // User not found, should not happen for authorized users
+            }
+
             var viewModel = new CreateRequestViewModel
             {
-                RequesterName = "Sample User", 
-                Department = "IT",
-                Section = "Development",
-                Plant = "HQ-01"
+                RequesterName = $"{user.FirstName} {user.LastName}",
+                Department = user.Department ?? string.Empty,
+                Section = user.Section ?? string.Empty,
+                Plant = user.Plant ?? string.Empty
             };
+
             return View(viewModel);
         }
 
@@ -69,6 +79,16 @@ namespace myapp.Controllers
         {
             if (ModelState.IsValid)
             {
+                string? nextApproverId = null;
+                if (!string.IsNullOrEmpty(viewModel.NextResponsibleUserId))
+                {
+                    var parts = viewModel.NextResponsibleUserId.Split('|');
+                    if (parts.Length > 0)
+                    {
+                        nextApproverId = parts[0];
+                    }
+                }
+
                  var requestItem = new RequestItem
                 {
                     RequestType = viewModel.RequestType.ToString(),
@@ -76,6 +96,7 @@ namespace myapp.Controllers
                     Requester = viewModel.RequesterName,
                     Status = "Pending",
                     RequestDate = DateTime.UtcNow,
+                    NextApproverId = nextApproverId, // Set the next approver
 
                     // Correctly parse and assign values
                     PlantFG = viewModel.PlantFG,
@@ -164,7 +185,6 @@ namespace myapp.Controllers
             }
             
             // If we got this far, something failed, redisplay form
-            // The validation summary will now display all errors.
             return View(viewModel);
         }
 
@@ -290,19 +310,18 @@ namespace myapp.Controllers
 
             if (ModelState.IsValid)
             {
+                 var requestItemToUpdate = await _context.RequestItems
+                    .Include(r => r.BomComponents)
+                    .Include(r => r.Routings)
+                    .FirstOrDefaultAsync(r => r.Id == id);
+
+                if (requestItemToUpdate == null)
+                {
+                    return NotFound();
+                }
+
                 try
                 {
-                    var requestItemToUpdate = await _context.RequestItems
-                        .Include(r => r.BomComponents)
-                        .Include(r => r.Routings)
-                        .FirstOrDefaultAsync(r => r.Id == id);
-
-                    if (requestItemToUpdate == null)
-                    {
-                        TempData["ErrorMessage"] = "Request not found.";
-                        return NotFound();
-                    }
-
                     // Update scalar properties from the view model
                     requestItemToUpdate.RequestType = viewModel.RequestType.ToString();
                     requestItemToUpdate.Description = viewModel.Description;
@@ -350,11 +369,10 @@ namespace myapp.Controllers
                     requestItemToUpdate.PurchasingGroup = viewModel.PurchasingGroup;
                     requestItemToUpdate.Price = decimal.TryParse(viewModel.Price, out var price) ? price : null;
 
-                    // Remove existing related entities
+                    // Remove existing related entities and add updated ones
                     _context.BomComponents.RemoveRange(requestItemToUpdate.BomComponents);
                     _context.Routings.RemoveRange(requestItemToUpdate.Routings);
-
-                    // Add updated related entities from the view model
+                    
                     requestItemToUpdate.BomComponents = (viewModel.Components ?? new List<BomComponentViewModel>()).Select(c => new BomComponent
                     {
                         Level = c.Level,
@@ -389,9 +407,9 @@ namespace myapp.Controllers
                         GroupCounter = r.GroupCounter
                     }).ToList();
 
-                    _context.Update(requestItemToUpdate);
                     await _context.SaveChangesAsync();
                     TempData["SuccessMessage"] = "Request updated successfully!";
+                    return RedirectToAction(nameof(Index));
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -404,7 +422,6 @@ namespace myapp.Controllers
                         throw;
                     }
                 }
-                return RedirectToAction(nameof(Index));
             }
             return View(viewModel);
         }
@@ -507,6 +524,71 @@ namespace myapp.Controllers
             }
 
             return RedirectToAction(nameof(Index));
+        }
+        
+        [HttpGet]
+        public async Task<IActionResult> GetNextApprovers(RequestType requestType)
+        {
+            var requestTypeName = requestType.ToString();
+            var routings = await _context.DocumentRoutings
+                .Include(dr => dr.DocumentType)
+                .Include(dr => dr.Department)
+                .Include(dr => dr.Section) // Include Section data
+                .Where(dr => dr.DocumentType.Name == requestTypeName)
+                .OrderBy(dr => dr.Step)
+                .ToListAsync();
+
+            if (!routings.Any())
+            {
+                return Json(new List<object>());
+            }
+
+            var allUsers = await _userManager.Users.OrderBy(u => u.FirstName).ThenBy(u => u.LastName).ToListAsync();
+            var approvers = new List<object>();
+
+            foreach (var stepRouting in routings)
+            {
+                var departmentName = stepRouting.Department?.DepartmentName;
+                var sectionName = stepRouting.Section?.SectionName;
+
+                var usersInRule = allUsers.AsQueryable();
+
+                if (!string.IsNullOrEmpty(departmentName))
+                {
+                    usersInRule = usersInRule.Where(u => !string.IsNullOrEmpty(u.Department) && 
+                                                       u.Department.Trim().Equals(departmentName.Trim(), StringComparison.OrdinalIgnoreCase));
+                }
+
+                if (!string.IsNullOrEmpty(sectionName))
+                {
+                     usersInRule = usersInRule.Where(u => !string.IsNullOrEmpty(u.Section) && 
+                                                        u.Section.Trim().Equals(sectionName.Trim(), StringComparison.OrdinalIgnoreCase));
+                }
+                
+                var foundUsers = usersInRule.ToList();
+
+                if (foundUsers.Any())
+                {
+                    var ruleForDisplay = $"Step {stepRouting.Step}: {departmentName}" + 
+                                         (string.IsNullOrEmpty(sectionName) ? "" : $" / {sectionName}");
+
+                    foreach (var user in foundUsers)
+                    {
+                        approvers.Add(new
+                        {
+                            Id = $"{user.Id}|{stepRouting.Id}",
+                            FullName = $"{user.FirstName} {user.LastName} (Assign to {ruleForDisplay})"
+                        });
+                    }
+                }
+            }
+            
+            var distinctApprovers = approvers
+                .GroupBy(a => ((dynamic)a).Id)
+                .Select(g => g.First())
+                .ToList();
+
+            return Json(distinctApprovers);
         }
     }
 }
