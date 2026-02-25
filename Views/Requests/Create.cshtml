@@ -1,4 +1,6 @@
 @model myapp.Models.ViewModels.CreateRequestViewModel
+@using Microsoft.AspNetCore.Identity
+@inject SignInManager<ApplicationUser> SignInManager
 
 @{
     ViewData["Title"] = "Create Service Request";
@@ -83,7 +85,7 @@
         box-shadow: 0 4px 15px rgba(52, 152, 219, 0.2);
     }
     
-    .btn-primary:hover {
+    .btn-primary:hover:not(:disabled) {
         background-color: #2980b9;
         border-color: #2980b9;
         transform: translateY(-2px);
@@ -150,27 +152,6 @@
 
 </style>
 
-<div class="import-container">
-    <div class="text-center">
-        <h4>Import from Excel</h4>
-        <p class="subtitle">Quickly add multiple requests by uploading an Excel file.</p>
-    </div>
-    <form asp-action="Import" method="post" enctype="multipart/form-data">
-        <div class="mb-3">
-            <label for="excelFile" class="form-label">Select Excel File</label>
-            <input class="form-control" type="file" id="excelFile" name="file" accept=".xlsx, .xls" required>
-        </div>
-        <div class="form-group text-center mt-4">
-            <button type="submit" class="btn btn-success">Import File</button>
-        </div>
-    </form>
-</div>
-
-<div class="import-or-divider">
-    <hr>
-    <span class="divider-text">OR</span>
-</div>
-
 <div class="form-container">
     <div class="text-center">
         <h1>Create New Service Request</h1>
@@ -178,7 +159,7 @@
     </div>
     <hr />
 
-    <form asp-action="Create">
+    <form id="create-form" asp-action="Create">
         <div asp-validation-summary="All" class="text-danger mb-3"></div>
 
         <h4>Requester Information</h4>
@@ -233,19 +214,41 @@
         <hr />
 
         <h4>Approver</h4>
+        <p class="text-muted small">You must select a request type first to see the list of approvers.</p>
         <div class="row mb-4">
             <div class="col-md-6">
                 <div class="form-group">
-                    <label for="NextResponsibleUserId" class="control-label">ชื่อผู้รับผิดชอบลำดับถัดไป</label>
-                    <select name="NextResponsibleUserId" id="NextResponsibleUserId" class="form-control">
-                        <option value="">-- กรุณาเลือกประเภทคำขอก่อน --</option>
+                    <label for="NextResponsibleUserId" class="control-label">Next Responsible User</label>
+                    <select name="NextResponsibleUserId" id="NextResponsibleUserId" class="form-control" required>
+                        <option value="">-- Please select a request type first --</option>
                     </select>
                 </div>
             </div>
         </div>
 
+        @if (SignInManager.IsSignedIn(User) && User.IsInRole("IT"))
+        {
+            <hr />
+            <h4>IT Status Update</h4>
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label asp-for="Status" class="control-label"></label>
+                        <select asp-for="Status" class="form-control">
+                            <option value="Pending">Pending</option>
+                            <option value="Run Standard Cost">Run Standard Cost</option>
+                            <option value="Check and Confirm">Check and Confirm</option>
+                            <option value="Release">Release</option>
+                            <option value="Input Price">Input Price</option>
+                            <option value="Complete">Complete</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        }
+
         <div class="form-group text-center mt-5">
-            <input type="submit" value="Submit Request" class="btn btn-primary" />
+            <input type="submit" id="create-submit-button" value="Submit Request" class="btn btn-primary" />
         </div>
     </form>
     
@@ -254,11 +257,38 @@
     </div>
 </div>
 
+<div class="import-or-divider">
+    <hr>
+    <span class="divider-text">OR</span>
+</div>
+
+<div class="import-container">
+    <div class="text-center">
+        <h4>Import from Excel</h4>
+        <p class="subtitle">Quickly add multiple requests by uploading an Excel file.</p>
+    </div>
+    <form id="import-form" asp-action="Import" method="post" enctype="multipart/form-data">
+        <div class="mb-3">
+            <label for="excelFile" class="form-label">Select Excel File</label>
+            <input class="form-control" type="file" id="excelFile" name="file" accept=".xlsx, .xls" required>
+        </div>
+
+        <input type="hidden" name="NextResponsibleUserId" id="importNextResponsibleUserId" />
+        
+        <div class="d-flex justify-content-center align-items-center mt-4">
+            <button type="submit" id="import-submit-button" class="btn btn-success me-3">Import File</button>
+            <a id="download-template-link" href="#" class="btn btn-outline-secondary disabled">Download Template</a>
+        </div>
+    </form>
+</div>
+
+
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const requestTypeSelect = document.getElementById('RequestType');
+            const downloadLink = document.getElementById('download-template-link');
             const fgFieldsContainer = document.getElementById('fg-fields-container');
             const smFieldsContainer = document.getElementById('sm-fields-container');
             const rmFieldsContainer = document.getElementById('rm-fields-container');
@@ -272,7 +302,10 @@
             const ipoFieldsContainer = document.getElementById('ipo-fields-container');
             const plantFgGroup = document.getElementById('plant-fg-group');
             const nextResponsibleUserSelect = document.getElementById('NextResponsibleUserId');
-            
+            const importNextResponsibleUserIdInput = document.getElementById('importNextResponsibleUserId');
+            const importForm = document.getElementById('import-form');
+            const createForm = document.getElementById('create-form');
+
             const fgEnumValue = '0'; 
             const smEnumValue = '1'; 
             const rmEnumValue = '2';
@@ -285,6 +318,17 @@
             const distributionChanelEnumValue = '9';
             const ipoEnumValue = '10';
 
+            function checkResponsibleUser(event) {
+                if (nextResponsibleUserSelect.value === '') {
+                    event.preventDefault(); // Stop form submission
+                    Swal.fire({
+                        title: 'Incomplete Information',
+                        text: "Please select a 'Next Responsible User' before submitting.",
+                        icon: 'warning',
+                        confirmButtonColor: '#3498db'
+                    });
+                }
+            }
 
             function toggleMaterialFields() {
                 const selectedValue = requestTypeSelect.value;
@@ -332,7 +376,7 @@
             
             function fetchNextApprovers() {
                 const requestTypeValue = requestTypeSelect.value;
-                nextResponsibleUserSelect.innerHTML = '<option value="">-- กำลังโหลด... --</option>';
+                nextResponsibleUserSelect.innerHTML = '<option value="">-- Loading... --</option>';
 
                 if (requestTypeValue) {
                     fetch(`/Requests/GetNextApprovers?requestType=${requestTypeValue}`)
@@ -343,26 +387,37 @@
                             return response.json();
                         })
                         .then(data => {
-                            nextResponsibleUserSelect.innerHTML = '<option value="">-- กรุณาเลือกผู้รับผิดชอบ --</option>';
+                            nextResponsibleUserSelect.innerHTML = '<option value="">-- Please select a responsible user --</option>';
                             if (data && data.length > 0) {
                                 data.forEach(user => {
                                     const option = new Option(user.fullName, user.id);
                                     nextResponsibleUserSelect.add(option);
                                 });
                             } else {
-                                nextResponsibleUserSelect.innerHTML = '<option value="">-- ไม่พบผู้ใช้ในแผนกที่กำหนด --</option>';
+                                nextResponsibleUserSelect.innerHTML = '<option value="">-- No users found for the specified rule --</option>';
                             }
                         })
                         .catch(error => {
                             console.error('Error fetching approvers:', error);
-                            nextResponsibleUserSelect.innerHTML = '<option value="">-- เกิดข้อผิดพลาดในการโหลดข้อมูล --</option>';
+                            nextResponsibleUserSelect.innerHTML = '<option value="">-- Error loading data --</option>';
                         });
                 } else {
-                    nextResponsibleUserSelect.innerHTML = '<option value="">-- กรุณาเลือกประเภทคำขอก่อน --</option>';
+                    nextResponsibleUserSelect.innerHTML = '<option value="">-- Please select a request type first --</option>';
                 }
             }
 
-            // --- BOM Multi-level Logic ---
+            function updateDownloadLink() {
+                const selectedValue = requestTypeSelect.value;
+                if (selectedValue) {
+                    downloadLink.href = `/Requests/DownloadTemplate?requestType=${selectedValue}`;
+                    downloadLink.classList.remove('disabled');
+                } else {
+                    downloadLink.href = '#';
+                    downloadLink.classList.add('disabled');
+                }
+            }
+
+            // --- BOM Multi-level Logic (omitted for brevity) ---
             const bomTableBody = document.getElementById('bom-items-body');
             const addParentBtn = document.getElementById('add-parent-item');
             const addChildBtn = document.getElementById('add-child-item');
@@ -531,7 +586,7 @@
                 }
             });
 
-            // --- Routing Logic ---
+            // --- Routing Logic (omitted for brevity) ---
             const routingTableBody = document.getElementById('routing-items-body');
             const addRoutingBtn = document.getElementById('add-routing-item');
 
@@ -584,14 +639,25 @@
             });
 
 
+            // --- Event Listeners and Initial Calls ---
+
             // Initial call to set the correct form on page load
             toggleMaterialFields();
+            updateDownloadLink(); 
 
             // Add event listener to handle changes
             requestTypeSelect.addEventListener('change', () => {
                 toggleMaterialFields();
                 fetchNextApprovers();
+                updateDownloadLink();
             });
+
+            nextResponsibleUserSelect.addEventListener('change', () => {
+                 importNextResponsibleUserIdInput.value = nextResponsibleUserSelect.value;
+            });
+
+            createForm.addEventListener('submit', checkResponsibleUser);
+            importForm.addEventListener('submit', checkResponsibleUser);
         });
     </script>
 }

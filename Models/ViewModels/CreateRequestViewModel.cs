@@ -23,6 +23,8 @@ namespace myapp.Models.ViewModels
         // To capture the selected next approver from the dropdown
         public string? NextResponsibleUserId { get; set; }
 
+        public string Status { get; set; } = "Pending"; // Add Status property
+
         // FG, SM, RM Common Fields
         public string? PlantFG { get; set; }
         public string? ItemCode { get; set; }
@@ -74,7 +76,7 @@ namespace myapp.Models.ViewModels
         public string? MaterialStatisticsGroup { get; set; }
         public string? AccountAssignment { get; set; }
         public string? GeneralItemCategory { get; set; }
-        public string? Availability { get; set; } 
+        public string? Availability { get; set; }
         public string? Transportation { get; set; }
         public string? LoadingGroup { get; set; }
         public string? PlanDelTime { get; set; }

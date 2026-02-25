@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Http;
 using System.Globalization;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using ClosedXML.Excel;
 
 namespace myapp.Controllers
 {
@@ -67,7 +68,8 @@ namespace myapp.Controllers
                 RequesterName = $"{user.FirstName} {user.LastName}",
                 Department = user.Department ?? string.Empty,
                 Section = user.Section ?? string.Empty,
-                Plant = user.Plant ?? string.Empty
+                Plant = user.Plant ?? string.Empty,
+                Status = "Pending"
             };
 
             return View(viewModel);
@@ -94,7 +96,7 @@ namespace myapp.Controllers
                     RequestType = viewModel.RequestType.ToString(),
                     Description = viewModel.Description,
                     Requester = viewModel.RequesterName,
-                    Status = "Pending",
+                    Status = User.IsInRole("IT") ? viewModel.Status : "Pending",
                     RequestDate = DateTime.UtcNow,
                     NextApproverId = nextApproverId, // Set the next approver
 
@@ -134,7 +136,6 @@ namespace myapp.Controllers
                     StorageLocationEP = viewModel.StorageLocationEP,
                     ToolingBSection = viewModel.ToolingBSection,
                     PoNumber = viewModel.PoNumber,
-                    StatusInA = viewModel.StatusInA,
                     DateIn = DateTime.TryParse(viewModel.DateIn, out var dateIn) ? dateIn : null,
                     QuotationNumber = viewModel.QuotationNumber,
                     ToolingBModel = viewModel.ToolingBModel,
@@ -212,6 +213,7 @@ namespace myapp.Controllers
                 RequestType = Enum.Parse<RequestType>(requestItem.RequestType, true),
                 Description = requestItem.Description,
                 RequesterName = requestItem.Requester,
+                Status = requestItem.Status,
 
                 // Convert model properties back to strings for display
                 PlantFG = requestItem.PlantFG,
@@ -249,7 +251,6 @@ namespace myapp.Controllers
                 StorageLocationEP = requestItem.StorageLocationEP,
                 ToolingBSection = requestItem.ToolingBSection,
                 PoNumber = requestItem.PoNumber,
-                StatusInA = requestItem.StatusInA,
                 DateIn = requestItem.DateIn?.ToString("yyyy-MM-dd"),
                 QuotationNumber = requestItem.QuotationNumber,
                 ToolingBModel = requestItem.ToolingBModel,
@@ -325,6 +326,7 @@ namespace myapp.Controllers
                     // Update scalar properties from the view model
                     requestItemToUpdate.RequestType = viewModel.RequestType.ToString();
                     requestItemToUpdate.Description = viewModel.Description;
+                    requestItemToUpdate.Status = User.IsInRole("IT") ? viewModel.Status : requestItemToUpdate.Status;
                     requestItemToUpdate.PlantFG = viewModel.PlantFG;
                     requestItemToUpdate.ItemCode = viewModel.ItemCode;
                     requestItemToUpdate.EnglishMatDescription = viewModel.EnglishMatDescription;
@@ -360,7 +362,6 @@ namespace myapp.Controllers
                     requestItemToUpdate.StorageLocationEP = viewModel.StorageLocationEP;
                     requestItemToUpdate.ToolingBSection = viewModel.ToolingBSection;
                     requestItemToUpdate.PoNumber = viewModel.PoNumber;
-                    requestItemToUpdate.StatusInA = viewModel.StatusInA;
                     requestItemToUpdate.DateIn = DateTime.TryParse(viewModel.DateIn, out var dateIn) ? dateIn : null;
                     requestItemToUpdate.QuotationNumber = viewModel.QuotationNumber;
                     requestItemToUpdate.ToolingBModel = viewModel.ToolingBModel;
@@ -466,11 +467,44 @@ namespace myapp.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Import(IFormFile file)
+        public async Task<IActionResult> Import(IFormFile file, string NextResponsibleUserId)
         {
             if (file == null || file.Length == 0)
             {
                 TempData["ErrorMessage"] = "Please select a file to upload.";
+                return RedirectToAction(nameof(Create));
+            }
+
+            if (string.IsNullOrEmpty(NextResponsibleUserId))
+            {
+                TempData["ErrorMessage"] = "Please select the next responsible user before importing.";
+                return RedirectToAction(nameof(Create));
+            }
+
+            string? nextApproverId = null;
+            var parts = NextResponsibleUserId.Split('|');
+            if (parts.Length > 0)
+            {
+                nextApproverId = parts[0];
+            }
+
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return Challenge();
+            }
+
+            var fileName = file.FileName;
+            var requestTypeString = fileName.Split('_').FirstOrDefault();
+            if (string.IsNullOrEmpty(requestTypeString) || !Enum.TryParse<RequestType>(requestTypeString, true, out var requestType))
+            {
+                TempData["ErrorMessage"] = "Invalid file name format. Expected format: [RequestType]_Template.xlsx";
+                return RedirectToAction(nameof(Create));
+            }
+
+            if (requestType == RequestType.BOM || requestType == RequestType.Routing)
+            {
+                TempData["ErrorMessage"] = "Import for BOM and Routing request types is not supported yet.";
                 return RedirectToAction(nameof(Create));
             }
 
@@ -480,29 +514,42 @@ namespace myapp.Controllers
                 using (var stream = new MemoryStream())
                 {
                     await file.CopyToAsync(stream);
-                    using (var package = new ExcelPackage(stream))
+                    using (var workbook = new XLWorkbook(stream))
                     {
-                        var worksheet = package.Workbook.Worksheets.FirstOrDefault();
-                        if (worksheet == null)
+                        var worksheet = workbook.Worksheets.FirstOrDefault();
+                        if (worksheet == null || worksheet.LastRowUsed() == null || worksheet.LastRowUsed().RowNumber() < 2)
                         {
-                            TempData["ErrorMessage"] = "The Excel file is empty or corrupted.";
+                            TempData["ErrorMessage"] = "The Excel file is empty or does not contain any data.";
                             return RedirectToAction(nameof(Create));
                         }
 
-                        int rowCount = worksheet.Dimension.Rows;
-                        for (int row = 2; row <= rowCount; row++) 
+                        var headerRow = worksheet.Row(1);
+                        var headerMap = new Dictionary<string, int>();
+                        foreach (var cell in headerRow.CellsUsed())
                         {
+                            headerMap[cell.Value.ToString().Trim()] = cell.Address.ColumnNumber;
+                        }
+
+                        for (int rowNum = 2; rowNum <= worksheet.LastRowUsed().RowNumber(); rowNum++)
+                        {
+                            var row = worksheet.Row(rowNum);
                             var requestItem = new RequestItem
                             {
-                                Description = worksheet.Cells[row, 1].Value?.ToString()?.Trim() ?? string.Empty,
-                                Requester = worksheet.Cells[row, 2].Value?.ToString()?.Trim() ?? string.Empty,
+                                RequestType = requestType.ToString(),
+                                Requester = $"{user.FirstName} {user.LastName}",
                                 Status = "Pending",
-                                RequestDate = DateTime.UtcNow
+                                RequestDate = DateTime.UtcNow,
+                                NextApproverId = nextApproverId, // Assign the selected approver
+                                Description = $"Imported {requestTypeString} data on {DateTime.UtcNow.ToShortDateString()}"
                             };
-                            if (!string.IsNullOrWhiteSpace(requestItem.Description) && !string.IsNullOrWhiteSpace(requestItem.Requester))
+
+                            foreach (var header in headerMap)
                             {
-                                newRequests.Add(requestItem);
+                                var cellValue = row.Cell(header.Value).GetFormattedString();
+                                SetProperty(requestItem, header.Key, cellValue);
                             }
+
+                            newRequests.Add(requestItem);
                         }
                     }
                 }
@@ -518,12 +565,36 @@ namespace myapp.Controllers
                     TempData["ErrorMessage"] = "The file was processed, but no valid requests were found to import.";
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                TempData["ErrorMessage"] = "An error occurred while processing the file.";
+                // Log the exception ex.ToString() to your logging framework
+                TempData["ErrorMessage"] = "An error occurred while processing the file. Please ensure the data format is correct.";
             }
 
             return RedirectToAction(nameof(Index));
+        }
+
+        private void SetProperty(RequestItem item, string propertyName, string value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                return; // Do not set property if cell is empty
+            }
+
+            var propertyInfo = typeof(RequestItem).GetProperty(propertyName);
+            if (propertyInfo != null && propertyInfo.CanWrite)
+            {
+                try
+                {
+                    var targetType = Nullable.GetUnderlyingType(propertyInfo.PropertyType) ?? propertyInfo.PropertyType;
+                    var convertedValue = Convert.ChangeType(value, targetType);
+                    propertyInfo.SetValue(item, convertedValue, null);
+                }
+                catch (Exception)
+                {
+                    // Could log a warning: $"Could not set property {propertyName} with value {value}"
+                }
+            }
         }
         
         [HttpGet]
@@ -589,6 +660,128 @@ namespace myapp.Controllers
                 .ToList();
 
             return Json(distinctApprovers);
+        }
+
+        [HttpGet]
+        public IActionResult DownloadTemplate(RequestType requestType)
+        {
+            using (var workbook = new XLWorkbook())
+            {
+                var worksheet = workbook.Worksheets.Add("Template");
+
+                // Add headers based on RequestType
+                var headers = GetHeadersForRequestType(requestType);
+                for (int i = 0; i < headers.Count; i++)
+                {
+                    worksheet.Cell(1, i + 1).Value = headers[i];
+                }
+
+                // Style the header
+                var headerRange = worksheet.Range(1, 1, 1, headers.Count);
+                headerRange.Style.Font.Bold = true;
+                headerRange.Style.Fill.BackgroundColor = XLColor.LightGray;
+
+                worksheet.Columns().AdjustToContents();
+
+                using (var stream = new MemoryStream())
+                {
+                    workbook.SaveAs(stream);
+                    var content = stream.ToArray();
+                    var contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+                    var fileName = $"{requestType}_Template.xlsx";
+                    return File(content, contentType, fileName);
+                }
+            }
+        }
+
+        private List<string> GetHeadersForRequestType(RequestType requestType)
+        {
+            var headers = new List<string>();
+
+            switch (requestType)
+            {
+                case RequestType.FG:
+                    headers.AddRange(new[] 
+                    {
+                        "PlantFG", "ItemCode", "EnglishMatDescription", "ModelName", "BaseUnit", "MaterialGroup",
+                        "ExternalMaterialGroup", "DivisionCode", "ProfitCenter", "DistributionChannel", "BoiCode",
+                        "MrpController", "StorageLocation", "ProductionSupervisor", "CostingLotSize", "ValClass"
+                    });
+                    break;
+                case RequestType.SM:
+                    headers.AddRange(new[] 
+                    {
+                        "ItemCode", "EnglishMatDescription", "BaseUnit", "PlantFG", "MaterialGroup", "DivisionCode",
+                        "ProfitCenter", "MrpController", "StorageLocation", "ProductionSupervisor", "CostingLotSize", "StandardPack"
+                    });
+                    break;
+                case RequestType.RM:
+                    headers.AddRange(new[] 
+                    {
+                        "ItemCode", "EnglishMatDescription", "ModelName", "BaseUnit", "BoiDescription", "PlantFG",
+                        "MaterialGroup", "ExternalMaterialGroup", "DivisionCode", "ProfitCenter", "PurchasingGroup",
+                        "MakerMfrPartNumber", "CommCodeTariffCode", "TraffCodePercentage", "MrpController",
+                        "StorageLocation", "StorageLocationB1", "PriceControl", "ValClass", "Price", "Currency",
+                        "CostingLotSize", "SupplierCode"
+                    });
+                    break;
+                case RequestType.ToolingB:
+                    headers.AddRange(new[] 
+                    {
+                        "ItemCode", "MatType", "Check", "EnglishMatDescription", "MaterialGroup", "BaseUnit",
+                        "ExternalMaterialGroup", "PlantFG", "DevicePlant", "AssemblyPlant", "IpoPlant", "AsiOfPlant",
+                        "PurchasingGroup", "DivisionCode", "ProfitCenter", "Price", "PriceUnit", "StorageLocationEP",
+                        "ToolingBModel", "ToolingBSection", "PoNumber", "StatusInA", "DateIn", "QuotationNumber"
+                    });
+                    break;
+                case RequestType.ToolingB_FG:
+                    headers.AddRange(new[] 
+                    {
+                        "CurrentICS", "ItemCode", "EnglishMatDescription", "Level", "Rohs", "MaterialGroup", "BaseUnit",
+                        "CodenMid", "DevicePlant", "AssemblyPlant", "IpoPlant", "AsiOfPlant", "PlantFG", "SalesOrg",
+                        "DistributionChannel", "DivisionCode", "TaxTh", "MaterialStatisticsGroup", "AccountAssignment",
+                        "GeneralItemCategory", "Availability", "Transportation", "LoadingGroup", "BoiCode", "PurchasingGroup",
+                        "ProfitCenter", "PlanDelTime", "SchedMargin", "ValClass", "Price", "PriceUnit", "CostingLotSize",
+                        "MrpController", "MinLot", "MaxLot", "FixedLot", "Rounding", "Mtlsm", "Effective", "StorageLoc",
+                        "ReceiveStorage", "ProductionSupervisor", "QuotationNumber", "PoNumber", "StatusInA", "ToolingBSection",
+                        "DateIn", "ModelName"
+                    });
+                    break;
+                case RequestType.ToolingB_PU:
+                    headers.AddRange(new[] 
+                    {
+                        "CurrentICS", "ItemCode", "EnglishMatDescription", "Level", "Rohs", "MaterialGroup", "BaseUnit",
+                        "ExternalMaterialGroup", "DivisionCode", "DevicePlant", "AssemblyPlant", "IpoPlant", "AsiOfPlant",
+                        "PlantFG", "SalesOrg", "DistributionChannel"
+                    });
+                    break;
+                case RequestType.BOM:
+                     headers.AddRange(new[] { "Level", "Item", "ItemCat", "ComponentNumber", "Description", "ItemQuantity", "Unit", "BomUsage", "Plant", "Sloc" });
+                    break;
+                case RequestType.Routing:
+                    headers.AddRange(new[] 
+                    {
+                        "Material", "Description", "WorkCenter", "Operation", "BaseQty", "Unit", "DirectLaborCosts", 
+                        "DirectExpenses", "AllocationExpense", "ProductionVersionCode", "Version", "ValidFrom", "ValidTo", 
+                        "MaximumLotSize", "Group", "GroupCounter"
+                    });
+                    break;
+                case RequestType.AddStorage:
+                     headers.AddRange(new[] { "ItemCode", "PlantFG", "StorageLocation" });
+                    break;
+                case RequestType.DistributionChanel:
+                     headers.AddRange(new[] { "ItemCode", "PlantFG", "StorageLocation", "DistributionChannel", "DivisionCode", "AccountAssignment", "ProfitCenter", "BoiCode" });
+                    break;
+                case RequestType.IPO:
+                     headers.AddRange(new[] 
+                     {
+                        "ItemCode", "EnglishMatDescription", "ModelName", "BaseUnit", "PlantFG", "MaterialGroup", 
+                        "ExternalMaterialGroup", "DivisionCode", "ProfitCenter", "DistributionChannel", "BoiCode", 
+                        "PurchasingGroup", "TariffCode", "MrpController", "StorageLocation", "ValClass", "Price", "Planner"
+                     });
+                    break;
+            }
+            return headers;
         }
     }
 }
