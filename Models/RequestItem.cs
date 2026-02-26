@@ -27,7 +27,7 @@ namespace myapp.Models
         public string? NextApproverId { get; set; }
 
         // All fields from CreateRequestViewModel
-        public string? PlantFG { get; set; }
+        public string? Plant { get; set; } // Renamed from PlantFG
         public string? ItemCode { get; set; }
         public string? EnglishMatDescription { get; set; }
         public string? ModelName { get; set; }

@@ -31,7 +31,7 @@ namespace myapp.Controllers
         public IActionResult Create()
         {
             ViewBag.Departments = new SelectList(_context.Departments.OrderBy(d => d.DepartmentName).ToList(), "DepartmentId", "DepartmentName");
-            ViewBag.Sections = new SelectList(Enumerable.Empty<SelectListItem>(), "Value", "Text"); // Start with empty list
+            ViewBag.Sections = new SelectList(Enumerable.Empty<SelectListItem>(), "Value", "Text");
             return View();
         }
 
@@ -159,6 +159,23 @@ namespace myapp.Controllers
 
                     if (result.Succeeded)
                     {
+                        if (!string.IsNullOrEmpty(model.NewPassword))
+                        {
+                            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+                            var passwordResult = await _userManager.ResetPasswordAsync(user, token, model.NewPassword);
+
+                            if (!passwordResult.Succeeded)
+                            {
+                                foreach (var error in passwordResult.Errors)
+                                {
+                                    ModelState.AddModelError(string.Empty, error.Description);
+                                }
+                                ViewBag.Departments = new SelectList(_context.Departments.OrderBy(d => d.DepartmentName).ToList(), "DepartmentId", "DepartmentName", model.DepartmentId);
+                                ViewBag.Sections = new SelectList(await _context.Sections.Where(s => s.DepartmentId == model.DepartmentId).OrderBy(s => s.SectionName).ToListAsync(), "SectionId", "SectionName", model.SectionId);
+                                return View(model);
+                            }
+                        }
+
                         TempData["SuccessMessage"] = "User updated successfully!";
                         return RedirectToAction(nameof(Index));
                     }

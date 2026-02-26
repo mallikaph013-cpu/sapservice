@@ -196,7 +196,6 @@
 /home/user/sapservice/obj/Debug/net9.0/compressed/0ouiajekne-c9pl8hdirh.gz
 /home/user/sapservice/obj/Debug/net9.0/compressed/a0j1mzjrrq-8ok095ovw7.gz
 /home/user/sapservice/obj/Debug/net9.0/compressed/89a701djol-rspbzmf4g3.gz
-/home/user/sapservice/obj/Debug/net9.0/compressed/srsdvfsejk-cj6ds4z6ug.gz
 /home/user/sapservice/obj/Debug/net9.0/compressed/jdrixves1g-fwpdzra598.gz
 /home/user/sapservice/obj/Debug/net9.0/compressed/75ajzvsluu-zavjl8kan6.gz
 /home/user/sapservice/obj/Debug/net9.0/compressed/hwnt904nd6-5ipweew5fc.gz
@@ -267,3 +266,5 @@
 /home/user/sapservice/obj/Debug/net9.0/myapp.pdb
 /home/user/sapservice/obj/Debug/net9.0/myapp.genruntimeconfig.cache
 /home/user/sapservice/obj/Debug/net9.0/ref/myapp.dll
+/home/user/sapservice/obj/Debug/net9.0/compressed/x75r499t72-ny8ad5rz7i.gz
+/home/user/sapservice/obj/Debug/net9.0/compressed/srsdvfsejk-5dpe6bdhzh.gz

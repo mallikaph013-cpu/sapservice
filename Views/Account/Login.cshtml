@@ -4,37 +4,130 @@
     ViewData["Title"] = "Log in";
 }
 
-<h2>@ViewData["Title"]</h2>
-<div class="row">
-    <div class="col-md-4">
-        <section>
-            <form asp-controller="Account" asp-action="Login" method="post">
-                <h4>Use a local account to log in.</h4>
-                <hr />
-                <div asp-validation-summary="All" class="text-danger"></div>
-                <div class="form-group">
-                    <label asp-for="UserName"></label>
-                    <input asp-for="UserName" class="form-control" />
-                    <span asp-validation-for="UserName" class="text-danger"></span>
+<style>
+    .login-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 80vh;
+        background-color: #f8f9fa;
+    }
+
+    .login-card {
+        width: 100%;
+        max-width: 420px;
+        padding: 2.5rem;
+        border: none;
+        border-radius: 1rem;
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        background-color: #fff;
+    }
+
+    .login-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .login-header h2 {
+        font-weight: 700;
+        color: #333;
+    }
+
+    .login-header p {
+        color: #6c757d;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-control {
+        height: 50px;
+        padding-left: 2.5rem;
+        border-radius: 0.5rem;
+        border: 1px solid #ced4da;
+        transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    }
+
+    .form-control:focus {
+        border-color: #F97316;
+        box-shadow: 0 0 0 0.25rem rgba(249, 115, 22, 0.25);
+    }
+
+    .input-group-text {
+        position: absolute;
+        top: 50%;
+        left: 0.75rem;
+        transform: translateY(-50%);
+        background-color: transparent;
+        border: none;
+        color: #adb5bd;
+    }
+
+    .input-group {
+        position: relative;
+    }
+
+    .btn-primary {
+        width: 100%;
+        padding: 0.8rem;
+        font-size: 1rem;
+        font-weight: 600;
+        border-radius: 0.5rem;
+        background-color: #F97316; 
+        border: none;
+        transition: background-color 0.2s;
+    }
+
+    .btn-primary:hover {
+        background-color: #EA580C; /* Darker Orange */
+    }
+
+    .form-check-label {
+         color: #495057;
+    }
+
+</style>
+
+<div class="login-container">
+    <div class="login-card">
+        <div class="login-header">
+            <h2>Welcome Back!</h2>
+            <p>Please sign in to continue.</p>
+        </div>
+
+        <form asp-controller="Account" asp-action="Login" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+            
+            <div class="form-group">
+                <label asp-for="UserName" class="visually-hidden">Username</label>
+                <div class="input-group">
+                     <span class="input-group-text"><i class="fas fa-user"></i></span>
+                    <input asp-for="UserName" class="form-control" placeholder="Username" required autofocus/>
                 </div>
-                <div class="form-group">
-                    <label asp-for="Password"></label>
-                    <input asp-for="Password" class="form-control" />
-                    <span asp-validation-for="Password" class="text-danger"></span>
+                <span asp-validation-for="UserName" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Password" class="visually-hidden">Password</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                    <input asp-for="Password" class="form-control" placeholder="Password" required/>
                 </div>
-                <div class="form-group">
-                    <div class="checkbox">
-                        <label>
-                            <input asp-for="RememberMe" />
-                            @Html.DisplayNameFor(m => m.RememberMe)
-                        </label>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <button type="submit" class="btn btn-primary">Log in</button>
-                </div>
-            </form>
-        </section>
+                <span asp-validation-for="Password" class="text-danger"></span>
+            </div>
+
+            <div class="form-group form-check">
+                <input class="form-check-input" asp-for="RememberMe" />
+                <label class="form-check-label" asp-for="RememberMe">
+                    @Html.DisplayNameFor(m => m.RememberMe)
+                </label>
+            </div>
+
+            <div class="form-group mt-4">
+                <button type="submit" class="btn btn-primary">Log in</button>
+            </div>
+        </form>
     </div>
 </div>
 

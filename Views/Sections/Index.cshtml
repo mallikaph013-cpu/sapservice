@@ -7,7 +7,9 @@
 <div class="container mt-5">
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h1>@ViewData["Title"]</h1>
-        <a asp-action="Create" class="btn btn-primary">Create New</a>
+        <a asp-action="Create" class="btn btn-primary">
+            <i class="fas fa-plus me-2"></i>Create New Section
+        </a>
     </div>
 
     @if (TempData["SuccessMessage"] != null)
@@ -24,7 +26,7 @@
                     <th>
                         @Html.DisplayNameFor(model => model.SectionName)
                     </th>
-                    <th style="width: 150px;">Actions</th>
+                    <th style="width: 150px;" class="text-center">Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -34,9 +36,13 @@
                         <td>
                             @Html.DisplayFor(modelItem => item.SectionName)
                         </td>
-                        <td>
-                            <a asp-action="Edit" asp-route-id="@item.SectionId" class="btn btn-sm btn-warning">Edit</a>
-                            <a asp-action="Delete" asp-route-id="@item.SectionId" class="btn btn-sm btn-danger">Delete</a>
+                        <td class="text-center">
+                            <a asp-action="Edit" asp-route-id="@item.SectionId" class="btn btn-icon btn-warning me-2" data-bs-toggle="tooltip" title="Edit">
+                                <i class="fas fa-pencil-alt"></i>
+                            </a>
+                            <a asp-action="Delete" asp-route-id="@item.SectionId" class="btn btn-icon btn-danger" data-bs-toggle="tooltip" title="Delete">
+                                <i class="fas fa-trash-alt"></i>
+                            </a>
                         </td>
                     </tr>
                 }
@@ -44,3 +50,13 @@
         </table>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        // Initialize Bootstrap tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        })
+    </script>
+}

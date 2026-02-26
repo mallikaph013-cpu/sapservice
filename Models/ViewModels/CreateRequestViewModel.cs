@@ -18,15 +18,18 @@ namespace myapp.Models.ViewModels
         public string RequesterName { get; set; } = string.Empty;
         public string Department { get; set; } = string.Empty;
         public string Section { get; set; } = string.Empty;
-        public string Plant { get; set; } = string.Empty;
+        public string RequesterPlant { get; set; } = string.Empty; // Renamed from 'Plant'
 
         // To capture the selected next approver from the dropdown
         public string? NextResponsibleUserId { get; set; }
 
-        public string Status { get; set; } = "Pending"; // Add Status property
+        public string Status { get; set; } = "Pending";
 
-        // FG, SM, RM Common Fields
-        public string? PlantFG { get; set; }
+        // --- Main Material Fields ---
+
+        [Required(ErrorMessage = "Plant selection is required.")]
+        public string? Plant { get; set; } // Renamed from PlantFG and made required
+
         public string? ItemCode { get; set; }
         public string? EnglishMatDescription { get; set; }
         public string? ModelName { get; set; }

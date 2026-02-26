@@ -20,6 +20,7 @@ namespace myapp.Data
         public DbSet<MasterDataCombination> MasterDataCombinations { get; set; } = null!;
         public DbSet<DocumentType> DocumentTypes { get; set; } = null!;
         public DbSet<DocumentRouting> DocumentRoutings { get; set; } = null!;
+        public DbSet<NewsArticle> NewsArticles { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

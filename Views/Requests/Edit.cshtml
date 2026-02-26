@@ -6,68 +6,168 @@
     ViewData["Title"] = "Edit Service Request";
 }
 
-<div class="row justify-content-center">
-    <div class="col-lg-10 col-xl-8">
-        <div class="main-content-card">
-            <div class="text-center mb-4">
-                <h2>Edit Service Request</h2>
-                <p class="text-light">Update the details of the request below.</p>
-            </div>
+<style>
+    body {
+        background-color: #f4f7f6;
+        color: #333;
+    }
 
-            <form asp-action="Edit">
-                <input type="hidden" asp-for="Id" />
-                <div asp-validation-summary="ModelOnly" class="text-danger mb-4"></div>
+    .form-container {
+        background: #ffffff;
+        padding: 40px;
+        border-radius: 12px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        margin-top: 50px;
+        margin-bottom: 50px;
+    }
 
-                <h5>Requester Information</h5>
-                <div class="row g-3 mb-4">
-                    <div class="col-md-4"><div class="form-group"><label asp-for="RequesterName" class="form-label"></label><input asp-for="RequesterName" class="form-control" readonly /></div></div>
-                    <div class="col-md-3"><div class="form-group"><label asp-for="Department" class="form-label"></label><input asp-for="Department" class="form-control" readonly /></div></div>
-                    <div class="col-md-2"><div class="form-group"><label asp-for="Section" class="form-label"></label><input asp-for="Section" class="form-control" readonly /></div></div>
-                    <div class="col-md-3"><div class="form-group"><label asp-for="Plant" class="form-label"></label><input asp-for="Plant" class="form-control" readonly /></div></div>
-                </div>
+    h1, h4 {
+        font-weight: 700;
+        color: #2c3e50;
+        margin-bottom: 10px;
+    }
 
-                <hr class="my-4">
+    .subtitle {
+        color: #7f8c8d;
+        margin-bottom: 30px;
+    }
 
-                <h5>Request Details</h5>
-                <div class="row g-3 mb-4">
-                     <div class="col-md-6"><div class="form-group"><label asp-for="RequestType" class="form-label"></label><select asp-for="RequestType" id="RequestType" class="form-select" asp-items="Html.GetEnumSelectList<myapp.Models.RequestType>()"></select><span asp-validation-for="RequestType" class="text-danger"></span></div></div>
-                     <div id="plant-fg-group" class="col-md-6" style="display: none;"><div class="form-group"><label asp-for="PlantFG" class="form-label"></label><select asp-for="PlantFG" class="form-select"><option value="">-- Select Plant --</option><option value="6021">6021 (Device)</option><option value="6031">6031 (Assembly)</option><option value="6051">6051 (Injection)</option><option value="6081">6081 (IPO)</option><option value="6060">6060</option></select><span asp-validation-for="PlantFG" class="text-danger"></span></div></div>
-                </div>
-                 <div class="form-group mb-4">
-                    <label asp-for="Description" class="form-label"></label>
+    .control-label {
+        font-weight: 600;
+        margin-bottom: .5rem;
+        color: #34495e;
+    }
+
+    .form-control,
+    .form-select,
+    .form-control:disabled,
+    .form-control[readonly] {
+        border-radius: 8px;
+        border: 1px solid #dcdcdc;
+        padding: 10px 15px;
+        transition: all 0.3s ease;
+        background-color: #fff;
+    }
+    
+    .form-control:focus,
+    .form-select:focus {
+        border-color: #3498db;
+        box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+        outline: none;
+    }
+
+    input.form-control[readonly] {
+         background-color: #ecf0f1;
+        cursor: not-allowed;
+    }
+
+    select.form-control, select.form-select {
+        cursor: pointer;
+    }
+
+    .btn-primary {
+        background-color: #3498db;
+        border-color: #3498db;
+        padding: 12px 30px;
+        font-size: 1rem;
+        font-weight: 600;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(52, 152, 219, 0.2);
+    }
+
+    .btn-primary:hover {
+        background-color: #2980b9;
+        border-color: #2980b9;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(52, 152, 219, 0.3);
+    }
+    
+    .back-to-list {
+        display: inline-block;
+        margin-top: 20px;
+        color: #3498db;
+        text-decoration: none;
+        font-weight: 500;
+    }
+
+    .back-to-list:hover {
+        text-decoration: underline;
+    }
+
+    hr {
+        margin-top: 2rem;
+        margin-bottom: 2rem;
+    }
+</style>
+
+<div class="form-container">
+    <div class="text-center">
+        <h1>Edit Service Request</h1>
+        <p class="subtitle">Update the details of the request below.</p>
+    </div>
+    <hr />
+
+    <form asp-action="Edit">
+        <input type="hidden" asp-for="Id" />
+        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+        <h4>Requester Information</h4>
+        <p class="text-muted small">The requester's details are read-only.</p>
+        <div class="row mb-4">
+            <div class="col-md-4"><div class="form-group"><label asp-for="RequesterName" class="control-label"></label><input asp-for="RequesterName" class="form-control" readonly /></div></div>
+            <div class="col-md-3"><div class="form-group"><label asp-for="Department" class="control-label"></label><input asp-for="Department" class="form-control" readonly /></div></div>
+            <div class="col-md-2"><div class="form-group"><label asp-for="Section" class="control-label"></label><input asp-for="Section" class="form-control" readonly /></div></div>
+            <div class="col-md-3"><div class="form-group"><label asp-for="RequesterPlant" class="control-label"></label><input asp-for="RequesterPlant" class="form-control" readonly /></div></div>
+        </div>
+
+        <hr />
+
+        <h4>Request Details</h4>
+        <div class="row g-3 mb-4">
+             <div class="col-md-6"><div class="form-group"><label asp-for="RequestType" class="control-label"></label><select asp-for="RequestType" id="RequestType" class="form-select" asp-items="Html.GetEnumSelectList<myapp.Models.RequestType>()"></select><span asp-validation-for="RequestType" class="text-danger"></span></div></div>
+             <div class="col-md-6"><div class="form-group"><label asp-for="Plant" class="control-label"></label><select asp-for="Plant" class="form-select"><option value="">-- Select Plant --</option><option value="6021">6021 (Device)</option><option value="6031">6031 (Assembly)</option><option value="6051">6051 (Injection)</option><option value="6081">6081 (IPO)</option><option value="6060">6060</option></select><span asp-validation-for="Plant" class="text-danger"></span></div></div>
+             <div class="col-md-12">
+                 <div class="form-group">
+                    <label asp-for="Description" class="control-label"></label>
                     <textarea asp-for="Description" class="form-control" rows="3"></textarea>
                     <span asp-validation-for="Description" class="text-danger"></span>
                 </div>
-
-                <partial name="_MaterialForms" model="Model" />
-                
-                @if (SignInManager.IsSignedIn(User) && User.IsInRole("IT"))
-                {
-                    <hr class="my-4" />
-                    <h5>IT Status Update</h5>
-                     <div class="row mb-4">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label asp-for="Status" class="form-label"></label>
-                                <select asp-for="Status" class="form-select">
-                                    <option value="Pending">Pending</option>
-                                    <option value="Run Standard Cost">Run Standard Cost</option>
-                                    <option value="Check and Confirm">Check and Confirm</option>
-                                    <option value="Release">Release</option>
-                                    <option value="Input Price">Input Price</option>
-                                    <option value="Complete">Complete</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                }
-
-                <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-5">
-                    <a asp-action="Index" class="btn btn-secondary me-md-2">Cancel</a>
-                    <input type="submit" value="Save Changes" class="btn btn-primary" />
-                </div>
-            </form>
+            </div>
         </div>
+
+        <partial name="_MaterialForms" model="Model" />
+        
+        @if (SignInManager.IsSignedIn(User) && User.IsInRole("IT"))
+        {
+            <hr />
+            <h4>IT Status Update</h4>
+             <div class="row mb-4">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label asp-for="Status" class="control-label"></label>
+                        <select asp-for="Status" class="form-select">
+                            <option value="Pending">Pending</option>
+                            <option value="Run Standard Cost">Run Standard Cost</option>
+                            <option value="Check and Confirm">Check and Confirm</option>
+                            <option value="Release">Release</option>
+                            <option value="Input Price">Input Price</option>
+                            <option value="Complete">Complete</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        }
+
+        <div class="form-group text-center mt-5">
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save me-2"></i>Save Changes
+            </button>
+        </div>
+    </form>
+    
+    <div class="text-center">
+        <a asp-action="Index" class="back-to-list">Back to List</a>
     </div>
 </div>
 
@@ -76,60 +176,102 @@
     <script>
     document.addEventListener('DOMContentLoaded', function () {
         const requestTypeSelect = document.getElementById('RequestType');
-        
+        const materialFieldsContainer = document.getElementById('material-fields-container');
+        const allMaterialFields = materialFieldsContainer.querySelectorAll('[data-types]');
+        const bomContainer = document.getElementById('bom-fields-container');
+        const routingContainer = document.getElementById('routing-fields-container');
+
+        const typeMapping = {
+            '0': 'FG',
+            '1': 'SM',
+            '2': 'RM',
+            '3': 'ToolingB',
+            '4': 'ToolingBFG',
+            '5': 'ToolingBPU',
+            '6': 'BOM',
+            '7': 'Routing',
+            '8': 'AddStorage',
+            '9': 'DistributionChanel',
+            '10': 'IPO'
+        };
+
         function toggleMaterialFields() {
             const selectedValue = requestTypeSelect.value;
-            const fgFieldsContainer = document.getElementById('fg-fields-container');
-            const smFieldsContainer = document.getElementById('sm-fields-container');
-            const rmFieldsContainer = document.getElementById('rm-fields-container');
-            const toolingbFieldsContainer = document.getElementById('toolingb-fields-container');
-            const toolingbfgFieldsContainer = document.getElementById('toolingbfg-fields-container');
-            const toolingbpuFieldsContainer = document.getElementById('toolingbpu-fields-container');
-            const distributionchanelFieldsContainer = document.getElementById('distributionchanel-fields-container');
-            const addstorageFieldsContainer = document.getElementById('addstorage-fields-container');
-            const bomFieldsContainer = document.getElementById('bom-fields-container');
-            const routingFieldsContainer = document.getElementById('routing-fields-container');
-            const ipoFieldsContainer = document.getElementById('ipo-fields-container');
-            const plantFgGroup = document.getElementById('plant-fg-group');
+            const selectedTypeName = typeMapping[selectedValue];
 
-            const fgEnumValue = '0'; 
-            const smEnumValue = '1'; 
-            const rmEnumValue = '2';
-            const toolingBEnumValue = '3';
-            const toolingBFGEnumValue = '4';
-            const toolingBPUEnumValue = '5';
-            const bomEnumValue = '6';
-            const routingEnumValue = '7';
-            const addStorageEnumValue = '8';
-            const distributionChanelEnumValue = '9';
-            const ipoEnumValue = '10';
+            const showMaterialFields = selectedValue && selectedTypeName !== 'BOM' && selectedTypeName !== 'Routing';
+            materialFieldsContainer.style.display = showMaterialFields ? 'block' : 'none';
 
-            fgFieldsContainer.style.display = 'none';
-            smFieldsContainer.style.display = 'none';
-            rmFieldsContainer.style.display = 'none';
-            toolingbFieldsContainer.style.display = 'none';
-            toolingbfgFieldsContainer.style.display = 'none';
-            toolingbpuFieldsContainer.style.display = 'none';
-            distributionchanelFieldsContainer.style.display = 'none';
-            addstorageFieldsContainer.style.display = 'none';
-            bomFieldsContainer.style.display = 'none';
-            routingFieldsContainer.style.display = 'none';
-            ipoFieldsContainer.style.display = 'none';
-            plantFgGroup.style.display = 'none';
+            if (showMaterialFields) {
+                 allMaterialFields.forEach(field => {
+                    const parentCol = field.closest('.col-md-4, .col-md-6, .col-md-8, .col-md-12');
+                    if(parentCol) {
+                        const types = parentCol.dataset.types ? parentCol.dataset.types.split(',') : [];
+                        if (types.includes(selectedTypeName)) {
+                            parentCol.style.display = 'block';
+                        } else {
+                            parentCol.style.display = 'none';
+                        }
+                    }
+                });
+            }
 
-            if (selectedValue === fgEnumValue) { fgFieldsContainer.style.display = 'block'; plantFgGroup.style.display = 'block'; }
-            else if (selectedValue === smEnumValue) { smFieldsContainer.style.display = 'block'; }
-            else if (selectedValue === rmEnumValue) { rmFieldsContainer.style.display = 'block'; }
-            else if (selectedValue === toolingBEnumValue) { toolingbFieldsContainer.style.display = 'block'; }
-            else if (selectedValue === toolingBFGEnumValue) { toolingbfgFieldsContainer.style.display = 'block'; }
-            else if (selectedValue === toolingBPUEnumValue) { toolingbpuFieldsContainer.style.display = 'block'; }
-            else if (selectedValue === distributionChanelEnumValue) { distributionchanelFieldsContainer.style.display = 'block'; }
-            else if (selectedValue === addStorageEnumValue) { addstorageFieldsContainer.style.display = 'block'; }
-            else if (selectedValue === bomEnumValue) { bomFieldsContainer.style.display = 'block'; }
-            else if (selectedValue === routingEnumValue) { routingFieldsContainer.style.display = 'block'; }
-            else if (selectedValue === ipoEnumValue) { ipoFieldsContainer.style.display = 'block'; }
+            bomContainer.style.display = selectedTypeName === 'BOM' ? 'block' : 'none';
+            routingContainer.style.display = selectedTypeName === 'Routing' ? 'block' : 'none';
         }
 
+        function addBomItem(level) {
+            const tbody = document.getElementById('bom-items-body');
+            const index = tbody.getElementsByTagName('tr').length;
+            const newRow = `
+                <tr>
+                    <td><input type="text" name="Components[${index}].Level" class="form-control" value="${level}" readonly/></td>
+                    <td><input type="text" name="Components[${index}].Item" class="form-control" /></td>
+                    <td><input type="text" name="Components[${index}].ItemCat" class="form-control" /></td>
+                    <td><input type="text" name="Components[${index}].ComponentNumber" class="form-control" /></td>
+                    <td><input type="text" name="Components[${index}].Description" class="form-control" /></td>
+                    <td><input type="number" name="Components[${index}].ItemQuantity" class="form-control" /></td>
+                    <td><input type="text" name="Components[${index}].Unit" class="form-control" /></td>
+                    <td><input type="text" name="Components[${index}].BomUsage" class="form-control" /></td>
+                    <td><input type="text" name="Components[${index}].Plant" class="form-control" /></td>
+                    <td><input type="text" name="Components[${index}].Sloc" class="form-control" /></td>
+                    <td><button type="button" class="btn btn-danger btn-sm remove-bom-item">Remove</button></td>
+                </tr>`;
+            tbody.insertAdjacentHTML('beforeend', newRow);
+        }
+        
+        document.getElementById('add-parent-item').addEventListener('click', () => addBomItem(1));
+        document.getElementById('add-child-item').addEventListener('click', () => addBomItem(2));
+
+        document.getElementById('bom-items-body').addEventListener('click', function(e) {
+            if (e.target && e.target.classList.contains('remove-bom-item')) {
+                e.target.closest('tr').remove();
+            }
+        });
+
+        document.getElementById('add-routing-item').addEventListener('click', function() {
+            const tbody = document.getElementById('routing-items-body');
+            const index = tbody.rows.length;
+            const row = `
+                <tr>
+                    <td><input class="form-control" type="text" name="Routings[${index}].Material"></td>
+                    <td><input class="form-control" type="text" name="Routings[${index}].WorkCenter"></td>
+                    <td><input class="form-control" type="text" name="Routings[${index}].Operation"></td>
+                    <td><input class="form-control" type="number" name="Routings[${index}].BaseQty"></td>
+                    <td><input class="form-control" type="text" name="Routings[${index}].Unit"></td>
+                    <td><input class="form-control" type="number" step="0.01" name="Routings[${index}].DirectLaborCosts"></td>
+                    <td><button type="button" class="btn btn-danger btn-sm remove-routing-item">Remove</button></td>
+                </tr>`;
+            tbody.insertAdjacentHTML('beforeend', row);
+        });
+
+        document.getElementById('routing-items-body').addEventListener('click', function(e) {
+            if (e.target && e.target.classList.contains('remove-routing-item')) {
+                e.target.closest('tr').remove();
+            }
+        });
+
+        // Initial call to set the correct fields on page load
         toggleMaterialFields();
         requestTypeSelect.addEventListener('change', toggleMaterialFields);
     });

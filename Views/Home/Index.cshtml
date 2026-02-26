@@ -1,62 +1,113 @@
-
-@{ ViewData["Title"] = "Home Page"; }
+@model List<myapp.Models.NewsArticleViewModel>
+@{
+    ViewData["Title"] = "Company News";
+}
 
 <style>
-  .hero {
-    text-align: center;
-    padding: 4rem 1rem;
-    background-color: #f8f9fa;
-    border-radius: 0.5rem;
-    margin-bottom: 2rem;
-  }
-  .hero h1 {
-    font-size: 3rem;
-    font-weight: 700;
-  }
-  .hero p {
-    font-size: 1.25rem;
-    color: #6c757d;
-  }
-  .features {
-    display: flex;
-    justify-content: space-around;
-    flex-wrap: wrap;
-    gap: 1.5rem;
-  }
-  .feature-card {
-    background-color: #ffffff;
-    border: 1px solid #dee2e6;
-    border-radius: 0.5rem;
-    padding: 2rem;
-    text-align: center;
-    flex: 1 1 300px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  }
-  .feature-card h3 {
-    font-size: 1.75rem;
-    margin-bottom: 1rem;
-  }
+    body {
+        background-color: #f0f2f5;
+    }
+
+    .news-container {
+        max-width: 900px;
+        margin: 2rem auto;
+    }
+
+    .page-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #1a2c50;
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .news-list-container {
+        background-color: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.07);
+        overflow: hidden;
+    }
+
+    .news-list-item {
+        display: flex;
+        align-items: flex-start;
+        padding: 1.5rem;
+        border-bottom: 1px solid #e9ecef;
+        text-decoration: none;
+        color: inherit;
+        transition: background-color 0.2s ease-in-out;
+    }
+
+    .news-list-item:last-child {
+        border-bottom: none;
+    }
+
+    .news-list-item:hover {
+        background-color: #f8f9fa;
+    }
+
+    .news-item-icon {
+        font-size: 1.5rem;
+        color: #F97316; /* Theme color */
+        margin-right: 1.5rem;
+        padding-top: 5px;
+    }
+
+    .news-item-content {
+        flex-grow: 1;
+    }
+
+    .news-item-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 0.3rem;
+    }
+
+    .news-item-excerpt {
+        font-size: 0.95rem;
+        color: #5a6a7a;
+        margin-bottom: 0.75rem;
+        line-height: 1.6;
+    }
+
+    .news-item-meta {
+        font-size: 0.85rem;
+        color: #8895a7;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
 </style>
 
-<div class="hero">
-  <h1 class="display-4">Welcome to SAP Service</h1>
-  <p class="lead">The simplest way to manage your service requests.</p>
-  <a asp-controller="Requests" asp-action="Index" class="btn btn-primary btn-lg">View Requests</a>
-</div>
+<div class="news-container">
+    <h1 class="page-title"><i class="fas fa-newspaper me-2"></i>@ViewData["Title"]</h1>
 
-<div class="features">
-  <div class="feature-card">
-    <h3><i class="fas fa-list-check"></i> Easy Tracking</h3>
-    <p>Keep track of all your requests in one place. Never lose a task again.</p>
-  </div>
-  <div class="feature-card">
-    <h3><i class="fas fa-rocket"></i> Prioritize & Organize</h3>
-    <p>Set priorities and statuses to effectively manage your workflow.</p>
-  </div>
-  <div class="feature-card">
-    <h3><i class="fas fa-users"></i> For Everyone</h3>
-    <p>A simple and intuitive interface for individuals and teams.</p>
-  </div>
+    <div class="news-list-container">
+        @if (Model.Any())
+        {
+            foreach (var article in Model)
+            {
+                <a href="@article.ArticleUrl" class="news-list-item">
+                    <div class="news-item-icon">
+                        <i class="fas fa-desktop"></i>
+                    </div>
+                    <div class="news-item-content">
+                        <h5 class="news-item-title">@article.Title</h5>
+                        <p class="news-item-excerpt">@article.Excerpt</p>
+                        <div class="news-item-meta">
+                            <span>By @article.Author</span>
+                            <span>@article.PublishedDate.ToString("MMMM dd, yyyy")</span>
+                        </div>
+                    </div>
+                </a>
+            }
+        }
+        else
+        {
+            <div class="text-center p-5">
+                <p class="text-muted">No news articles found.</p>
+            </div>
+        }
+    </div>
 </div>
-
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />

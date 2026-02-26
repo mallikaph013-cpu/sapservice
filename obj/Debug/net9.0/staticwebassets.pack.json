@@ -21,6 +21,10 @@
       "PackagePath": "staticwebassets/css/master-data.css"
     },
     {
+      "Id": "/home/user/sapservice/wwwroot/css/orange-theme.css",
+      "PackagePath": "staticwebassets/css/orange-theme.css"
+    },
+    {
       "Id": "/home/user/sapservice/wwwroot/css/site.css",
       "PackagePath": "staticwebassets/css/site.css"
     },

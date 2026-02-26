@@ -3,53 +3,69 @@
 @{
     ViewData["Title"] = "Service Requests";
 
-    // Helper to get status badge color class
-    Func<string, string> GetStatusClass = (status) => {
+    // Helper to get Bootstrap badge color class
+    Func<string, string> GetBadgeClass = (status) => {
         switch (status?.ToLower()) {
-            case "approved": return "status-approved";
-            case "rejected": return "status-rejected";
-            case "processing": return "status-processing";
-            default: return "status-pending";
+            case "approved": return "bg-success";
+            case "rejected": return "bg-danger";
+            case "processing": return "bg-info text-dark";
+            case "complete": return "bg-primary";
+            default: return "bg-secondary";
         }
     };
 }
 
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h1 class="mb-0">Service Requests</h1>
-    <a asp-action="Create" class="btn btn-primary">Create New Request</a>
+    <a asp-action="Create" class="btn btn-primary">
+        <i class="fas fa-plus me-2"></i>Create New Request
+    </a>
 </div>
 
 @if (Model.Any())
 {
-    <div class="request-card-grid">
-        @foreach (var item in Model)
-        {
-            <div class="request-card">
-                <div class="request-card-header">
-                    <div>
-                        <p class="request-card-title">@Html.DisplayFor(modelItem => item.RequestType) Request</p>
-                        <p class="request-card-requester">by @Html.DisplayFor(modelItem => item.Requester)</p>
-                    </div>
-                    <span class="request-status @GetStatusClass(item.Status)">@Html.DisplayFor(modelItem => item.Status)</span>
-                </div>
-
-                <div class="request-card-body">
-                    <p>
-                        <strong>Description:</strong>
-                        <span>@Html.DisplayFor(modelItem => item.Description)</span>
-                    </p>
-                    <p>
-                        <strong>Date:</strong>
-                        <span>@item.RequestDate.ToString("MMM dd, yyyy")</span>
-                    </p>
-                </div>
-
-                <div class="request-card-footer">
-                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-secondary">Details</a>
-                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-primary">Edit</a>
-                </div>
+    <div class="card">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="py-3 ps-4">Request Type</th>
+                            <th class="py-3">Description</th>
+                            <th class="py-3">Requester</th>
+                            <th class="py-3">Request Date</th>
+                            <th class="py-3 text-center">Status</th>
+                            <th class="py-3 text-center pe-4">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td class="ps-4">@Html.DisplayFor(modelItem => item.RequestType)</td>
+                                <td>@Html.DisplayFor(modelItem => item.Description)</td>
+                                <td>@Html.DisplayFor(modelItem => item.Requester)</td>
+                                <td>@item.RequestDate.ToString("MMM dd, yyyy")</td>
+                                <td class="text-center">
+                                    <span class="badge @GetBadgeClass(item.Status)">@Html.DisplayFor(modelItem => item.Status)</span>
+                                </td>
+                                <td class="text-center pe-4">
+                                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-icon btn-sm btn-outline-secondary me-1" data-bs-toggle="tooltip" title="Details">
+                                        <i class="fas fa-info-circle"></i>
+                                    </a>
+                                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-icon btn-sm btn-warning me-1" data-bs-toggle="tooltip" title="Edit">
+                                        <i class="fas fa-pencil-alt"></i>
+                                    </a>
+                                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-icon btn-sm btn-danger" data-bs-toggle="tooltip" title="Delete">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
             </div>
-        }
+        </div>
     </div>
 }
 else
@@ -57,6 +73,18 @@ else
     <div class="text-center main-content-card">
         <h4 class="text-dark">No requests found.</h4>
         <p class="text-light">Get started by creating a new service request.</p>
-        <a asp-action="Create" class="btn btn-primary mt-3">Create Your First Request</a>
+        <a asp-action="Create" class="btn btn-primary mt-3">
+            <i class="fas fa-plus me-2"></i>Create Your First Request
+        </a>
     </div>
+}
+
+@section Scripts {
+    <script>
+        // Initialize Bootstrap tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        })
+    </script>
 }

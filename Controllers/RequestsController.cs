@@ -14,6 +14,7 @@ using System.Globalization;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using ClosedXML.Excel;
+using Microsoft.Extensions.Logging;
 
 namespace myapp.Controllers
 {
@@ -22,16 +23,38 @@ namespace myapp.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly ILogger<RequestsController> _logger;
 
-        public RequestsController(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
+        public RequestsController(ApplicationDbContext context, UserManager<ApplicationUser> userManager, ILogger<RequestsController> logger)
         {
             _context = context;
             _userManager = userManager;
+            _logger = logger;
         }
 
         public async Task<IActionResult> Index()
         {
-            var requests = await _context.RequestItems.OrderByDescending(r => r.RequestDate).ToListAsync();
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return Challenge(); // Should not happen for authorized users
+            }
+
+            IQueryable<RequestItem> requestsQuery = _context.RequestItems.AsQueryable();
+
+            // If the user is not in the "IT" role, filter the requests.
+            if (!User.IsInRole("IT"))
+            {
+                var currentUserName = $"{user.FirstName} {user.LastName}";
+                var userId = user.Id;
+
+                // A user sees their own requests OR requests where they are the next approver.
+                requestsQuery = requestsQuery.Where(r => r.Requester == currentUserName || r.NextApproverId == userId);
+            }
+
+            // Order the results and execute the query.
+            var requests = await requestsQuery.OrderByDescending(r => r.RequestDate).ToListAsync();
+            
             return View(requests);
         }
 
@@ -68,17 +91,70 @@ namespace myapp.Controllers
                 RequesterName = $"{user.FirstName} {user.LastName}",
                 Department = user.Department ?? string.Empty,
                 Section = user.Section ?? string.Empty,
-                Plant = user.Plant ?? string.Empty,
+                RequesterPlant = user.Plant ?? string.Empty,
                 Status = "Pending"
             };
 
             return View(viewModel);
         }
 
+        private void ValidateRequest(CreateRequestViewModel viewModel)
+        {
+            // ItemCode: Not required for SM, ToolingB, ToolingB_FG, ToolingB_PU
+            if (viewModel.RequestType != RequestType.SM && 
+                viewModel.RequestType != RequestType.ToolingB &&
+                viewModel.RequestType != RequestType.ToolingB_FG &&
+                viewModel.RequestType != RequestType.ToolingB_PU &&
+                string.IsNullOrWhiteSpace(viewModel.ItemCode))
+            {
+                ModelState.AddModelError(nameof(viewModel.ItemCode), "The Item Code field is required for this request type.");
+            }
+
+            // DivisionCode & ProfitCenter: Not required for RM
+            if (viewModel.RequestType != RequestType.RM)
+            {
+                if ((viewModel.RequestType == RequestType.SM || viewModel.RequestType == RequestType.FG) && string.IsNullOrWhiteSpace(viewModel.DivisionCode))
+                    ModelState.AddModelError(nameof(viewModel.DivisionCode), "Division Code is required for this request type.");
+
+                if ((viewModel.RequestType == RequestType.SM || viewModel.RequestType == RequestType.FG) && string.IsNullOrWhiteSpace(viewModel.ProfitCenter))
+                    ModelState.AddModelError(nameof(viewModel.ProfitCenter), "Profit Center is required for this request type.");
+            }
+
+            // MrpController & StorageLocation: Exempt for specific types
+            if (viewModel.RequestType != RequestType.FG && 
+                viewModel.RequestType != RequestType.RM && 
+                viewModel.RequestType != RequestType.IPO && 
+                viewModel.RequestType != RequestType.ToolingB_FG &&
+                viewModel.RequestType != RequestType.ToolingB_PU)
+            {
+                if (string.IsNullOrWhiteSpace(viewModel.MrpController))
+                    ModelState.AddModelError(nameof(viewModel.MrpController), "MRP Controller is required for this request type.");
+                if (string.IsNullOrWhiteSpace(viewModel.StorageLocation))
+                    ModelState.AddModelError(nameof(viewModel.StorageLocation), "Storage Location is required for this request type.");
+            }
+
+            // ProductionSupervisor & CostingLotSize: Exempt for specific types
+            if (viewModel.RequestType != RequestType.FG && 
+                viewModel.RequestType != RequestType.SM && 
+                viewModel.RequestType != RequestType.ToolingB_FG &&
+                viewModel.RequestType != RequestType.ToolingB_PU &&
+                viewModel.RequestType != RequestType.Passthrough &&
+                viewModel.RequestType != RequestType.CrossPlantPurchase)
+            {
+                if (string.IsNullOrWhiteSpace(viewModel.ProductionSupervisor))
+                    ModelState.AddModelError(nameof(viewModel.ProductionSupervisor), "Production Supervisor is required for this request type.");
+                if (string.IsNullOrWhiteSpace(viewModel.CostingLotSize))
+                    ModelState.AddModelError(nameof(viewModel.CostingLotSize), "Costing Lot Size is required for this request type.");
+            }
+        }
+
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(CreateRequestViewModel viewModel)
         {
+            ValidateRequest(viewModel);
+
             if (ModelState.IsValid)
             {
                 string? nextApproverId = null;
@@ -101,7 +177,7 @@ namespace myapp.Controllers
                     NextApproverId = nextApproverId, // Set the next approver
 
                     // Correctly parse and assign values
-                    PlantFG = viewModel.PlantFG,
+                    Plant = viewModel.Plant,
                     ItemCode = viewModel.ItemCode,
                     EnglishMatDescription = viewModel.EnglishMatDescription,
                     ModelName = viewModel.ModelName,
@@ -206,6 +282,9 @@ namespace myapp.Controllers
             {
                 return NotFound();
             }
+
+            // Find the original requester to populate their details
+            var requesterUser = await _userManager.Users.FirstOrDefaultAsync(u => (u.FirstName + " " + u.LastName) == requestItem.Requester);
             
             var viewModel = new CreateRequestViewModel
             {
@@ -213,10 +292,14 @@ namespace myapp.Controllers
                 RequestType = Enum.Parse<RequestType>(requestItem.RequestType, true),
                 Description = requestItem.Description,
                 RequesterName = requestItem.Requester,
+                // Populate from the found user, or leave empty if not found
+                Department = requesterUser?.Department ?? "",
+                Section = requesterUser?.Section ?? "",
+                RequesterPlant = requesterUser?.Plant ?? "",
                 Status = requestItem.Status,
 
                 // Convert model properties back to strings for display
-                PlantFG = requestItem.PlantFG,
+                Plant = requestItem.Plant,
                 ItemCode = requestItem.ItemCode,
                 EnglishMatDescription = requestItem.EnglishMatDescription,
                 ModelName = requestItem.ModelName,
@@ -309,6 +392,8 @@ namespace myapp.Controllers
                 return NotFound();
             }
 
+            ValidateRequest(viewModel);
+
             if (ModelState.IsValid)
             {
                  var requestItemToUpdate = await _context.RequestItems
@@ -327,7 +412,7 @@ namespace myapp.Controllers
                     requestItemToUpdate.RequestType = viewModel.RequestType.ToString();
                     requestItemToUpdate.Description = viewModel.Description;
                     requestItemToUpdate.Status = User.IsInRole("IT") ? viewModel.Status : requestItemToUpdate.Status;
-                    requestItemToUpdate.PlantFG = viewModel.PlantFG;
+                    requestItemToUpdate.Plant = viewModel.Plant;
                     requestItemToUpdate.ItemCode = viewModel.ItemCode;
                     requestItemToUpdate.EnglishMatDescription = viewModel.EnglishMatDescription;
                     requestItemToUpdate.ModelName = viewModel.ModelName;
@@ -517,20 +602,34 @@ namespace myapp.Controllers
                     using (var workbook = new XLWorkbook(stream))
                     {
                         var worksheet = workbook.Worksheets.FirstOrDefault();
-                        if (worksheet == null || worksheet.LastRowUsed() == null || worksheet.LastRowUsed().RowNumber() < 2)
+                        if (worksheet == null)
                         {
-                            TempData["ErrorMessage"] = "The Excel file is empty or does not contain any data.";
+                            TempData["ErrorMessage"] = "The Excel file is empty or invalid.";
                             return RedirectToAction(nameof(Create));
                         }
+
+                        var lastRowUsed = worksheet.LastRowUsed();
+                        if (lastRowUsed == null) {
+                             TempData["ErrorMessage"] = "The Excel file does not contain any data rows.";
+                            return RedirectToAction(nameof(Create));
+                        }
+
+                        var lastRowNumber = lastRowUsed.RowNumber();
 
                         var headerRow = worksheet.Row(1);
                         var headerMap = new Dictionary<string, int>();
                         foreach (var cell in headerRow.CellsUsed())
                         {
-                            headerMap[cell.Value.ToString().Trim()] = cell.Address.ColumnNumber;
+                            if(cell == null) continue;
+
+                            var headerText = cell.GetString()?.Trim();
+                            if (!string.IsNullOrEmpty(headerText))
+                            {
+                                headerMap[headerText] = cell.Address.ColumnNumber;
+                            }
                         }
 
-                        for (int rowNum = 2; rowNum <= worksheet.LastRowUsed().RowNumber(); rowNum++)
+                        for (int rowNum = 2; rowNum <= lastRowNumber; rowNum++)
                         {
                             var row = worksheet.Row(rowNum);
                             var requestItem = new RequestItem
@@ -539,7 +638,7 @@ namespace myapp.Controllers
                                 Requester = $"{user.FirstName} {user.LastName}",
                                 Status = "Pending",
                                 RequestDate = DateTime.UtcNow,
-                                NextApproverId = nextApproverId, // Assign the selected approver
+                                NextApproverId = nextApproverId,
                                 Description = $"Imported {requestTypeString} data on {DateTime.UtcNow.ToShortDateString()}"
                             };
 
@@ -567,8 +666,8 @@ namespace myapp.Controllers
             }
             catch (Exception ex)
             {
-                // Log the exception ex.ToString() to your logging framework
-                TempData["ErrorMessage"] = "An error occurred while processing the file. Please ensure the data format is correct.";
+                _logger.LogError(ex, "An error occurred while processing the Excel file.");
+                TempData["ErrorMessage"] = "An error occurred while processing the file. Please ensure the data format is correct and check the logs for details.";
             }
 
             return RedirectToAction(nameof(Index));
@@ -590,9 +689,9 @@ namespace myapp.Controllers
                     var convertedValue = Convert.ChangeType(value, targetType);
                     propertyInfo.SetValue(item, convertedValue, null);
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
-                    // Could log a warning: $"Could not set property {propertyName} with value {value}"
+                     _logger.LogWarning(ex, "Could not set property {PropertyName} with value {Value}", propertyName, value);
                 }
             }
         }
@@ -703,7 +802,7 @@ namespace myapp.Controllers
                 case RequestType.FG:
                     headers.AddRange(new[] 
                     {
-                        "PlantFG", "ItemCode", "EnglishMatDescription", "ModelName", "BaseUnit", "MaterialGroup",
+                        "Plant", "ItemCode", "EnglishMatDescription", "ModelName", "BaseUnit", "MaterialGroup",
                         "ExternalMaterialGroup", "DivisionCode", "ProfitCenter", "DistributionChannel", "BoiCode",
                         "MrpController", "StorageLocation", "ProductionSupervisor", "CostingLotSize", "ValClass"
                     });
@@ -711,25 +810,35 @@ namespace myapp.Controllers
                 case RequestType.SM:
                     headers.AddRange(new[] 
                     {
-                        "ItemCode", "EnglishMatDescription", "BaseUnit", "PlantFG", "MaterialGroup", "DivisionCode",
+                        "ItemCode", "EnglishMatDescription", "BaseUnit", "Plant", "MaterialGroup", "DivisionCode",
                         "ProfitCenter", "MrpController", "StorageLocation", "ProductionSupervisor", "CostingLotSize", "StandardPack"
                     });
                     break;
                 case RequestType.RM:
-                    headers.AddRange(new[] 
+                     headers.AddRange(new[] 
                     {
-                        "ItemCode", "EnglishMatDescription", "ModelName", "BaseUnit", "BoiDescription", "PlantFG",
+                        "ItemCode", "EnglishMatDescription", "ModelName", "BaseUnit", "BoiDescription", "Plant",
                         "MaterialGroup", "ExternalMaterialGroup", "DivisionCode", "ProfitCenter", "PurchasingGroup",
                         "MakerMfrPartNumber", "CommCodeTariffCode", "TraffCodePercentage", "MrpController",
                         "StorageLocation", "StorageLocationB1", "PriceControl", "ValClass", "Price", "Currency",
                         "CostingLotSize", "SupplierCode"
                     });
                     break;
+                case RequestType.Passthrough:
+                case RequestType.CrossPlantPurchase:
+                    headers.AddRange(new[] 
+                    {
+                        "ItemCode", "EnglishMatDescription", "ModelName", "BaseUnit", "BoiDescription", "Plant",
+                        "MaterialGroup", "ExternalMaterialGroup", "DivisionCode", "ProfitCenter", "PurchasingGroup",
+                        "MakerMfrPartNumber", "CommCodeTariffCode", "TraffCodePercentage", "MrpController",
+                        "StorageLocation", "PriceControl", "ValClass", "Price", "SupplierCode"
+                    });
+                    break;
                 case RequestType.ToolingB:
                     headers.AddRange(new[] 
                     {
                         "ItemCode", "MatType", "Check", "EnglishMatDescription", "MaterialGroup", "BaseUnit",
-                        "ExternalMaterialGroup", "PlantFG", "DevicePlant", "AssemblyPlant", "IpoPlant", "AsiOfPlant",
+                        "ExternalMaterialGroup", "Plant", "DevicePlant", "AssemblyPlant", "IpoPlant", "AsiOfPlant",
                         "PurchasingGroup", "DivisionCode", "ProfitCenter", "Price", "PriceUnit", "StorageLocationEP",
                         "ToolingBModel", "ToolingBSection", "PoNumber", "StatusInA", "DateIn", "QuotationNumber"
                     });
@@ -738,7 +847,7 @@ namespace myapp.Controllers
                     headers.AddRange(new[] 
                     {
                         "CurrentICS", "ItemCode", "EnglishMatDescription", "Level", "Rohs", "MaterialGroup", "BaseUnit",
-                        "CodenMid", "DevicePlant", "AssemblyPlant", "IpoPlant", "AsiOfPlant", "PlantFG", "SalesOrg",
+                        "CodenMid", "DevicePlant", "AssemblyPlant", "IpoPlant", "AsiOfPlant", "Plant", "SalesOrg",
                         "DistributionChannel", "DivisionCode", "TaxTh", "MaterialStatisticsGroup", "AccountAssignment",
                         "GeneralItemCategory", "Availability", "Transportation", "LoadingGroup", "BoiCode", "PurchasingGroup",
                         "ProfitCenter", "PlanDelTime", "SchedMargin", "ValClass", "Price", "PriceUnit", "CostingLotSize",
@@ -752,7 +861,7 @@ namespace myapp.Controllers
                     {
                         "CurrentICS", "ItemCode", "EnglishMatDescription", "Level", "Rohs", "MaterialGroup", "BaseUnit",
                         "ExternalMaterialGroup", "DivisionCode", "DevicePlant", "AssemblyPlant", "IpoPlant", "AsiOfPlant",
-                        "PlantFG", "SalesOrg", "DistributionChannel"
+                        "Plant", "SalesOrg", "DistributionChannel"
                     });
                     break;
                 case RequestType.BOM:
@@ -767,15 +876,15 @@ namespace myapp.Controllers
                     });
                     break;
                 case RequestType.AddStorage:
-                     headers.AddRange(new[] { "ItemCode", "PlantFG", "StorageLocation" });
+                     headers.AddRange(new[] { "ItemCode", "Plant", "StorageLocation" });
                     break;
                 case RequestType.DistributionChanel:
-                     headers.AddRange(new[] { "ItemCode", "PlantFG", "StorageLocation", "DistributionChannel", "DivisionCode", "AccountAssignment", "ProfitCenter", "BoiCode" });
+                     headers.AddRange(new[] { "ItemCode", "Plant", "StorageLocation", "DistributionChannel", "DivisionCode", "AccountAssignment", "ProfitCenter", "BoiCode" });
                     break;
                 case RequestType.IPO:
                      headers.AddRange(new[] 
                      {
-                        "ItemCode", "EnglishMatDescription", "ModelName", "BaseUnit", "PlantFG", "MaterialGroup", 
+                        "ItemCode", "EnglishMatDescription", "ModelName", "BaseUnit", "Plant", "MaterialGroup", 
                         "ExternalMaterialGroup", "DivisionCode", "ProfitCenter", "DistributionChannel", "BoiCode", 
                         "PurchasingGroup", "TariffCode", "MrpController", "StorageLocation", "ValClass", "Price", "Planner"
                      });

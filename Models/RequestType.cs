@@ -19,6 +19,10 @@ namespace myapp.Models
         AddStorage,
         [Display(Name = "Distribution Chanel")]
         DistributionChanel,
-        IPO
+        IPO,
+        [Display(Name = "Passthrough")]
+        Passthrough,
+        [Display(Name = "ซื้อข้าม Plant")]
+        CrossPlantPurchase
     }
 }

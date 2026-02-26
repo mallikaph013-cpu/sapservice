@@ -9,7 +9,18 @@
             case "approved": return "status-approved";
             case "rejected": return "status-rejected";
             case "processing": return "status-processing";
+            case "complete": return "status-approved"; // Assuming complete is a success status
             default: return "status-pending";
+        }
+    };
+
+    // Helper to render a data field only if the value is not null, empty, or whitespace
+    Action<string, string?> RenderDetailField = (label, value) => {
+        if (!string.IsNullOrWhiteSpace(value)) {
+            <div class="col-md-4 mb-2">
+                <strong>@label:</strong>
+                <span class="text-secondary">@value</span>
+            </div>
         }
     };
 }
@@ -31,8 +42,8 @@
             <div class="mb-4">
                 <h5 class="mb-3">Requester Information</h5>
                 <div class="row g-3">
-                    <div class="col-md-6"><strong>Requester:</strong> @Model.Requester</div>
-                    <div class="col-md-6"><strong>Request Date:</strong> @Model.RequestDate.ToString("MMMM dd, yyyy")</div>
+                    <div class="col-md-6"><strong>Requester:</strong> <span class="text-secondary">@Model.Requester</span></div>
+                    <div class="col-md-6"><strong>Request Date:</strong> <span class="text-secondary">@Model.RequestDate.ToString("MMMM dd, yyyy")</span></div>
                 </div>
             </div>
 
@@ -41,36 +52,43 @@
             <!-- Request Details -->
             <div class="mb-4">
                 <h5 class="mb-3">Request Details</h5>
-                <p><strong>Description:</strong></p>
-                <p>@Html.DisplayFor(model => model.Description)</p>
+                @if (!string.IsNullOrWhiteSpace(Model.Description))
+                {
+                    <p class="description-box">@Html.Raw(Model.Description.Replace("\n", "<br />"))</p>
+                }
             </div>
-            
-            <hr class="my-4">
 
             <!-- Material Info -->
-            <div class="mb-4">
-                <h5 class="mb-3">Material Information</h5>
-                <div class="row g-3">
-                    <div class="col-md-4"><strong>Item Code:</strong> @Model.ItemCode</div>
-                    <div class="col-md-8"><strong>English Mat/Description:</strong> @Model.EnglishMatDescription</div>
-                    <div class="col-md-4"><strong>Model Name:</strong> @Model.ModelName</div>
-                    <div class="col-md-4"><strong>Plant:</strong> @Model.PlantFG</div>
-                    <div class="col-md-4"><strong>Material Group:</strong> @Model.MaterialGroup</div>
-                    <div class="col-md-4"><strong>Division:</strong> @Model.DivisionCode</div>
-                    <div class="col-md-4"><strong>Profit Center:</strong> @Model.ProfitCenter</div>
-                    <div class="col-md-4"><strong>MRP Controller:</strong> @Model.MrpController</div>
-                    <div class="col-md-4"><strong>Purchasing Group:</strong> @Model.PurchasingGroup</div>
-                    <div class="col-md-4"><strong>Valuation Class:</strong> @Model.ValClass</div>
-                    <div class="col-md-4"><strong>Price:</strong> @Model.Price?.ToString("C")</div>
-                    <div class="col-md-4"><strong>Distribution Channel:</strong> @Model.DistributionChannel</div>
+            @if (Model.RequestType != "BOM" && Model.RequestType != "Routing")
+            {
+                <hr class="my-4">
+                <div class="mb-4">
+                    <h5 class="mb-3">Material Information</h5>
+                    <div class="row g-3">
+                        @{
+                            var requestType = Model.RequestType;
+                            
+                            RenderDetailField("Item Code", Model.ItemCode);
+                            RenderDetailField("English Mat/Description", Model.EnglishMatDescription);
 
-                    @if(Model.RequestType == myapp.Models.RequestType.IPO)
-                    {
-                        <div class="col-md-4"><strong>Tariff Code:</strong> @Model.TariffCode</div>
-                        <div class="col-md-4"><strong>Planner:</strong> @Model.Planner</div>
-                    }
+                            if (requestType == "FG" || requestType == "RM" || requestType == "ToolingB" || requestType == "IPO") { RenderDetailField("Model Name", Model.ModelName); }
+                            if (requestType != "AddStorage") { RenderDetailField("Base Unit", Model.BaseUnit); }
+                            if (requestType != "AddStorage") { RenderDetailField("Material Group", Model.MaterialGroup); }
+                            if (requestType != "AddStorage") { RenderDetailField("External Material Group", Model.ExternalMaterialGroup); }
+                            if (requestType == "FG" || requestType == "SM" || requestType == "RM" || requestType == "ToolingB" || requestType == "DistributionChanel" || requestType == "IPO") { RenderDetailField("Division", Model.DivisionCode); }
+                            if (requestType != "AddStorage") { RenderDetailField("Profit Center", Model.ProfitCenter); }
+                            if (requestType == "FG" || requestType == "SM" || requestType == "RM" || requestType == "IPO") { RenderDetailField("MRP Controller", Model.MrpController); }
+                            if (requestType == "FG" || requestType == "SM" || requestType == "RM" || requestType == "AddStorage" || requestType == "IPO") { RenderDetailField("Storage Location", Model.StorageLocation); }
+                            if (requestType == "FG" || requestType == "RM" || requestType == "IPO") { RenderDetailField("Valuation Class", Model.ValClass); }
+                            if (requestType == "RM" || requestType == "ToolingB" || requestType == "IPO") { RenderDetailField("Price", Model.Price?.ToString("C")); }
+                            if (requestType == "RM" || requestType == "ToolingB" || requestType == "IPO") { RenderDetailField("Purchasing Group", Model.PurchasingGroup); }
+                            if (requestType == "FG" || requestType == "DistributionChanel" || requestType == "IPO") { RenderDetailField("Distribution Channel", Model.DistributionChannel); }
+                            if (requestType == "IPO") { RenderDetailField("Tariff Code", Model.TariffCode); }
+                            if (requestType == "IPO") { RenderDetailField("Planner", Model.Planner); }
+                        }
+                    </div>
                 </div>
-            </div>
+            }
 
             <!-- BOM Components Table -->
             @if (Model.BomComponents != null && Model.BomComponents.Any())
@@ -79,7 +97,7 @@
                 <div class="mb-4">
                     <h5 class="mb-3">BOM Components</h5>
                     <div class="table-responsive">
-                        <table class="table table-sm table-bordered">
+                        <table class="table table-sm table-bordered table-striped">
                             <thead class="table-light">
                                 <tr>
                                     <th>Level</th><th>Item</th><th>Item Cat</th><th>Component</th><th>Description</th><th>Quantity</th><th>Unit</th><th>Usage</th><th>Plant</th><th>Sloc</th>
@@ -105,17 +123,17 @@
                 <div class="mb-4">
                     <h5 class="mb-3">Routings</h5>
                      <div class="table-responsive">
-                        <table class="table table-sm table-bordered">
+                        <table class="table table-sm table-bordered table-striped">
                             <thead class="table-light">
                                 <tr>
-                                    <th>Material</th><th>Description</th><th>Work Center</th><th>Operation</th><th>Base Qty</th><th>Unit</th><th>Labor Costs</th>
+                                    <th>Material</th><th>Work Center</th><th>Operation</th><th>Base Qty</th><th>Unit</th><th>Labor Costs</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @foreach (var item in Model.Routings)
                                 {
                                     <tr>
-                                       <td>@item.Material</td><td>@item.Description</td><td>@item.WorkCenter</td><td>@item.Operation</td><td>@item.BaseQty</td><td>@item.Unit</td><td>@item.DirectLaborCosts?.ToString("C")</td>
+                                       <td>@item.Material</td><td>@item.WorkCenter</td><td>@item.Operation</td><td>@item.BaseQty</td><td>@item.Unit</td><td>@item.DirectLaborCosts?.ToString("C")</td>
                                     </tr>
                                 }
                             </tbody>
@@ -126,9 +144,22 @@
 
             <!-- Action Buttons -->
             <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-5">
-                <a asp-action="Index" class="btn btn-secondary">Back to List</a>
-                <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Edit Request</a> 
+                <a asp-action="Index" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>Back to List
+                </a>
+                <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">
+                    <i class="fas fa-pencil-alt me-2"></i>Edit Request
+                </a> 
             </div>
         </div>
     </div>
 </div>
+<style>
+    .description-box {
+        background-color: #f8f9fa;
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
+        padding: 1rem;
+        color: #495057;
+    }
+</style>

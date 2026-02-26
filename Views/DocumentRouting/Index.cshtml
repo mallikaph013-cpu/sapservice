@@ -13,7 +13,7 @@
     <div class="card-body">
         <form asp-action="Create" method="post">
             <div asp-validation-summary="All" class="text-danger"></div>
-            <div class="row">
+            <div class="row g-3 align-items-end">
                 <div class="col-md-3">
                     <div class="form-group">
                         <label asp-for="CreateForm.NewDocumentTypeName" class="control-label">Document Type</label>
@@ -23,7 +23,7 @@
                         <span asp-validation-for="CreateForm.NewDocumentTypeName" class="text-danger"></span>
                     </div>
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-2">
                     <div class="form-group">
                         <label asp-for="CreateForm.DepartmentId" class="control-label"></label>
                         <select asp-for="CreateForm.DepartmentId" asp-items="Model.DepartmentList" class="form-control">
@@ -57,9 +57,9 @@
                         <span asp-validation-for="CreateForm.Step" class="text-danger"></span>
                     </div>
                 </div>
-                <div class="col-md-1 align-self-end">
+                <div class="col-md-2">
                     <div class="form-group">
-                        <button type="submit" class="btn btn-primary">Create</button>
+                        <button type="submit" class="btn btn-primary w-100"><i class="fas fa-plus me-1"></i> Create</button>
                     </div>
                 </div>
             </div>
@@ -87,7 +87,7 @@
                     <th>Section</th>
                     <th>Plant</th>
                     <th>Step</th>
-                    <th>Actions</th>
+                    <th class="text-center">Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -99,9 +99,13 @@
                         <td>@item.Section.SectionName</td>
                         <td>@item.Plant.PlantName</td>
                         <td>@item.Step</td>
-                        <td>
-                            <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning">Edit</a>
-                            <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger">Delete</a>
+                        <td class="text-center">
+                            <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-icon btn-warning me-2" data-bs-toggle="tooltip" title="Edit">
+                                <i class="fas fa-pencil-alt"></i>
+                            </a>
+                            <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-icon btn-danger" data-bs-toggle="tooltip" title="Delete">
+                                <i class="fas fa-trash-alt"></i>
+                            </a>
                         </td>
                     </tr>
                 }
@@ -109,3 +113,13 @@
         </table>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        // Initialize Bootstrap tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        })
+    </script>
+}

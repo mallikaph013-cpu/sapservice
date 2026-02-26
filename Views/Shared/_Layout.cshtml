@@ -25,41 +25,55 @@
 </head>
 <body>
     <header>
-        <nav class="navbar navbar-expand-lg">
+        <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom">
             <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">SAP Portal</a>
+                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">
+                    <i class="fas fa-cogs text-primary"></i> 
+                    SAP Portal
+                </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
-                <div class="navbar-collapse collapse d-lg-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" asp-area="" asp-controller="Requests" asp-action="Index">Requests</a>
-                        </li>
-
-                        @if (SignInManager.IsSignedIn(User) && User.IsInRole("IT"))
-                        {
-                            <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownAdmin" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                    Management
-                                a>
-                                <div class="dropdown-menu" aria-labelledby="navbarDropdownAdmin">
-                                    <a class="dropdown-item" asp-controller="Users" asp-action="Index">Manage Users</a>
-                                    <a class="dropdown-item" asp-controller="Departments" asp-action="Index">Manage Departments</a>
-                                    <a class="dropdown-item" asp-controller="Sections" asp-action="Index">Manage Sections</a>
-                                </div>
+                <div class="navbar-collapse collapse">
+                    @if (SignInManager.IsSignedIn(User))
+                    {
+                        <ul class="navbar-nav me-auto mb-2 mb-lg-0 nav-underline">
+                            <li class="nav-item">
+                                <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">
+                                    <i class="fas fa-home me-1"></i><span class="d-none d-lg-inline">Home</span>
+                                </a>
                             </li>
-                        }
+                            <li class="nav-item">
+                                <a class="nav-link" asp-area="" asp-controller="Requests" asp-action="Index">
+                                    <i class="fas fa-file-alt me-1"></i><span class="d-none d-lg-inline">Requests</span>
+                                </a>
+                            </li>
 
-                        <li class="nav-item">
-                            <a class="nav-link" asp-area="" asp-controller="DocumentRouting" asp-action="Index">Document Routing</a>
-                        </li>
-                    </ul>
-                    <partial name="_LoginPartial" />
+                            @if (User.IsInRole("IT"))
+                            {
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownAdmin" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        <i class="fas fa-cogs me-1"></i><span class="d-none d-lg-inline">Management</span>
+                                    </a>
+                                    <div class="dropdown-menu" aria-labelledby="navbarDropdownAdmin">
+                                        <a class="dropdown-item" asp-controller="News" asp-action="Index">Manage News</a>
+                                        <a class="dropdown-item" asp-controller="Users" asp-action="Index">Manage Users</a>
+                                        <a class="dropdown-item" asp-controller="Departments" asp-action="Index">Manage Departments</a>
+                                        <a class="dropdown-item" asp-controller="Sections" asp-action="Index">Manage Sections</a>
+                                    </div>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-area="" asp-controller="DocumentRouting" asp-action="Index">
+                                        <i class="fas fa-project-diagram me-1"></i><span class="d-none d-lg-inline">Document Routing</span>
+                                    </a>
+                                </li>
+                            }
+                        </ul>
+                    }
+                    <div class="ms-auto">
+                        <partial name="_LoginPartial" />
+                    </div>
                 </div>
             </div>
         </nav>
@@ -77,7 +91,7 @@
 
     <footer class="footer text-muted text-center py-3">
         <div class="container">
-            &copy; 2024 - SAP Portal - All Rights Reserved
+            &copy; 2026 - SAP Portal - All Rights Reserved
         </div>
     </footer>
 
