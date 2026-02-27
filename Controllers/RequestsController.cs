@@ -4,6 +4,7 @@ using myapp.Data;
 using myapp.Models;
 using myapp.Models.ViewModels;
 using System.Threading.Tasks;
+using System.Text.Json;
 using OfficeOpenXml;
 using System.Collections.Generic;
 using System.IO;
@@ -30,6 +31,33 @@ namespace myapp.Controllers
             _context = context;
             _userManager = userManager;
             _logger = logger;
+        }
+
+        private void SetBomComponentProperty(BomComponent component, string propertyName, string value)
+        {
+            if (string.IsNullOrWhiteSpace(value)) return;
+
+            try
+            {
+                var propertyInfo = GetPropertyByHeader(typeof(BomComponent), propertyName);
+                if (propertyInfo == null || !propertyInfo.CanWrite) return;
+
+                var targetType = Nullable.GetUnderlyingType(propertyInfo.PropertyType) ?? propertyInfo.PropertyType;
+                object convertedValue;
+
+                if (targetType == typeof(decimal))
+                    convertedValue = decimal.Parse(value, CultureInfo.InvariantCulture);
+                else if (targetType == typeof(int))
+                    convertedValue = int.Parse(value, CultureInfo.InvariantCulture);
+                else
+                    convertedValue = Convert.ChangeType(value, targetType, CultureInfo.InvariantCulture);
+
+                propertyInfo.SetValue(component, convertedValue, null);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Could not set BOM component property {PropertyName} with value {Value}", propertyName, value);
+            }
         }
 
         public async Task<IActionResult> Index()
@@ -265,7 +293,7 @@ namespace myapp.Controllers
             return View(viewModel);
         }
 
-        public async Task<IActionResult> Edit(int? id)
+        public async Task<IActionResult> Edit(int? id, bool fromImport = false)
         {
             if (id == null)
             {
@@ -379,6 +407,13 @@ namespace myapp.Controllers
                 }).ToList()
             };
 
+            // Mark viewModel when redirected from import flow
+            viewModel.FromImport = fromImport || (TempData["FromImport"] as string) == "true";
+            if (viewModel.FromImport)
+            {
+                ViewBag.ImportNotice = "This request was created from imported data. Some validations may be relaxed for initial save. Please verify fields before finalizing.";
+            }
+
             return View("Edit", viewModel); 
         }
 
@@ -387,13 +422,56 @@ namespace myapp.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, CreateRequestViewModel viewModel)
         {
+            _logger.LogInformation("Edit POST called for id={Id}", id);
+            if (viewModel != null)
+            {
+                try { _logger.LogDebug("Posted viewModel: {@ViewModel}", viewModel); } catch { }
+            }
             if (id != viewModel.Id)
             {
                 return NotFound();
             }
 
-            ValidateRequest(viewModel);
+            // Only validate strictly when not coming from import preview
+            if (!viewModel.FromImport)
+            {
+                ValidateRequest(viewModel);
+            }
 
+            if (viewModel.FromImport)
+            {
+                // Clear ModelState errors that commonly come from imported data so user can save and then update later.
+                var fieldsToClear = new[] { "ItemCode", "MrpController", "StorageLocation", "ProductionSupervisor", "CostingLotSize", "DivisionCode", "ProfitCenter", "Plant" };
+                try
+                {
+                    var keys = ModelState.Keys.ToList();
+                    var matched = keys.Where(k => fieldsToClear.Any(f => k.EndsWith(f, StringComparison.OrdinalIgnoreCase))).ToList();
+                    foreach (var k in matched)
+                    {
+                        ModelState[k].Errors.Clear();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Failed to clear ModelState errors for imported record id={Id}", id);
+                }
+                _logger.LogInformation("Edit POST: relaxed validation for imported record id={Id}", id);
+            }
+
+            if (!ModelState.IsValid)
+            {
+                // Log validation errors to help debug why the form can't be saved
+                try
+                {
+                    var errors = ModelState.Where(ms => ms.Value.Errors.Any()).Select(ms => new { Key = ms.Key, Errors = ms.Value.Errors.Select(e => e.ErrorMessage).ToArray() }).ToArray();
+                    _logger.LogWarning("ModelState invalid on Edit POST: {@Errors}", errors);
+                }
+                catch { }
+                return View(viewModel);
+            }
+
+            // proceed when valid
+            
             if (ModelState.IsValid)
             {
                  var requestItemToUpdate = await _context.RequestItems
@@ -552,6 +630,122 @@ namespace myapp.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> SaveImported(List<RequestItem> requests, string? serializedRequests)
+        {
+            if ((requests == null || !requests.Any()) && !string.IsNullOrWhiteSpace(serializedRequests))
+            {
+                try
+                {
+                    var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                    requests = JsonSerializer.Deserialize<List<RequestItem>>(serializedRequests, options) ?? new List<RequestItem>();
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Failed to deserialize import preview payload");
+                    requests = new List<RequestItem>();
+                }
+            }
+
+            if (requests == null || !requests.Any())
+            {
+                TempData["ErrorMessage"] = "No import data to save.";
+                return RedirectToAction(nameof(Create));
+            }
+
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return Challenge();
+            }
+
+            // Ensure required metadata
+            foreach (var r in requests)
+            {
+                r.Requester = r.Requester ?? $"{user.FirstName} {user.LastName}";
+                r.Status = r.Status ?? "Pending";
+                r.RequestDate = r.RequestDate == default ? DateTime.UtcNow : r.RequestDate;
+            }
+
+            // If form posted plant values didn't bind to model, read them explicitly from Request.Form
+            try
+            {
+                for (int i = 0; i < requests.Count; i++)
+                {
+                    var key = $"requests[{i}].Plant";
+                    if (Request.Form.ContainsKey(key))
+                    {
+                        var postedPlant = Request.Form[key].FirstOrDefault();
+                        if (!string.IsNullOrWhiteSpace(postedPlant))
+                        {
+                            requests[i].Plant = postedPlant;
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to read plant values from Request.Form during import save");
+            }
+
+            // Log incoming parsed requests for debugging (plant values, component counts)
+            try
+            {
+                for (int i = 0; i < requests.Count; i++)
+                {
+                    var rr = requests[i];
+                    _logger.LogInformation("Import save incoming request index={Index} plant={Plant} components={Count}", i, rr.Plant, rr.BomComponents?.Count ?? 0);
+                }
+            }
+            catch { }
+
+            // If a request has a Plant value, propagate it to all BOM components for that request
+            foreach (var r in requests)
+            {
+                // If request-level Plant is empty, try to take from first component
+                if (string.IsNullOrWhiteSpace(r.Plant) && r.BomComponents != null && r.BomComponents.Any())
+                {
+                    r.Plant = r.BomComponents.First().Plant;
+                }
+
+                if (!string.IsNullOrWhiteSpace(r.Plant) && r.BomComponents != null)
+                {
+                    foreach (var c in r.BomComponents)
+                    {
+                        // Overwrite component Plant with request-level Plant
+                        c.Plant = r.Plant;
+                    }
+                }
+            }
+
+            _context.RequestItems.AddRange(requests);
+            await _context.SaveChangesAsync();
+
+            // Log saved items for debug
+            try
+            {
+                for (int i = 0; i < requests.Count; i++)
+                {
+                    var r = requests[i];
+                    _logger.LogInformation("Saved imported request index {Index} id {Id} plant={Plant} components={Count}", i, r.Id, r.Plant, r.BomComponents?.Count ?? 0);
+                }
+            }
+            catch { }
+
+            TempData["SuccessMessage"] = $"{requests.Count} requests have been saved.";
+
+            // Redirect to Edit of the first saved request so user can verify and edit fields
+            var firstId = requests.FirstOrDefault()?.Id;
+            if (firstId != null && firstId > 0)
+            {
+                TempData["FromImport"] = "true";
+                return RedirectToAction(nameof(Edit), new { id = firstId, fromImport = true });
+            }
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        [HttpPost]
         public async Task<IActionResult> Import(IFormFile file, string NextResponsibleUserId)
         {
             if (file == null || file.Length == 0)
@@ -587,13 +781,15 @@ namespace myapp.Controllers
                 return RedirectToAction(nameof(Create));
             }
 
-            if (requestType == RequestType.BOM || requestType == RequestType.Routing)
-            {
-                TempData["ErrorMessage"] = "Import for BOM and Routing request types is not supported yet.";
-                return RedirectToAction(nameof(Create));
-            }
+         //   if (requestType == RequestType.BOM || requestType == RequestType.Routing)
+         //   {
+         //       TempData["ErrorMessage"] = "Import for BOM and Routing request types is not supported yet.";
+         //       return RedirectToAction(nameof(Create));
+         //   }
 
             var newRequests = new List<RequestItem>();
+            var parsedHeaders = new List<string>();
+            int parsedDataRows = 0;
             try
             {
                 using (var stream = new MemoryStream())
@@ -629,39 +825,139 @@ namespace myapp.Controllers
                             }
                         }
 
-                        for (int rowNum = 2; rowNum <= lastRowNumber; rowNum++)
-                        {
-                            var row = worksheet.Row(rowNum);
-                            var requestItem = new RequestItem
-                            {
-                                RequestType = requestType.ToString(),
-                                Requester = $"{user.FirstName} {user.LastName}",
-                                Status = "Pending",
-                                RequestDate = DateTime.UtcNow,
-                                NextApproverId = nextApproverId,
-                                Description = $"Imported {requestTypeString} data on {DateTime.UtcNow.ToShortDateString()}"
-                            };
+                        parsedHeaders = headerMap.Keys.ToList();
+                        _logger.LogInformation("Import file {FileName}: RequestType={RequestType}, ParsedHeaders={Headers}, LastRow={LastRow}", fileName, requestType, string.Join(",", parsedHeaders), lastRowNumber);
 
-                            foreach (var header in headerMap)
+                        // Log first few data rows for debugging
+                        try
+                        {
+                            var previewRows = new List<string>();
+                            for (int r = 2; r <= Math.Min(lastRowNumber, 6); r++)
                             {
-                                var cellValue = row.Cell(header.Value).GetFormattedString();
-                                SetProperty(requestItem, header.Key, cellValue);
+                                var row = worksheet.Row(r);
+                                if (row == null) continue;
+                                var values = headerMap.Values.Select(c => row.Cell(c).GetFormattedString()).ToArray();
+                                if (values.All(v => string.IsNullOrWhiteSpace(v))) continue;
+                                previewRows.Add($"Row {r}: " + string.Join(" | ", values));
+                            }
+                            if (previewRows.Any())
+                                _logger.LogInformation("Import preview rows:\n{Preview}", string.Join("\n", previewRows));
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogWarning(ex, "Failed to build import preview rows");
+                        }
+
+                        if (requestType == RequestType.BOM)
+                        {
+                            var components = new List<BomComponent>();
+                            var headerColumns = headerMap.Values.ToList();
+
+                            for (int rowNum = 2; rowNum <= lastRowNumber; rowNum++)
+                            {
+                                var row = worksheet.Row(rowNum);
+                                if (row == null)
+                                    continue;
+
+                                // skip completely empty rows
+                                bool hasData = headerColumns.Any(col => !string.IsNullOrWhiteSpace(row.Cell(col).GetFormattedString()));
+                                if (!hasData)
+                                    continue;
+
+                                var component = new BomComponent();
+                                foreach (var header in headerMap)
+                                {
+                                    var cellValue = row.Cell(header.Value).GetFormattedString();
+                                    SetBomComponentProperty(component, header.Key, cellValue);
+                                }
+
+                                components.Add(component);
                             }
 
-                            newRequests.Add(requestItem);
+                            parsedDataRows = components.Count;
+
+                            if (components.Any())
+                            {
+                                var requestItem = new RequestItem
+                                {
+                                    RequestType = requestType.ToString(),
+                                    Requester = $"{user.FirstName} {user.LastName}",
+                                    Status = "Pending",
+                                    RequestDate = DateTime.UtcNow,
+                                    NextApproverId = nextApproverId,
+                                    Description = $"Imported {requestTypeString} BOM data on {DateTime.UtcNow.ToShortDateString()}",
+                                    BomComponents = components
+                                };
+
+                                newRequests.Add(requestItem);
+                            }
+                            else
+                            {
+                                TempData["ErrorMessage"] = "The file was processed but no BOM component rows were found. Please check the template and data.";
+                            }
+                        }
+                        else
+                        {
+                            for (int rowNum = 2; rowNum <= lastRowNumber; rowNum++)
+                            {
+                                var row = worksheet.Row(rowNum);
+                                if (row == null) continue;
+
+                                // skip completely empty rows
+                                bool hasData = headerMap.Values.Any(col => !string.IsNullOrWhiteSpace(row.Cell(col).GetFormattedString()));
+                                if (!hasData) continue;
+
+                                var requestItem = new RequestItem
+                                {
+                                    RequestType = requestType.ToString(),
+                                    Requester = $"{user.FirstName} {user.LastName}",
+                                    Status = "Pending",
+                                    RequestDate = DateTime.UtcNow,
+                                    NextApproverId = nextApproverId,
+                                    Description = $"Imported {requestTypeString} data on {DateTime.UtcNow.ToShortDateString()}"
+                                };
+
+                                foreach (var header in headerMap)
+                                {
+                                    var cellValue = row.Cell(header.Value).GetFormattedString();
+                                    SetProperty(requestItem, header.Key, cellValue);
+                                }
+                                newRequests.Add(requestItem);
+                                parsedDataRows++;
+                            }
                         }
                     }
                 }
 
                 if (newRequests.Any())
                 {
-                    _context.RequestItems.AddRange(newRequests);
-                    await _context.SaveChangesAsync();
-                    TempData["SuccessMessage"] = $"{newRequests.Count} requests have been successfully imported.";
+                    // Before saving, ensure required fields have sensible defaults so edit can proceed
+                    foreach (var nr in newRequests)
+                    {
+                        // Ensure Plant is set
+                        if (string.IsNullOrWhiteSpace(nr.Plant))
+                        {
+                            nr.Plant = nr.BomComponents?.FirstOrDefault()?.Plant ?? "";
+                        }
+
+                        // Ensure MRP Controller and StorageLocation have defaults to avoid ValidateRequest failures
+                        if (string.IsNullOrWhiteSpace(nr.MrpController)) nr.MrpController = "";
+                        if (string.IsNullOrWhiteSpace(nr.StorageLocation)) nr.StorageLocation = "";
+
+                        // CostingLotSize as string handled in ViewModel; set to null/empty
+                        // ProductionSupervisor default empty
+                        if (string.IsNullOrWhiteSpace(nr.ProductionSupervisor)) nr.ProductionSupervisor = "";
+                    }
+
+                    // Show preview page before saving
+                    return View("PreviewImport", newRequests);
                 }
                 else
                 {
-                    TempData["ErrorMessage"] = "The file was processed, but no valid requests were found to import.";
+                    // Provide more debugging info to help understand why nothing was imported
+                    var headerInfo = parsedHeaders != null && parsedHeaders.Any() ? string.Join(", ", parsedHeaders) : "(no headers parsed)";
+                    TempData["ErrorMessage"] = $"The file was processed, but no valid requests were found to import. Parsed headers: {headerInfo}. Data rows detected: {parsedDataRows}.";
+                    return RedirectToAction(nameof(Create));
                 }
             }
             catch (Exception ex)
@@ -679,21 +975,52 @@ namespace myapp.Controllers
             {
                 return; // Do not set property if cell is empty
             }
-
-            var propertyInfo = typeof(RequestItem).GetProperty(propertyName);
-            if (propertyInfo != null && propertyInfo.CanWrite)
+            try
             {
-                try
-                {
-                    var targetType = Nullable.GetUnderlyingType(propertyInfo.PropertyType) ?? propertyInfo.PropertyType;
-                    var convertedValue = Convert.ChangeType(value, targetType);
-                    propertyInfo.SetValue(item, convertedValue, null);
-                }
-                catch (Exception ex)
-                {
-                     _logger.LogWarning(ex, "Could not set property {PropertyName} with value {Value}", propertyName, value);
-                }
+                var propertyInfo = GetPropertyByHeader(typeof(RequestItem), propertyName);
+                if (propertyInfo == null || !propertyInfo.CanWrite)
+                    return;
+
+                var targetType = Nullable.GetUnderlyingType(propertyInfo.PropertyType) ?? propertyInfo.PropertyType;
+
+                object convertedValue;
+                if (targetType == typeof(decimal))
+                    convertedValue = decimal.Parse(value, CultureInfo.InvariantCulture);
+                else if (targetType == typeof(int))
+                    convertedValue = int.Parse(value, CultureInfo.InvariantCulture);
+                else if (targetType == typeof(bool))
+                    convertedValue = bool.Parse(value);
+                else if (targetType == typeof(DateTime))
+                    convertedValue = DateTime.Parse(value, CultureInfo.InvariantCulture);
+                else
+                    convertedValue = Convert.ChangeType(value, targetType, CultureInfo.InvariantCulture);
+
+                propertyInfo.SetValue(item, convertedValue, null);
             }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Could not set property {PropertyName} with value {Value}", propertyName, value);
+            }
+        }
+
+        private System.Reflection.PropertyInfo? GetPropertyByHeader(Type targetType, string header)
+        {
+            if (string.IsNullOrWhiteSpace(header)) return null;
+            string Normalize(string s) => new string(s.Where(char.IsLetterOrDigit).ToArray()).ToLowerInvariant();
+
+            var normalizedHeader = Normalize(header);
+            var props = targetType.GetProperties();
+
+            // First try exact match (case-insensitive)
+            var exact = props.FirstOrDefault(p => string.Equals(p.Name, header, StringComparison.OrdinalIgnoreCase));
+            if (exact != null) return exact;
+
+            // Otherwise match by normalized name (remove spaces/punctuation)
+            var byNormalized = props.FirstOrDefault(p => Normalize(p.Name) == normalizedHeader);
+            if (byNormalized != null) return byNormalized;
+
+            // As a fallback, try to find property where normalized header is substring of property name
+            return props.FirstOrDefault(p => Normalize(p.Name).Contains(normalizedHeader) || normalizedHeader.Contains(Normalize(p.Name)));
         }
         
         [HttpGet]
@@ -865,7 +1192,7 @@ namespace myapp.Controllers
                     });
                     break;
                 case RequestType.BOM:
-                     headers.AddRange(new[] { "Level", "Item", "ItemCat", "ComponentNumber", "Description", "ItemQuantity", "Unit", "BomUsage", "Plant", "Sloc" });
+                     headers.AddRange(new[] { "Level", "Item", "ItemCat", "ComponentNumber", "Description", "ItemQuantity", "Unit", "BomUsage", "Sloc","Plant" });
                     break;
                 case RequestType.Routing:
                     headers.AddRange(new[] 

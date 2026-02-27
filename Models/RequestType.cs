@@ -23,6 +23,10 @@ namespace myapp.Models
         [Display(Name = "Passthrough")]
         Passthrough,
         [Display(Name = "ซื้อข้าม Plant")]
-        CrossPlantPurchase
+        CrossPlantPurchase,
+
+        [Display(Name = "แก้ BOM")]
+        EditBOM
+
     }
 }

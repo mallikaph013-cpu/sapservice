@@ -1,25 +1,32 @@
 {
   "format": 1,
   "restore": {
-    "/home/user/sapservice/myapp.csproj": {}
+    "Y:\\git\\SAP_service\\sapservice\\myapp.csproj": {}
   },
   "projects": {
-    "/home/user/sapservice/myapp.csproj": {
+    "Y:\\git\\SAP_service\\sapservice\\myapp.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/home/user/sapservice/myapp.csproj",
+        "projectUniqueName": "Y:\\git\\SAP_service\\sapservice\\myapp.csproj",
         "projectName": "myapp",
-        "projectPath": "/home/user/sapservice/myapp.csproj",
-        "packagesPath": "/home/user/.nuget/packages/",
-        "outputPath": "/home/user/sapservice/obj/",
+        "projectPath": "Y:\\git\\SAP_service\\sapservice\\myapp.csproj",
+        "packagesPath": "C:\\Users\\p_mallika\\.nuget\\packages\\",
+        "outputPath": "Y:\\git\\SAP_service\\sapservice\\obj\\",
         "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+        ],
         "configFilePaths": [
-          "/home/user/.nuget/NuGet/NuGet.Config"
+          "C:\\Users\\p_mallika\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
           "net9.0"
         ],
         "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "C:\\Program Files\\dotnet\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -38,7 +45,7 @@
           "auditLevel": "low",
           "auditMode": "direct"
         },
-        "SdkAnalysisLevel": "9.0.200"
+        "SdkAnalysisLevel": "9.0.300"
       },
       "frameworks": {
         "net9.0": {
@@ -104,7 +111,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "/nix/store/3hhkyi53ky9qwjj9vjzg0pyq333vlrla-dotnet-sdk-9.0.203/share/dotnet/sdk/9.0.203/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.311/PortableRuntimeIdentifierGraph.json"
         }
       }
     }

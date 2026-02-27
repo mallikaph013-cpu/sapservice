@@ -31,6 +31,8 @@ namespace myapp.Models.ViewModels
         public string? Plant { get; set; } // Renamed from PlantFG and made required
 
         public string? ItemCode { get; set; }
+        // Top-level quantity field for BOM requests (optional)
+        public decimal? Quantity { get; set; }
         public string? EnglishMatDescription { get; set; }
         public string? ModelName { get; set; }
         public string? BaseUnit { get; set; }
@@ -98,5 +100,7 @@ namespace myapp.Models.ViewModels
         // For BOM and Routing
         public List<BomComponentViewModel> Components { get; set; } = new List<BomComponentViewModel>();
         public List<RoutingViewModel> Routings { get; set; } = new List<RoutingViewModel>();
+        // Flag to indicate this view was opened for an imported record
+        public bool FromImport { get; set; }
     }
 }

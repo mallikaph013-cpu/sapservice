@@ -5,14 +5,14 @@
     <h5 class="mb-3">Material Information</h5>
 
     <div class="row g-3 mb-3">
-        <div class="col-md-4" data-types="FG,SM,RM,ToolingB,ToolingBFG,ToolingBPU,DistributionChanel,AddStorage,IPO,Passthrough,CrossPlantPurchase">
+        <div class="col-md-4" data-types="FG,SM,RM,ToolingB,ToolingBFG,ToolingBPU,DistributionChanel,AddStorage,IPO,Passthrough,CrossPlantPurchase,BOM">
             <div class="form-group">
                 <label asp-for="ItemCode" class="control-label"></label>
                 <input asp-for="ItemCode" class="form-control" />
                 <span asp-validation-for="ItemCode" class="text-danger"></span>
             </div>
         </div>
-        <div class="col-md-8" data-types="FG,SM,RM,ToolingB,ToolingBFG,ToolingBPU,IPO,Passthrough,CrossPlantPurchase">
+        <div class="col-md-8" data-types="FG,SM,RM,ToolingB,ToolingBFG,ToolingBPU,IPO,Passthrough,CrossPlantPurchase,BOM">
             <div class="form-group">
                 <label asp-for="EnglishMatDescription" class="control-label">English Mat/Description (max 40)</label>
                 <input asp-for="EnglishMatDescription" class="form-control" maxlength="40" />
@@ -215,8 +215,14 @@
             </div>
         </div>
     </div>
+
+
+
+  
+
 </div>
 
+@*BOM*@
 <!-- BOM and Routing tables remain separate as they are fundamentally different inputs -->
 <div id="bom-fields-container" style="display: none;">
     <hr />
@@ -233,8 +239,8 @@
                     <th>Item quantity</th>
                     <th>Unit</th>
                     <th>BOM Usage</th>
-                    <th>Plant</th>
                     <th>Sloc</th>
+                    <th>Plant</th>
                     <th>Action</th>
                 </tr>
             </thead>
@@ -250,10 +256,11 @@
                             <td><input asp-for="Components[i].ItemQuantity" class="form-control" /></td>
                             <td><input asp-for="Components[i].Unit" class="form-control" /></td>
                             <td><input asp-for="Components[i].BomUsage" class="form-control" /></td>
-                            <td><input asp-for="Components[i].Plant" class="form-control" /></td>
                             <td><input asp-for="Components[i].Sloc" class="form-control" /></td>
+                            <td><input asp-for="Components[i].Plant" class="form-control" /></td>
                             <td><button type="button" class="btn btn-danger btn-sm remove-bom-item">Remove</button></td>
                         </tr>
+
                     }
                 }
             </tbody>
@@ -264,6 +271,8 @@
          <button type="button" class="btn btn-success btn-sm" id="add-child-item">+ Add Component (Lvl 2)</button>
     </div>
 </div>
+
+@*routing*@
 
 <div id="routing-fields-container" style="display: none;">
     <hr />

@@ -29,85 +29,228 @@
 
     @if (Model != null && Model.Any())
     {
-        <div class="table-responsive shadow-sm">
-            <table class="table table-bordered table-striped table-hover">
-                <thead class="thead-dark">
-                    <tr>
-                        <th>Plant</th>
-                        <th>Description</th>
-                        <th>Item Code</th>
-                        <th>English Mat Description</th>
-                        <th>Model Name</th>
-                        <th>Base Unit</th>
-                        <th>Material Group</th>
-                        <th>Division Code</th>
-                        <th>Profit Center</th>
-                        <th>Distribution Channel</th>
-                        <th>Standard Pack</th>
-                        <th>BOI Code</th>
-                        <th>MRP Controller</th>
-                        <th>Storage Location</th>
-                        <th>Production Supervisor</th>
-                        <th>Costing Lot Size</th>
-                        <th>Valuation Class</th>
-                        <th>Price</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var item in Model)
-                    {
-                        <tr>
-                            <td>@item.Plant</td>
-                            <td>@item.Description</td>
-                            <td>@item.ItemCode</td>
-                            <td>@item.EnglishMatDescription</td>
-                            <td>@item.ModelName</td>
-                            <td>@item.BaseUnit</td>
-                            <td>@item.MaterialGroup</td>
-                            <td>@item.DivisionCode</td>
-                            <td>@item.ProfitCenter</td>
-                            <td>@item.DistributionChannel</td>
-                            <td>@item.StandardPack</td>
-                            <td>@item.BoiCode</td>
-                            <td>@item.MrpController</td>
-                            <td>@item.StorageLocation</td>
-                            <td>@item.ProductionSupervisor</td>
-                            <td>@item.CostingLotSize</td>
-                            <td>@item.ValClass</td>
-                            <td>@item.Price</td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
-
-        <div class="text-center btn-container">
+        var first = Model.First();
+        // If BOM request type, show components preview
+        if (!string.IsNullOrEmpty(first.RequestType) && string.Equals(first.RequestType, "BOM", StringComparison.OrdinalIgnoreCase))
+        {
+            <h4>BOM Components Preview</h4>
             <form asp-action="SaveImported" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="serializedRequests" value="@System.Text.Json.JsonSerializer.Serialize(Model)" />
+
                 @for (int i = 0; i < Model.Count(); i++)
                 {
-                    <input type="hidden" name="requests[@i].Plant" value="@Model.ElementAt(i).Plant" />
-                    <input type="hidden" name="requests[@i].Description" value="@Model.ElementAt(i).Description" />
-                    <input type="hidden" name="requests[@i].ItemCode" value="@Model.ElementAt(i).ItemCode" />
-                    <input type="hidden" name="requests[@i].EnglishMatDescription" value="@Model.ElementAt(i).EnglishMatDescription" />
-                    <input type="hidden" name="requests[@i].ModelName" value="@Model.ElementAt(i).ModelName" />
-                    <input type="hidden" name="requests[@i].BaseUnit" value="@Model.ElementAt(i).BaseUnit" />
-                    <input type="hidden" name="requests[@i].MaterialGroup" value="@Model.ElementAt(i).MaterialGroup" />
-                    <input type="hidden" name="requests[@i].DivisionCode" value="@Model.ElementAt(i).DivisionCode" />
-                    <input type="hidden" name="requests[@i].ProfitCenter" value="@Model.ElementAt(i).ProfitCenter" />
-                    <input type="hidden" name="requests[@i].DistributionChannel" value="@Model.ElementAt(i).DistributionChannel" />
-                    <input type="hidden" name="requests[@i].StandardPack" value="@Model.ElementAt(i).StandardPack" />
-                    <input type="hidden" name="requests[@i].BoiCode" value="@Model.ElementAt(i).BoiCode" />
-                    <input type="hidden" name="requests[@i].MrpController" value="@Model.ElementAt(i).MrpController" />
-                    <input type="hidden" name="requests[@i].StorageLocation" value="@Model.ElementAt(i).StorageLocation" />
-                    <input type="hidden" name="requests[@i].ProductionSupervisor" value="@Model.ElementAt(i).ProductionSupervisor" />
-                    <input type="hidden" name="requests[@i].CostingLotSize" value="@Model.ElementAt(i).CostingLotSize" />
-                    <input type="hidden" name="requests[@i].ValClass" value="@Model.ElementAt(i).ValClass" />
-                    <input type="hidden" name="requests[@i].Price" value="@Model.ElementAt(i).Price" />
+                    var reqDetail = Model.ElementAt(i);
+                    var plantVal = reqDetail.Plant ?? (reqDetail.BomComponents != null && reqDetail.BomComponents.Any() ? reqDetail.BomComponents.First().Plant : "");
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <h5 class="card-title">Request Details (Row @i)</h5>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Requester</label>
+                                    <input type="text" class="form-control" value="@reqDetail.Requester" readonly />
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Plant</label>
+                                    <select name="requests[@i].Plant" class="form-select">
+                                        <option value="">-- Select Plant --</option>
+                                        @{
+                                            var plants = new[] {
+                                                new { Code = "6021", Text = "6021 (Device)" },
+                                                new { Code = "6031", Text = "6031 (Assembly)" },
+                                                new { Code = "6051", Text = "6051 (Injection)" },
+                                                new { Code = "6081", Text = "6081 (IPO)" },
+                                                new { Code = "6090", Text = "6090" }
+                                            };
+                                        }
+                                        @foreach (var p in plants)
+                                        {
+                                            if (p.Code == plantVal)
+                                            {
+                                                <option value="@p.Code" selected="selected">@p.Text</option>
+                                            }
+                                            else
+                                            {
+                                                <option value="@p.Code">@p.Text</option>
+                                            }
+                                        }
+                                    </select>
+                                    <span data-valmsg-for="requests[@i].Plant" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="row g-3 mt-3">
+                                <div class="col-12">
+                                    <label class="form-label">Description</label>
+                                    <textarea class="form-control" readonly>@reqDetail.Description</textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+
+                <div class="table-responsive shadow-sm">
+                    <table class="table table-bordered table-striped table-hover">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th>#</th>
+                            <th>Level</th>
+                            <th>Item</th>
+                            <th>Item Cat</th>
+                            <th>Component Number</th>
+                            <th>Description</th>
+                            <th>Item Quantity</th>
+                            <th>Unit</th>
+                            <th>BOM Usage</th>
+                            <th>Sloc</th>
+                            <th>Plant</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (int i = 0; i < Model.Count(); i++)
+                        {
+                            var req = Model.ElementAt(i);
+                            if (req.BomComponents != null && req.BomComponents.Any())
+                            {
+                                for (int j = 0; j < req.BomComponents.Count; j++)
+                                {
+                                    var c = req.BomComponents.ElementAt(j);
+                                    <tr>
+                                        <td>@(j+1)</td>
+                                        <td>@c.Level</td>
+                                        <td>@c.Item</td>
+                                        <td>@c.ItemCat</td>
+                                        <td>@c.ComponentNumber</td>
+                                        <td>@c.Description</td>
+                                        <td>@c.ItemQuantity</td>
+                                        <td>@c.Unit</td>
+                                        <td>@c.BomUsage</td>
+                                        <td>@c.Sloc</td>
+                                        <td>@c.Plant</td> 
+                                        
+                                    </tr>
+                                }
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="text-center btn-container">
+                @* Hidden inputs for components and request-level metadata *@
+                @for (int i = 0; i < Model.Count(); i++)
+                {
+                    var req = Model.ElementAt(i);
+                    <input type="hidden" name="requests[@i].RequestType" value="@req.RequestType" />
+                    <input type="hidden" name="requests[@i].Requester" value="@req.Requester" />
+                    <input type="hidden" name="requests[@i].Description" value="@req.Description" />
+                    @if (req.BomComponents != null)
+                    {
+                        for (int j = 0; j < req.BomComponents.Count; j++)
+                        {
+                            var c = req.BomComponents.ElementAt(j);
+                            <input type="hidden" name="requests[@i].BomComponents[@j].Level" value="@c.Level" />
+                            <input type="hidden" name="requests[@i].BomComponents[@j].Item" value="@c.Item" />
+                            <input type="hidden" name="requests[@i].BomComponents[@j].ItemCat" value="@c.ItemCat" />
+                            <input type="hidden" name="requests[@i].BomComponents[@j].ComponentNumber" value="@c.ComponentNumber" />
+                            <input type="hidden" name="requests[@i].BomComponents[@j].Description" value="@c.Description" />
+                            <input type="hidden" name="requests[@i].BomComponents[@j].ItemQuantity" value="@c.ItemQuantity" />
+                            <input type="hidden" name="requests[@i].BomComponents[@j].Unit" value="@c.Unit" />
+                            <input type="hidden" name="requests[@i].BomComponents[@j].BomUsage" value="@c.BomUsage" />
+                            <input type="hidden" name="requests[@i].BomComponents[@j].Sloc" value="@c.Sloc" />
+                            <input type="hidden" name="requests[@i].BomComponents[@j].Plant" value="@c.Plant" />
+                            
+                        }
+                    }
                 }
                 <button type="submit" class="btn btn-success btn-lg">Confirm & Save</button>
                 <a asp-action="Create" class="btn btn-danger btn-lg">Cancel</a>
+            </div>
             </form>
-        </div>
+        }
+        else
+        {
+            <div class="table-responsive shadow-sm">
+                <table class="table table-bordered table-striped table-hover">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th>Plant</th>
+                            <th>Description</th>
+                            <th>Item Code</th>
+                            <th>English Mat Description</th>
+                            <th>Model Name</th>
+                            <th>Base Unit</th>
+                            <th>Material Group</th>
+                            <th>Division Code</th>
+                            <th>Profit Center</th>
+                            <th>Distribution Channel</th>
+                            <th>Standard Pack</th>
+                            <th>BOI Code</th>
+                            <th>MRP Controller</th>
+                            <th>Storage Location</th>
+                            <th>Production Supervisor</th>
+                            <th>Costing Lot Size</th>
+                            <th>Valuation Class</th>
+                            <th>Price</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>@item.Plant</td>
+                                <td>@item.Description</td>
+                                <td>@item.ItemCode</td>
+                                <td>@item.EnglishMatDescription</td>
+                                <td>@item.ModelName</td>
+                                <td>@item.BaseUnit</td>
+                                <td>@item.MaterialGroup</td>
+                                <td>@item.DivisionCode</td>
+                                <td>@item.ProfitCenter</td>
+                                <td>@item.DistributionChannel</td>
+                                <td>@item.StandardPack</td>
+                                <td>@item.BoiCode</td>
+                                <td>@item.MrpController</td>
+                                <td>@item.StorageLocation</td>
+                                <td>@item.ProductionSupervisor</td>
+                                <td>@item.CostingLotSize</td>
+                                <td>@item.ValClass</td>
+                                <td>@item.Price</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="text-center btn-container">
+                <form asp-action="SaveImported" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="serializedRequests" value="@System.Text.Json.JsonSerializer.Serialize(Model)" />
+                    @for (int i = 0; i < Model.Count(); i++)
+                    {
+                        <input type="hidden" name="requests[@i].Plant" value="@Model.ElementAt(i).Plant" />
+                        <input type="hidden" name="requests[@i].Description" value="@Model.ElementAt(i).Description" />
+                        <input type="hidden" name="requests[@i].ItemCode" value="@Model.ElementAt(i).ItemCode" />
+                        <input type="hidden" name="requests[@i].EnglishMatDescription" value="@Model.ElementAt(i).EnglishMatDescription" />
+                        <input type="hidden" name="requests[@i].ModelName" value="@Model.ElementAt(i).ModelName" />
+                        <input type="hidden" name="requests[@i].BaseUnit" value="@Model.ElementAt(i).BaseUnit" />
+                        <input type="hidden" name="requests[@i].MaterialGroup" value="@Model.ElementAt(i).MaterialGroup" />
+                        <input type="hidden" name="requests[@i].DivisionCode" value="@Model.ElementAt(i).DivisionCode" />
+                        <input type="hidden" name="requests[@i].ProfitCenter" value="@Model.ElementAt(i).ProfitCenter" />
+                        <input type="hidden" name="requests[@i].DistributionChannel" value="@Model.ElementAt(i).DistributionChannel" />
+                        <input type="hidden" name="requests[@i].StandardPack" value="@Model.ElementAt(i).StandardPack" />
+                        <input type="hidden" name="requests[@i].BoiCode" value="@Model.ElementAt(i).BoiCode" />
+                        <input type="hidden" name="requests[@i].MrpController" value="@Model.ElementAt(i).MrpController" />
+                        <input type="hidden" name="requests[@i].StorageLocation" value="@Model.ElementAt(i).StorageLocation" />
+                        <input type="hidden" name="requests[@i].ProductionSupervisor" value="@Model.ElementAt(i).ProductionSupervisor" />
+                        <input type="hidden" name="requests[@i].CostingLotSize" value="@Model.ElementAt(i).CostingLotSize" />
+                        <input type="hidden" name="requests[@i].ValClass" value="@Model.ElementAt(i).ValClass" />
+                        <input type="hidden" name="requests[@i].Price" value="@Model.ElementAt(i).Price" />
+                    }
+                    <button type="submit" class="btn btn-success btn-lg">Confirm & Save</button>
+                    <a asp-action="Create" class="btn btn-danger btn-lg">Cancel</a>
+                </form>
+            </div>
+        }
     }
     else
     {
