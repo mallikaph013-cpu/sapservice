@@ -87,7 +87,7 @@ namespace myapp.Controllers
             }
         }
 
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string? searchTerm)
         {
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
@@ -106,6 +106,22 @@ namespace myapp.Controllers
                 // A user sees their own requests OR requests where they are the next approver.
                 requestsQuery = requestsQuery.Where(r => r.Requester == currentUserName || r.NextApproverId == userId);
             }
+
+            if (!string.IsNullOrWhiteSpace(searchTerm))
+            {
+                searchTerm = searchTerm.Trim();
+                var isDateSearch = DateTime.TryParse(searchTerm, out var parsedDate);
+                var searchDate = parsedDate.Date;
+
+                requestsQuery = requestsQuery.Where(r =>
+                    (r.RequestType != null && r.RequestType.Contains(searchTerm)) ||
+                    (r.Status != null && r.Status.Contains(searchTerm)) ||
+                    (r.ItemCode != null && r.ItemCode.Contains(searchTerm)) ||
+                    (isDateSearch && r.RequestDate.Date == searchDate)
+                );
+            }
+
+            ViewBag.SearchTerm = searchTerm;
 
             // Order the results and execute the query.
             var requests = await requestsQuery.OrderByDescending(r => r.RequestDate).ToListAsync();
@@ -342,6 +358,9 @@ namespace myapp.Controllers
 
             // Find the original requester to populate their details
             var requesterUser = await _userManager.Users.FirstOrDefaultAsync(u => (u.FirstName + " " + u.LastName) == requestItem.Requester);
+            var currentApproverUser = !string.IsNullOrWhiteSpace(requestItem.NextApproverId)
+                ? await _userManager.Users.FirstOrDefaultAsync(u => u.Id == requestItem.NextApproverId)
+                : null;
             
             var viewModel = new CreateRequestViewModel
             {
@@ -354,6 +373,7 @@ namespace myapp.Controllers
                 Section = requesterUser?.Section ?? "",
                 RequesterPlant = requesterUser?.Plant ?? "",
                 Status = requestItem.Status,
+                NextResponsibleUserId = requestItem.NextApproverId,
 
                 // Convert model properties back to strings for display
                 Plant = requestItem.Plant,
@@ -445,6 +465,10 @@ namespace myapp.Controllers
                 ViewBag.ImportNotice = "This request was created from imported data. Some validations may be relaxed for initial save. Please verify fields before finalizing.";
             }
 
+            ViewBag.CurrentNextApproverName = currentApproverUser != null
+                ? $"{currentApproverUser.FirstName} {currentApproverUser.LastName}"
+                : "Current Responsible User";
+
             return View("Edit", viewModel); 
         }
 
@@ -522,6 +546,12 @@ namespace myapp.Controllers
                     requestItemToUpdate.RequestType = viewModel.RequestType.ToString();
                     requestItemToUpdate.Description = viewModel.Description;
                     requestItemToUpdate.Status = User.IsInRole("IT") ? viewModel.Status : requestItemToUpdate.Status;
+
+                    if (!string.IsNullOrWhiteSpace(viewModel.NextResponsibleUserId))
+                    {
+                        var nextApproverParts = viewModel.NextResponsibleUserId.Split('|');
+                        requestItemToUpdate.NextApproverId = nextApproverParts.Length > 0 ? nextApproverParts[0] : viewModel.NextResponsibleUserId;
+                    }
                     requestItemToUpdate.Plant = viewModel.Plant;
                     requestItemToUpdate.ItemCode = viewModel.ItemCode;
                     requestItemToUpdate.EnglishMatDescription = viewModel.EnglishMatDescription;

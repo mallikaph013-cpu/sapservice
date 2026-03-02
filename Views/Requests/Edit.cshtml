@@ -145,6 +145,27 @@
         </div>
 
         <partial name="_MaterialForms" model="Model" />
+
+        <hr />
+        <h4>Approver</h4>
+        <p class="text-muted small mb-3">Select a request type to see the list of available approvers.</p>
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="NextResponsibleUserId" class="control-label">Next Responsible User</label>
+                    <select asp-for="NextResponsibleUserId" id="NextResponsibleUserId" class="form-select">
+                        @if (!string.IsNullOrWhiteSpace(Model.NextResponsibleUserId))
+                        {
+                            <option value="@Model.NextResponsibleUserId" selected="selected">@ViewBag.CurrentNextApproverName</option>
+                        }
+                        else
+                        {
+                            <option value="">-- Loading... --</option>
+                        }
+                    </select>
+                </div>
+            </div>
+        </div>
         
         @if (SignInManager.IsSignedIn(User) && User.IsInRole("IT"))
         {
@@ -199,6 +220,9 @@
         const routingContainer = document.getElementById('routing-fields-container');
         const editBomFgInput = document.getElementById('EditBomFg');
         const editBomAllFgCheckbox = document.getElementById('EditBomAllFg');
+        const nextResponsibleUserSelect = document.getElementById('NextResponsibleUserId');
+        const currentNextApproverId = '@(Model.NextResponsibleUserId ?? "")';
+        const currentNextApproverName = @Html.Raw(System.Text.Json.JsonSerializer.Serialize((string)(ViewBag.CurrentNextApproverName ?? "Current Responsible User")));
 
         const typeMapping = {
             '0': 'FG',
@@ -212,7 +236,9 @@
             '8': 'AddStorage',
             '9': 'DistributionChanel',
             '10':'IPO',
-            '11':'EditBOM'
+            '11':'Passthrough',
+            '12':'CrossPlantPurchase',
+            '13':'EditBOM'
         };
 
         function toggleMaterialFields() {
@@ -257,6 +283,65 @@
             if (isAllFgChecked) {
                 editBomFgInput.value = '';
             }
+        }
+
+        function fetchNextApprovers() {
+            if (!requestTypeSelect || !nextResponsibleUserSelect) return;
+
+            const requestTypeValue = requestTypeSelect.value;
+            nextResponsibleUserSelect.innerHTML = '<option value="">-- Loading... --</option>';
+
+            if (!requestTypeValue) {
+                nextResponsibleUserSelect.innerHTML = '<option value="">-- Please select a request type first --</option>';
+                return;
+            }
+
+            fetch(`/Requests/GetNextApprovers?requestType=${requestTypeValue}`)
+                .then(response => response.json())
+                .then(data => {
+                    nextResponsibleUserSelect.innerHTML = '<option value="">-- Please select a responsible user --</option>';
+
+                    let matchedCurrentApprover = false;
+
+                    if (!data || data.length === 0) {
+                        if (currentNextApproverId) {
+                            nextResponsibleUserSelect.innerHTML = '';
+                            const fallbackOption = new Option(currentNextApproverName, currentNextApproverId);
+                            fallbackOption.selected = true;
+                            nextResponsibleUserSelect.add(fallbackOption);
+                        }
+                        else {
+                        nextResponsibleUserSelect.innerHTML = '<option value="">-- No users found --</option>';
+                        }
+                        return;
+                    }
+
+                    data.forEach(user => {
+                        const option = new Option(user.fullName, user.id);
+                        if (currentNextApproverId && (user.id === currentNextApproverId || user.id.startsWith(currentNextApproverId + '|'))) {
+                            option.selected = true;
+                            matchedCurrentApprover = true;
+                        }
+                        nextResponsibleUserSelect.add(option);
+                    });
+
+                    if (currentNextApproverId && !matchedCurrentApprover) {
+                        const fallbackOption = new Option(`${currentNextApproverName} (Current)`, currentNextApproverId);
+                        fallbackOption.selected = true;
+                        nextResponsibleUserSelect.add(fallbackOption);
+                    }
+                })
+                .catch(() => {
+                    if (currentNextApproverId) {
+                        nextResponsibleUserSelect.innerHTML = '';
+                        const fallbackOption = new Option(currentNextApproverName, currentNextApproverId);
+                        fallbackOption.selected = true;
+                        nextResponsibleUserSelect.add(fallbackOption);
+                    }
+                    else {
+                        nextResponsibleUserSelect.innerHTML = '<option value="">-- Error loading data --</option>';
+                    }
+                });
         }
 
         function addBomItem(level) {
@@ -313,7 +398,11 @@
         // Initial call to set the correct fields on page load
         toggleMaterialFields();
         toggleEditBomFgInput();
-        requestTypeSelect.addEventListener('change', toggleMaterialFields);
+        fetchNextApprovers();
+        requestTypeSelect.addEventListener('change', function() {
+            toggleMaterialFields();
+            fetchNextApprovers();
+        });
         if (editBomAllFgCheckbox) {
             editBomAllFgCheckbox.addEventListener('change', toggleEditBomFgInput);
         }
