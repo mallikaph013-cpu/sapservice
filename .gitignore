@@ -12,3 +12,26 @@ npm-debug.log*
 *.db
 *.db-shm
 *.db-wal
+
+obj/
+bin/
+.vs/
+*.db
+
+
+# ASP.NET
+appsettings.Development.json
+
+# Others
+*.pdb
+*.dll
+
+
+# Visual Studio
+.vs/
+*.user
+*.suo
+
+# Build output
+bin/
+obj/

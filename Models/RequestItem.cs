@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using myapp.Models.ViewModels;
 
 namespace myapp.Models
 {
@@ -97,8 +98,13 @@ namespace myapp.Models
         [Column(TypeName = "decimal(18, 2)")]
         public decimal? Price { get; set; }
 
+       
+
         // Navigation properties
         public ICollection<BomComponent> BomComponents { get; set; } = new List<BomComponent>();
         public ICollection<Routing> Routings { get; set; } = new List<Routing>();
+
+        public ICollection<BomEditComponent> bomEditComponents { get; set; } = new List<BomEditComponent>();
+
     }
 }

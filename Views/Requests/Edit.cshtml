@@ -168,9 +168,11 @@
         }
 
         <div class="form-group text-center mt-5">
+
            @*  <button type="button" class="btn btn-primary" onclick="saveForm()">
                 <i class="fas fa-save me-2"></i>Save Changes
             </button> *@
+
             <button type="button" id="create-submit-button" class="btn btn-primary" onclick="saveForm()">
                 <i class="fas fa-save me-2"></i>Save Changes
             </button>
@@ -219,9 +221,9 @@
                 selectedTypeName = typeMapping[selectedValue] || selectedValue;
             }
             // Treat EditBOM (localized display) as BOM
-            if (selectedTypeName === 'EditBOM' || selectedTypeName === 'แก้ BOM') {
-                selectedTypeName = 'BOM';
-            }
+            //if (selectedTypeName === 'EditBOM' || selectedTypeName === 'แก้ BOM') {
+            //    selectedTypeName = 'EditBOM';
+            // }
 
             const showMaterialFields = selectedValue && selectedTypeName !== 'Routing';
             if (materialFieldsContainer) {

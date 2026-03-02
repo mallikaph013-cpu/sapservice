@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using myapp.Data;
 
@@ -10,9 +11,11 @@ using myapp.Data;
 namespace myapp.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260228021026_AddItemCodeForm")]
+    partial class AddItemCodeForm
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.0");
@@ -472,12 +475,6 @@ namespace myapp.Migrations
                     b.Property<string>("BoiDescription")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("BomUsageFrom")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("BomUsageTo")
-                        .HasColumnType("TEXT");
-
                     b.Property<bool>("Check")
                         .HasColumnType("INTEGER");
 
@@ -501,12 +498,6 @@ namespace myapp.Migrations
 
                     b.Property<string>("Description")
                         .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("DescriptionFrom")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("DescriptionTo")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("DevicePlant")
@@ -539,13 +530,7 @@ namespace myapp.Migrations
                     b.Property<string>("ItemCode")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("ItemCodeTo")
-                        .HasColumnType("TEXT");
-
-                    b.Property<decimal?>("ItemQuantityFrom")
-                        .HasColumnType("TEXT");
-
-                    b.Property<decimal?>("ItemQuantityTo")
+                    b.Property<string>("ItemCodeForm")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Level")
@@ -591,9 +576,6 @@ namespace myapp.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Plant")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("PlantTo")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("PoNumber")
@@ -646,12 +628,6 @@ namespace myapp.Migrations
                     b.Property<string>("SchedMargin")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("SlocFrom")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("SlocTo")
-                        .HasColumnType("TEXT");
-
                     b.Property<string>("StandardPack")
                         .HasColumnType("TEXT");
 
@@ -693,12 +669,6 @@ namespace myapp.Migrations
                         .HasColumnType("decimal(18, 2)");
 
                     b.Property<string>("Transportation")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("UnitFrom")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("UnitTo")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("ValClass")

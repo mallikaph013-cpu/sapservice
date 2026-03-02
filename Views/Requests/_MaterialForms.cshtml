@@ -5,14 +5,14 @@
     <h5 class="mb-3">Material Information</h5>
 
     <div class="row g-3 mb-3">
-        <div class="col-md-4" data-types="FG,SM,RM,ToolingB,ToolingBFG,ToolingBPU,DistributionChanel,AddStorage,IPO,Passthrough,CrossPlantPurchase,BOM">
+        <div class="col-md-4" data-types="FG,SM,RM,ToolingB,ToolingBFG,ToolingBPU,DistributionChanel,AddStorage,IPO,Passthrough,CrossPlantPurchase">
             <div class="form-group">
                 <label asp-for="ItemCode" class="control-label"></label>
                 <input asp-for="ItemCode" class="form-control" />
                 <span asp-validation-for="ItemCode" class="text-danger"></span>
             </div>
         </div>
-        <div class="col-md-8" data-types="FG,SM,RM,ToolingB,ToolingBFG,ToolingBPU,IPO,Passthrough,CrossPlantPurchase,BOM">
+        <div class="col-md-8" data-types="FG,SM,RM,ToolingB,ToolingBFG,ToolingBPU,IPO,Passthrough,CrossPlantPurchase">
             <div class="form-group">
                 <label asp-for="EnglishMatDescription" class="control-label">English Mat/Description (max 40)</label>
                 <input asp-for="EnglishMatDescription" class="form-control" maxlength="40" />
@@ -189,7 +189,7 @@
         </div>
     </div>
     <div class="row g-3 mb-3">
-        <div class="col-md-4" data-types="RM,Passthrough,CrossPlantPurchase">
+    <div class="col-md-4" data-types="RM,Passthrough,CrossPlantPurchase">
             <div class="form-group">
                 <label asp-for="SupplierCode" class="control-label"></label>
                 <input asp-for="SupplierCode" class="form-control" />
@@ -217,10 +217,74 @@
     </div>
 
 
-
-  
-
 </div>
+
+
+
+
+
+
+
+@*EditBOM*@
+
+<div id="bom-edit-fields-container" style="display: none;">
+    <hr />
+    <h4>Material Information (Edit BOM)</h4>
+    <div class="table-responsive">
+        <table class="table table-bordered bom-table">
+            <thead>
+                <tr>
+                    <th>ItemCode From</th>
+                    <th>Description</th>
+                    <th>Item quantity From</th>
+                    <th>Unit</th>
+                    <th>BOM Usage</th>
+                    <th>Sloc From</th>
+
+                    <th>ItemCode To</th>
+                    <th>Description</th>
+                    <th>Item quantity To</th>
+                    <th>Unit</th>
+                    <th>BOM Usage</th>
+                    <th>Sloc</th>
+                    <th>Plant</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="bom-edit-items-body">
+                @if (Model.EditBOM != null)
+                {
+                    @for (int i = 0; i < Model.EditBOM.Count; i++)
+                    {
+                        <tr>
+                            <td><input asp-for="EditBOM[i].ItemCodeFrom" class="form-control" /></td>
+                            <td><input asp-for="EditBOM[i].DescriptionFrom" class="form-control" /></td>
+                            <td><input asp-for="EditBOM[i].ItemQuantityFrom" class="form-control" /></td>
+                            <td><input asp-for="EditBOM[i].UnitFrom" class="form-control" /></td>
+                            <td><input asp-for="EditBOM[i].BomUsageFrom" class="form-control" /></td>
+                            <td><input asp-for="EditBOM[i].SlocFrom" class="form-control" /></td>
+                            <td><input asp-for="EditBOM[i].ItemCodeTo" class="form-control" /></td>
+                            <td><input asp-for="EditBOM[i].DescriptionTo" class="form-control" /></td>
+                            <td><input asp-for="EditBOM[i].ItemQuantityTo" class="form-control" /></td>
+                            <td><input asp-for="EditBOM[i].UnitTo" class="form-control" /></td>
+                            <td><input asp-for="EditBOM[i].BomUsageTo" class="form-control" /></td>
+                            <td><input asp-for="EditBOM[i].SlocTo" class="form-control" /></td>
+                            <td><input asp-for="EditBOM[i].PlantTo" class="form-control" /></td>
+                            <td><button type="button" class="btn btn-danger btn-sm remove-bom-item">Remove</button></td>
+                        </tr>
+
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+    <div class="mt-2">
+        <button type="button" class="btn btn-info btn-sm" id="add-editbom-row">+ Add Parent (Lvl 1)</button>
+        <button type="button" class="btn btn-success btn-sm" id="add-editbom-component">+ Add Component (Lvl 2)</button>
+    </div>
+</div>
+
+
 
 @*BOM*@
 <!-- BOM and Routing tables remain separate as they are fundamentally different inputs -->

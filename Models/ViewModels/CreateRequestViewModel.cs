@@ -97,10 +97,16 @@ namespace myapp.Models.ViewModels
         public string? PurchasingGroup { get; set; }
         public string? Price { get; set; }
 
+
+       
+
         // For BOM and Routing
         public List<BomComponentViewModel> Components { get; set; } = new List<BomComponentViewModel>();
         public List<RoutingViewModel> Routings { get; set; } = new List<RoutingViewModel>();
         // Flag to indicate this view was opened for an imported record
+
+        public List<BomEditComponentViewModel> EditBOM { get; set; } = new List<BomEditComponentViewModel>();
+
         public bool FromImport { get; set; }
     }
 }

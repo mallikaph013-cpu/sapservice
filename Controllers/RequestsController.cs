@@ -458,22 +458,23 @@ namespace myapp.Controllers
                 _logger.LogInformation("Edit POST: relaxed validation for imported record id={Id}", id);
             }
 
-            if (!ModelState.IsValid)
-            {
-                // Log validation errors to help debug why the form can't be saved
-                try
-                {
-                    var errors = ModelState.Where(ms => ms.Value.Errors.Any()).Select(ms => new { Key = ms.Key, Errors = ms.Value.Errors.Select(e => e.ErrorMessage).ToArray() }).ToArray();
-                    _logger.LogWarning("ModelState invalid on Edit POST: {@Errors}", errors);
-                }
-                catch { }
-                return View(viewModel);
-            }
+           // if (!ModelState.IsValid)
+            //{
+            //    // Log validation errors to help debug why the form can't be saved
+            //    try
+            //    {
+            //        var errors = ModelState.Where(ms => ms.Value.Errors.Any()).Select(ms => new { Key = ms.Key, Errors = ms.Value.Errors.Select(e => e.ErrorMessage).ToArray() }).ToArray();
+            //        _logger.LogWarning("ModelState invalid on Edit POST: {@Errors}", errors);
+            //    }
+            //    catch { }
+            //    return View(viewModel);
+            //}
 
             // proceed when valid
             
-            if (ModelState.IsValid)
-            {
+           // if (ModelState.IsValid)
+           {
+
                  var requestItemToUpdate = await _context.RequestItems
                     .Include(r => r.BomComponents)
                     .Include(r => r.Routings)
