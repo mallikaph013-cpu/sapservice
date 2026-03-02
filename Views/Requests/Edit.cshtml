@@ -384,6 +384,13 @@
                     <td><input class="form-control" type="number" name="Routings[${index}].BaseQty"></td>
                     <td><input class="form-control" type="text" name="Routings[${index}].Unit"></td>
                     <td><input class="form-control" type="number" step="0.01" name="Routings[${index}].DirectLaborCosts"></td>
+                    <td><input class="form-control" type="text" name="Routings[${index}].ProductionVersionCode"></td>
+                    <td><input class="form-control" type="text" name="Routings[${index}].Version"></td>
+                    <td><input class="form-control" type="date" name="Routings[${index}].ValidFrom"></td>
+                    <td><input class="form-control" type="date" name="Routings[${index}].ValidTo"></td>
+                    <td><input class="form-control" type="number" step="0.01" name="Routings[${index}].MaximumLotSize"></td>
+                    <td><input class="form-control" type="text" name="Routings[${index}].Group"></td>
+                    <td><input class="form-control" type="text" name="Routings[${index}].GroupCounter"></td>
                     <td><button type="button" class="btn btn-danger btn-sm remove-routing-item">Remove</button></td>
                 </tr>`;
             tbody.insertAdjacentHTML('beforeend', row);

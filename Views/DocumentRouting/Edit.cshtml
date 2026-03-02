@@ -49,3 +49,55 @@
         </form>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const departmentSelect = document.getElementById('DepartmentId');
+            const sectionSelect = document.getElementById('SectionId');
+            const sectionUrl = '@Url.Action("GetSectionsByDepartment", "DocumentRouting")';
+
+            if (!departmentSelect || !sectionSelect) {
+                return;
+            }
+
+            const selectedSectionOnLoad = sectionSelect.value;
+
+            const loadSections = async (departmentId, selectedSection = '') => {
+                sectionSelect.innerHTML = '<option value="">-- Select Section --</option>';
+
+                if (!departmentId) {
+                    return;
+                }
+
+                try {
+                    const response = await fetch(`${sectionUrl}?departmentId=${encodeURIComponent(departmentId)}`);
+                    if (!response.ok) {
+                        return;
+                    }
+
+                    const sections = await response.json();
+                    sections.forEach((section) => {
+                        const option = document.createElement('option');
+                        option.value = section.id;
+                        option.textContent = section.name;
+                        if (selectedSection && selectedSection === String(section.id)) {
+                            option.selected = true;
+                        }
+                        sectionSelect.appendChild(option);
+                    });
+                } catch (error) {
+                    console.error('Failed to load sections by department', error);
+                }
+            };
+
+            departmentSelect.addEventListener('change', function () {
+                loadSections(this.value);
+            });
+
+            if (departmentSelect.value) {
+                loadSections(departmentSelect.value, selectedSectionOnLoad);
+            }
+        });
+    </script>
+}

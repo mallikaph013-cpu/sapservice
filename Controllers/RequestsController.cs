@@ -149,6 +149,221 @@ namespace myapp.Controllers
             return View(requestItem);
         }
 
+        [HttpGet]
+        public async Task<IActionResult> ExportExcel(int id)
+        {
+            var requestItem = await _context.RequestItems
+                .Include(r => r.BomComponents)
+                .Include(r => r.bomEditComponents)
+                .Include(r => r.Routings)
+                .FirstOrDefaultAsync(r => r.Id == id);
+
+            if (requestItem == null)
+            {
+                return NotFound();
+            }
+
+            using var workbook = new XLWorkbook();
+
+            var requestSheet = workbook.Worksheets.Add("Request");
+            var metadataHeaders = new List<string>
+            {
+                "Request ID",
+                "Request Type",
+                "Status",
+                "Requester",
+                "Request Date",
+                "Description"
+            };
+
+            var requestTypeHeaders = new List<string>();
+            if (Enum.TryParse<RequestType>(requestItem.RequestType, true, out var parsedRequestType))
+            {
+                requestTypeHeaders = GetHeadersForRequestType(parsedRequestType);
+            }
+
+            var requestHeaders = metadataHeaders
+                .Concat(requestTypeHeaders)
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+            object? GetRequestValue(string header)
+            {
+                return header switch
+                {
+                    "Request ID" => requestItem.Id,
+                    "Request Type" => requestItem.RequestType,
+                    "Status" => requestItem.Status,
+                    "Requester" => requestItem.Requester,
+                    "Request Date" => requestItem.RequestDate,
+                    "Description" => requestItem.Description,
+                    _ => GetPropertyByHeader(typeof(RequestItem), header)?.GetValue(requestItem)
+                };
+            }
+
+            var requestTypeKey = (requestItem.RequestType ?? string.Empty)
+                .Replace(" ", string.Empty)
+                .Replace("_", string.Empty)
+                .ToLowerInvariant();
+
+            var horizontalExportTypes = new HashSet<string>
+            {
+                "fg",
+                "sm",
+                "rm",
+                "toolingb",
+                "toolingbfg",
+                "toolingbpu",
+                "routing",
+                "addstorage",
+                "distributionchanel",
+                "ipo",
+                "passthrough",
+                "passthought",
+                "crossplantpurchase"
+            };
+
+            if (horizontalExportTypes.Contains(requestTypeKey))
+            {
+                for (var i = 0; i < requestHeaders.Count; i++)
+                {
+                    var header = requestHeaders[i];
+                    requestSheet.Cell(1, i + 1).Value = header;
+                    requestSheet.Cell(2, i + 1).Value = GetRequestValue(header)?.ToString() ?? string.Empty;
+                }
+
+                var requestHeaderHorizontal = requestSheet.Range(1, 1, 1, requestHeaders.Count);
+                requestHeaderHorizontal.Style.Font.Bold = true;
+                requestHeaderHorizontal.Style.Fill.BackgroundColor = XLColor.LightGray;
+            }
+            else
+            {
+                requestSheet.Cell(1, 1).Value = "Field";
+                requestSheet.Cell(1, 2).Value = "Value";
+
+                for (var i = 0; i < requestHeaders.Count; i++)
+                {
+                    var header = requestHeaders[i];
+                    requestSheet.Cell(i + 2, 1).Value = header;
+                    requestSheet.Cell(i + 2, 2).Value = GetRequestValue(header)?.ToString() ?? string.Empty;
+                }
+
+                var requestHeaderVertical = requestSheet.Range(1, 1, 1, 2);
+                requestHeaderVertical.Style.Font.Bold = true;
+                requestHeaderVertical.Style.Fill.BackgroundColor = XLColor.LightGray;
+            }
+
+            requestSheet.Columns().AdjustToContents();
+
+            if (requestItem.BomComponents != null && requestItem.BomComponents.Any())
+            {
+                var bomSheet = workbook.Worksheets.Add("BOM Components");
+                var bomHeaders = new[] { "Level", "Item", "Item Cat", "Component", "Description", "Quantity", "Unit", "Usage", "Plant", "Sloc" };
+                for (var i = 0; i < bomHeaders.Length; i++)
+                {
+                    bomSheet.Cell(1, i + 1).Value = bomHeaders[i];
+                }
+
+                var bomRow = 2;
+                foreach (var item in requestItem.BomComponents.OrderBy(c => c.Level).ThenBy(c => c.Item))
+                {
+                    bomSheet.Cell(bomRow, 1).Value = item.Level;
+                    bomSheet.Cell(bomRow, 2).Value = item.Item ?? string.Empty;
+                    bomSheet.Cell(bomRow, 3).Value = item.ItemCat ?? string.Empty;
+                    bomSheet.Cell(bomRow, 4).Value = item.ComponentNumber ?? string.Empty;
+                    bomSheet.Cell(bomRow, 5).Value = item.Description ?? string.Empty;
+                    bomSheet.Cell(bomRow, 6).Value = item.ItemQuantity;
+                    bomSheet.Cell(bomRow, 7).Value = item.Unit ?? string.Empty;
+                    bomSheet.Cell(bomRow, 8).Value = item.BomUsage ?? string.Empty;
+                    bomSheet.Cell(bomRow, 9).Value = item.Plant ?? string.Empty;
+                    bomSheet.Cell(bomRow, 10).Value = item.Sloc ?? string.Empty;
+                    bomRow++;
+                }
+
+                var bomHeader = bomSheet.Range(1, 1, 1, bomHeaders.Length);
+                bomHeader.Style.Font.Bold = true;
+                bomHeader.Style.Fill.BackgroundColor = XLColor.LightGray;
+                bomSheet.Columns().AdjustToContents();
+            }
+
+            if (requestItem.bomEditComponents != null && requestItem.bomEditComponents.Any())
+            {
+                var editBomSheet = workbook.Worksheets.Add("Edit BOM Components");
+                var editBomHeaders = GetHeadersForRequestType(RequestType.EditBOM);
+                for (var i = 0; i < editBomHeaders.Count; i++)
+                {
+                    editBomSheet.Cell(1, i + 1).Value = editBomHeaders[i];
+                }
+
+                var editBomRow = 2;
+                foreach (var item in requestItem.bomEditComponents)
+                {
+                    for (var i = 0; i < editBomHeaders.Count; i++)
+                    {
+                        var header = editBomHeaders[i];
+                        var propertyValue = GetPropertyByHeader(typeof(BomEditComponent), header)?.GetValue(item);
+                        editBomSheet.Cell(editBomRow, i + 1).Value = propertyValue?.ToString() ?? string.Empty;
+                    }
+                    editBomRow++;
+                }
+
+                var editBomHeader = editBomSheet.Range(1, 1, 1, editBomHeaders.Count);
+                editBomHeader.Style.Font.Bold = true;
+                editBomHeader.Style.Fill.BackgroundColor = XLColor.LightGray;
+                editBomSheet.Columns().AdjustToContents();
+            }
+
+            if (requestItem.Routings != null && requestItem.Routings.Any())
+            {
+                var routingSheet = workbook.Worksheets.Add("Routings");
+                var routingHeaders = new[]
+                {
+                    "Material", "Description", "Work Center", "Operation", "Base Qty", "Unit",
+                    "Labor Costs", "Direct Expenses", "Allocation Expense", "Production Version Code",
+                    "Version", "Valid From", "Valid To", "Maximum Lot Size", "Group", "Group Counter"
+                };
+
+                for (var i = 0; i < routingHeaders.Length; i++)
+                {
+                    routingSheet.Cell(1, i + 1).Value = routingHeaders[i];
+                }
+
+                var routingRow = 2;
+                foreach (var item in requestItem.Routings)
+                {
+                    routingSheet.Cell(routingRow, 1).Value = item.Material ?? string.Empty;
+                    routingSheet.Cell(routingRow, 2).Value = item.Description ?? string.Empty;
+                    routingSheet.Cell(routingRow, 3).Value = item.WorkCenter ?? string.Empty;
+                    routingSheet.Cell(routingRow, 4).Value = item.Operation ?? string.Empty;
+                    routingSheet.Cell(routingRow, 5).Value = item.BaseQty;
+                    routingSheet.Cell(routingRow, 6).Value = item.Unit ?? string.Empty;
+                    routingSheet.Cell(routingRow, 7).Value = item.DirectLaborCosts;
+                    routingSheet.Cell(routingRow, 8).Value = item.DirectExpenses;
+                    routingSheet.Cell(routingRow, 9).Value = item.AllocationExpense;
+                    routingSheet.Cell(routingRow, 10).Value = item.ProductionVersionCode ?? string.Empty;
+                    routingSheet.Cell(routingRow, 11).Value = item.Version ?? string.Empty;
+                    routingSheet.Cell(routingRow, 12).Value = item.ValidFrom;
+                    routingSheet.Cell(routingRow, 13).Value = item.ValidTo;
+                    routingSheet.Cell(routingRow, 14).Value = item.MaximumLotSize;
+                    routingSheet.Cell(routingRow, 15).Value = item.Group ?? string.Empty;
+                    routingSheet.Cell(routingRow, 16).Value = item.GroupCounter ?? string.Empty;
+                    routingRow++;
+                }
+
+                var routingHeader = routingSheet.Range(1, 1, 1, routingHeaders.Length);
+                routingHeader.Style.Font.Bold = true;
+                routingHeader.Style.Fill.BackgroundColor = XLColor.LightGray;
+                routingSheet.Columns().AdjustToContents();
+            }
+
+            using var stream = new MemoryStream();
+            workbook.SaveAs(stream);
+            stream.Position = 0;
+
+            var fileName = $"Request_{requestItem.Id}_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx";
+            return File(stream.ToArray(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
+        }
+
         public async Task<IActionResult> Create()
         {
             var user = await _userManager.GetUserAsync(User);

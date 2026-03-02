@@ -364,6 +364,13 @@
                     <th>Base Qty</th>
                     <th>Unit</th>
                     <th>Labor Costs</th>
+                    <th>Production Version</th>
+                    <th>Version</th>
+                    <th>Valid from</th>
+                    <th>Valid To</th>
+                    <th>Maximum Lot Size</th>
+                    <th>Group</th>
+                    <th>Group Counter</th>
                     <th>Action</th>
                 </tr>
             </thead>
@@ -377,6 +384,13 @@
                             <td><input asp-for="Routings[i].BaseQty" class="form-control" /></td>
                             <td><input asp-for="Routings[i].Unit" class="form-control" /></td>
                             <td><input asp-for="Routings[i].DirectLaborCosts" class="form-control" /></td>
+                            <td><input asp-for="Routings[i].ProductionVersionCode" class="form-control" /></td>
+                            <td><input asp-for="Routings[i].Version" class="form-control" /></td>
+                            <td><input asp-for="Routings[i].ValidFrom" class="form-control" type="date" /></td>
+                            <td><input asp-for="Routings[i].ValidTo" class="form-control" type="date" /></td>
+                            <td><input asp-for="Routings[i].MaximumLotSize" class="form-control" /></td>
+                            <td><input asp-for="Routings[i].Group" class="form-control" /></td>
+                            <td><input asp-for="Routings[i].GroupCounter" class="form-control" /></td>
                             <td><button type="button" class="btn btn-danger btn-sm remove-routing-item">Remove</button></td>
                         </tr>
                     }

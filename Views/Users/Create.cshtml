@@ -5,12 +5,13 @@
 }
 
 <div class="row justify-content-center">
-    <div class="col-md-8">
-        <div class="card shadow-sm">
-            <div class="card-header bg-primary text-white">
-                <h4 class="mb-0"><i class="fas fa-user-plus me-2"></i>@ViewData["Title"]</h4>
+    <div class="col-lg-9 col-xl-8">
+        <div class="main-content-card">
+            <div class="text-center mb-4">
+                <h2><i class="fas fa-user-plus me-2"></i>@ViewData["Title"]</h2>
+                <p class="text-light mb-0">Create a user account and assign role information.</p>
             </div>
-            <div class="card-body">
+
                 <form asp-action="Create">
                     <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
                     
@@ -82,16 +83,15 @@
                         <label class="form-check-label" asp-for="IsIT">Assign to IT Role</label>
                     </div>
 
-                    <div class="card-footer bg-light text-end">
-                        <a asp-action="Index" class="btn btn-secondary me-2">
-                            <i class="fas fa-arrow-left me-1"></i> Back to List
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                        <a asp-action="Index" class="btn btn-outline-secondary me-md-2">
+                            <i class="fas fa-arrow-left me-2"></i>Back to List
                         </a>
                         <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-check me-1"></i> Create User
+                            <i class="fas fa-check me-2"></i>Create User
                         </button>
                     </div>
                 </form>
-            </div>
         </div>
     </div>
 </div>

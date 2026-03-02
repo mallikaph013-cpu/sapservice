@@ -4,7 +4,7 @@
     ViewData["Title"] = "Document Routing";
 }
 
-<h1 class="mb-4">Document Routing Management</h1>
+@*<h1 class="mb-4">Document Routing Management</h1>*@
 
 <div class="card mb-4">
     <div class="card-header">
@@ -25,7 +25,7 @@
                 </div>
                 <div class="col-md-2">
                     <div class="form-group">
-                        <label asp-for="CreateForm.DepartmentId" class="control-label"></label>
+                        <label asp-for="CreateForm.DepartmentId" class="control-label">Department</label>
                         <select asp-for="CreateForm.DepartmentId" asp-items="Model.DepartmentList" class="form-control">
                              <option value="">-- Select Department --</option>
                         </select>
@@ -34,7 +34,7 @@
                 </div>
                 <div class="col-md-2">
                     <div class="form-group">
-                        <label asp-for="CreateForm.NewSectionName" class="control-label"></label>
+                        <label asp-for="CreateForm.NewSectionName" class="control-label">Section</label>
                         <select asp-for="CreateForm.NewSectionName" asp-items="Model.SectionList" class="form-control">
                              <option value="">-- Select Section --</option>
                         </select>
@@ -43,7 +43,7 @@
                 </div>
                 <div class="col-md-2">
                     <div class="form-group">
-                        <label asp-for="CreateForm.NewPlantName" class="control-label"></label>
+                        <label asp-for="CreateForm.NewPlantName" class="control-label">Plant</label>
                         <select asp-for="CreateForm.NewPlantName" asp-items="Model.PlantList" class="form-control">
                              <option value="">-- Select Plant --</option>
                         </select>
@@ -121,5 +121,55 @@
         var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
             return new bootstrap.Tooltip(tooltipTriggerEl)
         })
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const departmentSelect = document.getElementById('CreateForm_DepartmentId');
+            const sectionSelect = document.getElementById('CreateForm_NewSectionName');
+            const sectionUrl = '@Url.Action("GetSectionsByDepartment", "DocumentRouting")';
+
+            if (!departmentSelect || !sectionSelect) {
+                return;
+            }
+
+            const selectedSectionOnLoad = sectionSelect.value;
+
+            const loadSections = async (departmentId, selectedSection = '') => {
+                sectionSelect.innerHTML = '<option value="">-- Select Section --</option>';
+
+                if (!departmentId) {
+                    return;
+                }
+
+                try {
+                    const response = await fetch(`${sectionUrl}?departmentId=${encodeURIComponent(departmentId)}`);
+                    if (!response.ok) {
+                        return;
+                    }
+
+                    const sections = await response.json();
+                    sections.forEach((section) => {
+                        const option = document.createElement('option');
+                        option.value = section.name;
+                        option.textContent = section.name;
+                        if (selectedSection && selectedSection === section.name) {
+                            option.selected = true;
+                        }
+                        sectionSelect.appendChild(option);
+                    });
+                } catch (error) {
+                    console.error('Failed to load sections by department', error);
+                }
+            };
+
+            departmentSelect.addEventListener('change', function () {
+                loadSections(this.value);
+            });
+
+            if (departmentSelect.value) {
+                loadSections(departmentSelect.value, selectedSectionOnLoad);
+            } else {
+                sectionSelect.innerHTML = '<option value="">-- Select Section --</option>';
+            }
+        });
     </script>
 }

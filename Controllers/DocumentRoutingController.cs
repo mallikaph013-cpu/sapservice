@@ -151,7 +151,13 @@ namespace myapp.Controllers
             }
 
             ViewData["DepartmentId"] = new SelectList(_context.Departments.OrderBy(d => d.DepartmentName), "DepartmentId", "DepartmentName", documentRouting.DepartmentId);
-            ViewData["SectionId"] = new SelectList(_context.Sections.OrderBy(s => s.SectionName), "SectionId", "SectionName", documentRouting.SectionId);
+            ViewData["SectionId"] = new SelectList(
+                _context.Sections
+                    .Where(s => s.DepartmentId == documentRouting.DepartmentId)
+                    .OrderBy(s => s.SectionName),
+                "SectionId",
+                "SectionName",
+                documentRouting.SectionId);
             ViewData["PlantId"] = new SelectList(_context.Plants.OrderBy(p => p.PlantName), "PlantId", "PlantName", documentRouting.PlantId);
 
             return View(documentRouting);
@@ -190,7 +196,13 @@ namespace myapp.Controllers
             }
 
             ViewData["DepartmentId"] = new SelectList(_context.Departments.OrderBy(d => d.DepartmentName), "DepartmentId", "DepartmentName", routingToUpdate.DepartmentId);
-            ViewData["SectionId"] = new SelectList(_context.Sections.OrderBy(s => s.SectionName), "SectionId", "SectionName", routingToUpdate.SectionId);
+            ViewData["SectionId"] = new SelectList(
+                _context.Sections
+                    .Where(s => s.DepartmentId == routingToUpdate.DepartmentId)
+                    .OrderBy(s => s.SectionName),
+                "SectionId",
+                "SectionName",
+                routingToUpdate.SectionId);
             ViewData["PlantId"] = new SelectList(_context.Plants.OrderBy(p => p.PlantName), "PlantId", "PlantName", routingToUpdate.PlantId);
             
             var documentType = await _context.DocumentTypes.FindAsync(routingToUpdate.DocumentTypeId);
@@ -200,6 +212,23 @@ namespace myapp.Controllers
             }
 
             return View(routingToUpdate);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetSectionsByDepartment(int departmentId)
+        {
+            if (departmentId <= 0)
+            {
+                return Json(new List<object>());
+            }
+
+            var sections = await _context.Sections
+                .Where(s => s.DepartmentId == departmentId)
+                .OrderBy(s => s.SectionName)
+                .Select(s => new { id = s.SectionId, name = s.SectionName })
+                .ToListAsync();
+
+            return Json(sections);
         }
 
         public async Task<IActionResult> Delete(int? id)

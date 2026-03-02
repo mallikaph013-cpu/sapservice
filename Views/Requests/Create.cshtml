@@ -6,11 +6,26 @@
     ViewData["Title"] = "Create Service Request";
 }
 
+<style>
+    #create-form .form-control[readonly] {
+        background-color: var(--bs-secondary-bg);
+    }
+
+    .create-import-card {
+        order: 1;
+        margin-bottom: 3rem;
+    }
+
+    .create-manual-card {
+        order: 2;
+    }
+</style>
+
 <div class="row justify-content-center">
-    <div class="col-lg-10 col-xl-9">
+    <div class="col-lg-10 col-xl-9 d-flex flex-column">
 
         <!-- Manual Creation Form -->
-        <div class="main-content-card mb-5">
+        <div class="main-content-card mb-5 create-manual-card">
             <div class="text-center mb-4">
                 <h2>Create New Service Request</h2>
                 <p class="text-light">Please fill in the details of your request below.</p>
@@ -66,7 +81,7 @@
 
                 <hr class="my-4">
 
-                <h5>Approver</h5>
+                <h5>Work Flow</h5>
                 <p class="text-light small mb-3">Select a request type to see the list of available approvers.</p>
                 <div class="row mb-4">
                     <div class="col-md-6">
@@ -82,7 +97,7 @@
                 @if (SignInManager.IsSignedIn(User) && User.IsInRole("IT"))
                 {
                     <hr class="my-4" />
-                    <h5>IT Status Update</h5>
+                    <h5>DX Update Status</h5>
                      <div class="row mb-4">
                         <div class="col-md-6">
                             <div class="form-group">
@@ -112,12 +127,18 @@
         </div>
 
         <!-- Excel Import Form -->
-        <div class="main-content-card">
+        <div class="main-content-card create-import-card">
              <div class="text-center mb-4">
                 <h2>Import from Excel</h2>
                 <p class="text-light">Quickly add multiple requests by uploading a pre-filled Excel file.</p>
             </div>
             <form id="import-form" asp-action="Import" method="post" enctype="multipart/form-data">
+                <div class="mb-3">
+                    <label for="ImportRequestType" class="form-label">Request Type (Template)</label>
+                    <select id="ImportRequestType" class="form-select" asp-items="Html.GetEnumSelectList<myapp.Models.RequestType>()">
+                        <option value="">-- Select Type --</option>
+                    </select>
+                </div>
                  <div class="mb-3">
                     <label for="excelFile" class="form-label">Select Excel File (.xlsx, .xls)</label>
                     <input class="form-control" type="file" id="excelFile" name="file" accept=".xlsx, .xls" required>
@@ -156,6 +177,7 @@
             const createForm = document.getElementById('create-form');
             const importForm = document.getElementById('import-form');
             const downloadLink = document.getElementById('download-template-link');
+            const importRequestTypeSelect = document.getElementById('ImportRequestType');
             const distributionChannelSelect = document.getElementById('DistributionChannel');
             const boiCodeContainer = document.getElementById('boi-code-container');
             const editBomFgInput = document.getElementById('EditBomFg');
@@ -273,7 +295,7 @@
             }
             
             function updateDownloadLink() {
-                const selectedValue = requestTypeSelect.value;
+                const selectedValue = importRequestTypeSelect ? importRequestTypeSelect.value : '';
                 if (selectedValue) {
                     downloadLink.href = `/Requests/DownloadTemplate?requestType=${selectedValue}`;
                     downloadLink.classList.remove('disabled');
@@ -300,18 +322,20 @@
                 const tbody = document.getElementById('bom-items-body');
                 if (!tbody) return;
                 const index = tbody.getElementsByTagName('tr').length;
+                const parentReadonly = level === 1 ? 'readonly' : '';
+                const componentBomUsageReadonly = level === 2 ? 'readonly' : '';
                 const newRow = `
                     <tr>
                         <td><input type="text" name="Components[${index}].Level" class="form-control" value="${level}" readonly/></td>
-                        <td><input type="text" name="Components[${index}].Item" class="form-control" /></td>
-                        <td><input type="text" name="Components[${index}].ItemCat" class="form-control" /></td>
+                        <td><input type="text" name="Components[${index}].Item" class="form-control" ${parentReadonly} /></td>
+                        <td><input type="text" name="Components[${index}].ItemCat" class="form-control" ${parentReadonly} /></td>
                         <td><input type="text" name="Components[${index}].ComponentNumber" class="form-control" /></td>
                         <td><input type="text" name="Components[${index}].Description" class="form-control" /></td>
-                        <td><input type="number" name="Components[${index}].ItemQuantity" class="form-control" /></td>
-                        <td><input type="text" name="Components[${index}].Unit" class="form-control" /></td>
-                        <td><input type="text" name="Components[${index}].BomUsage" class="form-control" /></td>
+                        <td><input type="number" name="Components[${index}].ItemQuantity" class="form-control" ${parentReadonly} /></td>
+                        <td><input type="text" name="Components[${index}].Unit" class="form-control" ${parentReadonly} /></td>
+                        <td><input type="text" name="Components[${index}].BomUsage" class="form-control" ${componentBomUsageReadonly} /></td>
                         <td><input type="text" name="Components[${index}].Plant" class="form-control" /></td>
-                        <td><input type="text" name="Components[${index}].Sloc" class="form-control" /></td>
+                        <td><input type="text" name="Components[${index}].Sloc" class="form-control" ${parentReadonly} /></td>
                         <td><button type="button" class="btn btn-danger btn-sm remove-bom-item">Remove</button></td>
                     </tr>`;
                 tbody.insertAdjacentHTML('beforeend', newRow);
@@ -391,6 +415,13 @@
                         <td><input class="form-control" type="number" name="Routings[${index}].BaseQty"></td>
                         <td><input class="form-control" type="text" name="Routings[${index}].Unit"></td>
                         <td><input class="form-control" type="number" step="0.01" name="Routings[${index}].DirectLaborCosts"></td>
+                        <td><input class="form-control" type="text" name="Routings[${index}].ProductionVersionCode"></td>
+                        <td><input class="form-control" type="text" name="Routings[${index}].Version"></td>
+                        <td><input class="form-control" type="date" name="Routings[${index}].ValidFrom"></td>
+                        <td><input class="form-control" type="date" name="Routings[${index}].ValidTo"></td>
+                        <td><input class="form-control" type="number" step="0.01" name="Routings[${index}].MaximumLotSize"></td>
+                        <td><input class="form-control" type="text" name="Routings[${index}].Group"></td>
+                        <td><input class="form-control" type="text" name="Routings[${index}].GroupCounter"></td>
                         <td><button type="button" class="btn btn-danger btn-sm remove-routing-item">Remove</button></td>
                     </tr>`;
                 tbody.insertAdjacentHTML('beforeend', row);
@@ -414,8 +445,11 @@
             requestTypeSelect.addEventListener('change', () => {
                 toggleMaterialFields();
                 fetchNextApprovers();
-                updateDownloadLink();
             });
+
+            if (importRequestTypeSelect) {
+                importRequestTypeSelect.addEventListener('change', updateDownloadLink);
+            }
 
             if (distributionChannelSelect) {
                  distributionChannelSelect.addEventListener('change', toggleBoiCode);
