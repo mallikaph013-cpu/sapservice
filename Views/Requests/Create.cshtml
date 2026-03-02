@@ -345,6 +345,7 @@
                         <td><input type="text" name="EditBOM[${index}].UnitFrom" class="form-control" /></td>
                         <td><input type="text" name="EditBOM[${index}].BomUsageFrom" class="form-control" /></td>
                         <td><input type="text" name="EditBOM[${index}].SlocFrom" class="form-control" /></td>
+                        <td></td>
 
 
                         <td><input type="text" name="EditBOM[${index}].ItemCodeTo" class="form-control" /></td>
@@ -353,7 +354,6 @@
                         <td><input type="text" name="EditBOM[${index}].UnitTo" class="form-control" /></td>
                         <td><input type="text" name="EditBOM[${index}].BomUsageTo" class="form-control" /></td>
                         <td><input type="text" name="EditBOM[${index}].SlocTo" class="form-control" /></td>
-                        <td><input type="text" name="EditBOM[${index}].PlantTo" class="form-control" /></td>
                         <td><button type="button" class="btn btn-danger btn-sm remove-editbom-item">Remove</button></td>
                     </tr>`;
                 tbody.insertAdjacentHTML('beforeend', newRow);
@@ -361,12 +361,8 @@
 
 
                     const addEditBomBtn = document.getElementById('add-editbom-row');
-                    const addEditBomComponentBtn = document.getElementById('add-editbom-component');
                     if (addEditBomBtn) {
                        addEditBomBtn.addEventListener('click', () => addBomEditItem());
-                    }
-                    if (addEditBomComponentBtn) {
-                        addEditBomComponentBtn.addEventListener('click', () => addBomEditItem());
                     }
 
                     const editBomBody = document.getElementById('bom-edit-items-body');
