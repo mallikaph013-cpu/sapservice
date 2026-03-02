@@ -95,6 +95,9 @@ namespace myapp.Models
         public string? ReceiveStorage { get; set; }
         public string? PurchasingGroup { get; set; }
 
+        public string? EditBomFg { get; set; }
+        public bool EditBomAllFg { get; set; }
+
         [Column(TypeName = "decimal(18, 2)")]
         public decimal? Price { get; set; }
 

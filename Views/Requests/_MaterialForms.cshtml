@@ -230,6 +230,20 @@
 <div id="bom-edit-fields-container" style="display: none;">
     <hr />
     <h4>Material Information (Edit BOM)</h4>
+    <div class="row g-3 mb-3">
+        <div class="col-md-6">
+            <div class="form-group">
+                <label asp-for="EditBomFg" class="control-label">FG</label>
+                <input asp-for="EditBomFg" id="EditBomFg" class="form-control" />
+            </div>
+        </div>
+        <div class="col-md-3 d-flex align-items-end">
+            <div class="form-check mb-2">
+                <input asp-for="EditBomAllFg" class="form-check-input" type="checkbox" id="EditBomAllFg" />
+                <label asp-for="EditBomAllFg" class="form-check-label">All FG</label>
+            </div>
+        </div>
+    </div>
     <div class="table-responsive">
         <table class="table table-bordered bom-table">
             <thead>

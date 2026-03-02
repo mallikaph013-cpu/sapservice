@@ -97,6 +97,9 @@ namespace myapp.Models.ViewModels
         public string? PurchasingGroup { get; set; }
         public string? Price { get; set; }
 
+        public string? EditBomFg { get; set; }
+        public bool EditBomAllFg { get; set; }
+
 
        
 

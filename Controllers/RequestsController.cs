@@ -60,6 +60,33 @@ namespace myapp.Controllers
             }
         }
 
+        private void SetBomEditComponentProperty(BomEditComponent component, string propertyName, string value)
+        {
+            if (string.IsNullOrWhiteSpace(value)) return;
+
+            try
+            {
+                var propertyInfo = GetPropertyByHeader(typeof(BomEditComponent), propertyName);
+                if (propertyInfo == null || !propertyInfo.CanWrite) return;
+
+                var targetType = Nullable.GetUnderlyingType(propertyInfo.PropertyType) ?? propertyInfo.PropertyType;
+                object convertedValue;
+
+                if (targetType == typeof(decimal))
+                    convertedValue = decimal.Parse(value, CultureInfo.InvariantCulture);
+                else if (targetType == typeof(int))
+                    convertedValue = int.Parse(value, CultureInfo.InvariantCulture);
+                else
+                    convertedValue = Convert.ChangeType(value, targetType, CultureInfo.InvariantCulture);
+
+                propertyInfo.SetValue(component, convertedValue, null);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Could not set Edit BOM component property {PropertyName} with value {Value}", propertyName, value);
+            }
+        }
+
         public async Task<IActionResult> Index()
         {
             var user = await _userManager.GetUserAsync(User);
@@ -246,6 +273,8 @@ namespace myapp.Controllers
                     TariffCode = viewModel.TariffCode,
                     Planner = viewModel.Planner,
                     PurchasingGroup = viewModel.PurchasingGroup,
+                    EditBomFg = viewModel.EditBomFg,
+                    EditBomAllFg = viewModel.EditBomAllFg,
                     Price = decimal.TryParse(viewModel.Price, out var price) ? price : null,
 
                     BomComponents = (viewModel.Components ?? new List<BomComponentViewModel>()).Select(c => new BomComponent
@@ -368,6 +397,8 @@ namespace myapp.Controllers
                 TariffCode = requestItem.TariffCode,
                 Planner = requestItem.Planner,
                 PurchasingGroup = requestItem.PurchasingGroup,
+                EditBomFg = requestItem.EditBomFg,
+                EditBomAllFg = requestItem.EditBomAllFg,
                 Price = requestItem.Price?.ToString(),
 
                 Components = requestItem.BomComponents.Select(c => new BomComponentViewModel
@@ -532,6 +563,8 @@ namespace myapp.Controllers
                     requestItemToUpdate.TariffCode = viewModel.TariffCode;
                     requestItemToUpdate.Planner = viewModel.Planner;
                     requestItemToUpdate.PurchasingGroup = viewModel.PurchasingGroup;
+                    requestItemToUpdate.EditBomFg = viewModel.EditBomFg;
+                    requestItemToUpdate.EditBomAllFg = viewModel.EditBomAllFg;
                     requestItemToUpdate.Price = decimal.TryParse(viewModel.Price, out var price) ? price : null;
 
                     // Remove existing related entities and add updated ones
@@ -897,6 +930,53 @@ namespace myapp.Controllers
                                 TempData["ErrorMessage"] = "The file was processed but no BOM component rows were found. Please check the template and data.";
                             }
                         }
+                        else if (requestType == RequestType.EditBOM)
+                        {
+                            var components = new List<BomEditComponent>();
+                            var headerColumns = headerMap.Values.ToList();
+
+                            for (int rowNum = 2; rowNum <= lastRowNumber; rowNum++)
+                            {
+                                var row = worksheet.Row(rowNum);
+                                if (row == null)
+                                    continue;
+
+                                bool hasData = headerColumns.Any(col => !string.IsNullOrWhiteSpace(row.Cell(col).GetFormattedString()));
+                                if (!hasData)
+                                    continue;
+
+                                var component = new BomEditComponent();
+                                foreach (var header in headerMap)
+                                {
+                                    var cellValue = row.Cell(header.Value).GetFormattedString();
+                                    SetBomEditComponentProperty(component, header.Key, cellValue);
+                                }
+
+                                components.Add(component);
+                            }
+
+                            parsedDataRows = components.Count;
+
+                            if (components.Any())
+                            {
+                                var requestItem = new RequestItem
+                                {
+                                    RequestType = requestType.ToString(),
+                                    Requester = $"{user.FirstName} {user.LastName}",
+                                    Status = "Pending",
+                                    RequestDate = DateTime.UtcNow,
+                                    NextApproverId = nextApproverId,
+                                    Description = $"Imported {requestTypeString} data on {DateTime.UtcNow.ToShortDateString()}",
+                                    bomEditComponents = components
+                                };
+
+                                newRequests.Add(requestItem);
+                            }
+                            else
+                            {
+                                TempData["ErrorMessage"] = "The file was processed but no Edit BOM rows were found. Please check the template and data.";
+                            }
+                        }
                         else
                         {
                             for (int rowNum = 2; rowNum <= lastRowNumber; rowNum++)
@@ -1194,6 +1274,13 @@ namespace myapp.Controllers
                     break;
                 case RequestType.BOM:
                      headers.AddRange(new[] { "Level", "Item", "ItemCat", "ComponentNumber", "Description", "ItemQuantity", "Unit", "BomUsage", "Sloc","Plant" });
+                    break;
+                case RequestType.EditBOM:
+                    headers.AddRange(new[]
+                    {
+                        "ItemCodeFrom", "DescriptionFrom", "ItemQuantityFrom", "UnitFrom", "BomUsageFrom", "SlocFrom",
+                        "ItemCodeTo", "DescriptionTo", "ItemQuantityTo", "UnitTo", "BomUsageTo", "SlocTo", "PlantTo"
+                    });
                     break;
                 case RequestType.Routing:
                     headers.AddRange(new[] 

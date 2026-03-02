@@ -197,6 +197,8 @@
         const allMaterialFields = materialFieldsContainer ? materialFieldsContainer.querySelectorAll('[data-types]') : [];
         const bomContainer = document.getElementById('bom-fields-container');
         const routingContainer = document.getElementById('routing-fields-container');
+        const editBomFgInput = document.getElementById('EditBomFg');
+        const editBomAllFgCheckbox = document.getElementById('EditBomAllFg');
 
         const typeMapping = {
             '0': 'FG',
@@ -221,7 +223,7 @@
                 selectedTypeName = typeMapping[selectedValue] || selectedValue;
             }
             // Treat EditBOM (localized display) as BOM
-            //if (selectedTypeName === 'EditBOM' || selectedTypeName === 'á¡é BOM') {
+            //if (selectedTypeName === 'EditBOM' || selectedTypeName === 'ï¿½ï¿½ BOM') {
             //    selectedTypeName = 'EditBOM';
             // }
 
@@ -246,6 +248,15 @@
 
             if (bomContainer) bomContainer.style.display = selectedTypeName === 'BOM' ? 'block' : 'none';
             if (routingContainer) routingContainer.style.display = selectedTypeName === 'Routing' ? 'block' : 'none';
+        }
+
+        function toggleEditBomFgInput() {
+            if (!editBomFgInput || !editBomAllFgCheckbox) return;
+            const isAllFgChecked = editBomAllFgCheckbox.checked;
+            editBomFgInput.disabled = isAllFgChecked;
+            if (isAllFgChecked) {
+                editBomFgInput.value = '';
+            }
         }
 
         function addBomItem(level) {
@@ -301,7 +312,11 @@
 
         // Initial call to set the correct fields on page load
         toggleMaterialFields();
+        toggleEditBomFgInput();
         requestTypeSelect.addEventListener('change', toggleMaterialFields);
+        if (editBomAllFgCheckbox) {
+            editBomAllFgCheckbox.addEventListener('change', toggleEditBomFgInput);
+        }
 
         // Expose a global saveForm function to validate then submit the form
         window.saveForm = function () {

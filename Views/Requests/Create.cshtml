@@ -158,6 +158,8 @@
             const downloadLink = document.getElementById('download-template-link');
             const distributionChannelSelect = document.getElementById('DistributionChannel');
             const boiCodeContainer = document.getElementById('boi-code-container');
+            const editBomFgInput = document.getElementById('EditBomFg');
+            const editBomAllFgCheckbox = document.getElementById('EditBomAllFg');
 
             const typeMapping = {
                 '0': 'FG',
@@ -186,6 +188,15 @@
                     boiCodeContainer.style.display = 'block';
                 } else {
                     boiCodeContainer.style.display = 'none';
+                }
+            }
+
+            function toggleEditBomFgInput() {
+                if (!editBomFgInput || !editBomAllFgCheckbox) return;
+                const isAllFgChecked = editBomAllFgCheckbox.checked;
+                editBomFgInput.disabled = isAllFgChecked;
+                if (isAllFgChecked) {
+                    editBomFgInput.value = '';
                 }
             }
 
@@ -412,6 +423,11 @@
             if (distributionChannelSelect) {
                  distributionChannelSelect.addEventListener('change', toggleBoiCode);
             }
+              if (editBomAllFgCheckbox) {
+                 editBomAllFgCheckbox.addEventListener('change', toggleEditBomFgInput);
+              }
+
+              toggleEditBomFgInput();
 
             nextResponsibleUserSelect.addEventListener('change', () => {
                  importNextResponsibleUserIdInput.value = nextResponsibleUserSelect.value;
