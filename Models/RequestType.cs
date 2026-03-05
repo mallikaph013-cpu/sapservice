@@ -26,7 +26,10 @@ namespace myapp.Models
         CrossPlantPurchase,
 
         [Display(Name = "แก้ BOM")]
-        EditBOM
+        EditBOM,
+
+        [Display(Name = "สิทธิ์การใช้งาน")]
+        LicensePermission
 
     }
 }

@@ -146,6 +146,14 @@ namespace myapp.Controllers
                 return NotFound();
             }
 
+            var nextApproverUser = !string.IsNullOrWhiteSpace(requestItem.NextApproverId)
+                ? await _userManager.Users.FirstOrDefaultAsync(u => u.Id == requestItem.NextApproverId)
+                : null;
+
+            ViewBag.NextResponsibleUserName = nextApproverUser != null
+                ? $"{nextApproverUser.FirstName} {nextApproverUser.LastName}"
+                : "-";
+
             return View(requestItem);
         }
 
@@ -386,6 +394,11 @@ namespace myapp.Controllers
 
         private void ValidateRequest(CreateRequestViewModel viewModel)
         {
+            if (viewModel.RequestType == RequestType.LicensePermission)
+            {
+                return;
+            }
+
             // ItemCode: Not required for SM, ToolingB, ToolingB_FG, ToolingB_PU
             if (viewModel.RequestType != RequestType.SM && 
                 viewModel.RequestType != RequestType.ToolingB &&
@@ -439,7 +452,24 @@ namespace myapp.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(CreateRequestViewModel viewModel)
         {
+            _logger.LogInformation(
+                "Create POST started by {Actor}. RequestType={RequestType}, Requester={Requester}, NextResponsible={NextResponsibleUserId}",
+                User?.Identity?.Name ?? "Unknown",
+                viewModel.RequestType,
+                viewModel.RequesterName,
+                viewModel.NextResponsibleUserId);
+
             ValidateRequest(viewModel);
+
+            if (!ModelState.IsValid)
+            {
+                var errorCount = ModelState.Values.Sum(v => v.Errors.Count);
+                _logger.LogWarning(
+                    "Create POST validation failed. ErrorCount={ErrorCount}, RequestType={RequestType}, Requester={Requester}",
+                    errorCount,
+                    viewModel.RequestType,
+                    viewModel.RequesterName);
+            }
 
             if (ModelState.IsValid)
             {
@@ -540,11 +570,33 @@ namespace myapp.Controllers
                         MaximumLotSize = r.MaximumLotSize,
                         Group = r.Group,
                         GroupCounter = r.GroupCounter
-                    }).ToList()
+                    }).ToList(),
+
+                    LicensePermissions = (viewModel.LicensePermissions ?? new List<LicensePermissionViewModel>())
+                        .Where(lp => !string.IsNullOrWhiteSpace(lp.TCode))
+                        .Select(lp => new LicensePermissionItem
+                        {
+                            SapUsername = lp.SapUsername,
+                            TCode = lp.TCode
+                        }).ToList()
                 };
 
                 _context.Add(requestItem);
                 await _context.SaveChangesAsync();
+
+                await AddAuditLogAsync(
+                    entityName: nameof(RequestItem),
+                    entityId: requestItem.Id.ToString(),
+                    action: "Create",
+                    details: $"RequestType={requestItem.RequestType}; Status={requestItem.Status}; NextApproverId={requestItem.NextApproverId}");
+
+                _logger.LogInformation(
+                    "Create POST succeeded. RequestId={RequestId}, RequestType={RequestType}, Requester={Requester}, NextApproverId={NextApproverId}",
+                    requestItem.Id,
+                    requestItem.RequestType,
+                    requestItem.Requester,
+                    requestItem.NextApproverId);
+
                 TempData["SuccessMessage"] = "Request created successfully!";
                 return RedirectToAction(nameof(Index));
             }
@@ -563,6 +615,7 @@ namespace myapp.Controllers
             var requestItem = await _context.RequestItems
                 .Include(r => r.BomComponents)
                 .Include(r => r.Routings)
+                .Include(r => r.LicensePermissions)
                 .AsNoTracking()
                 .FirstOrDefaultAsync(r => r.Id == id);
 
@@ -670,6 +723,12 @@ namespace myapp.Controllers
                     MaximumLotSize = r.MaximumLotSize,
                     Group = r.Group,
                     GroupCounter = r.GroupCounter
+                }).ToList(),
+
+                LicensePermissions = requestItem.LicensePermissions.Select(lp => new LicensePermissionViewModel
+                {
+                    SapUsername = lp.SapUsername,
+                    TCode = lp.TCode
                 }).ToList()
             };
 
@@ -693,10 +752,7 @@ namespace myapp.Controllers
         public async Task<IActionResult> Edit(int id, CreateRequestViewModel viewModel)
         {
             _logger.LogInformation("Edit POST called for id={Id}", id);
-            if (viewModel != null)
-            {
-                try { _logger.LogDebug("Posted viewModel: {@ViewModel}", viewModel); } catch { }
-            }
+            try { _logger.LogDebug("Posted viewModel: {@ViewModel}", viewModel); } catch { }
             if (id != viewModel.Id)
             {
                 return NotFound();
@@ -748,6 +804,7 @@ namespace myapp.Controllers
                  var requestItemToUpdate = await _context.RequestItems
                     .Include(r => r.BomComponents)
                     .Include(r => r.Routings)
+                          .Include(r => r.LicensePermissions)
                     .FirstOrDefaultAsync(r => r.Id == id);
 
                 if (requestItemToUpdate == null)
@@ -757,6 +814,9 @@ namespace myapp.Controllers
 
                 try
                 {
+                    var previousStatus = requestItemToUpdate.Status;
+                    var previousNextApproverId = requestItemToUpdate.NextApproverId;
+
                     // Update scalar properties from the view model
                     requestItemToUpdate.RequestType = viewModel.RequestType.ToString();
                     requestItemToUpdate.Description = viewModel.Description;
@@ -815,6 +875,7 @@ namespace myapp.Controllers
                     // Remove existing related entities and add updated ones
                     _context.BomComponents.RemoveRange(requestItemToUpdate.BomComponents);
                     _context.Routings.RemoveRange(requestItemToUpdate.Routings);
+                    _context.LicensePermissionItems.RemoveRange(requestItemToUpdate.LicensePermissions);
                     
                     requestItemToUpdate.BomComponents = (viewModel.Components ?? new List<BomComponentViewModel>()).Select(c => new BomComponent
                     {
@@ -850,14 +911,39 @@ namespace myapp.Controllers
                         GroupCounter = r.GroupCounter
                     }).ToList();
 
+                    requestItemToUpdate.LicensePermissions = (viewModel.LicensePermissions ?? new List<LicensePermissionViewModel>())
+                        .Where(lp => !string.IsNullOrWhiteSpace(lp.TCode))
+                        .Select(lp => new LicensePermissionItem
+                        {
+                            SapUsername = lp.SapUsername,
+                            TCode = lp.TCode
+                        }).ToList();
+
                     await _context.SaveChangesAsync();
+
+                    await AddAuditLogAsync(
+                        entityName: nameof(RequestItem),
+                        entityId: requestItemToUpdate.Id.ToString(),
+                        action: "Update",
+                        details: $"RequestType={requestItemToUpdate.RequestType}; Status:{previousStatus}->{requestItemToUpdate.Status}; NextApproverId:{previousNextApproverId}->{requestItemToUpdate.NextApproverId}");
+
+                    _logger.LogInformation(
+                        "Edit POST succeeded for RequestId={RequestId} by {Actor}. RequestType={RequestType}, Status={Status}, NextApproverId={NextApproverId}",
+                        requestItemToUpdate.Id,
+                        User?.Identity?.Name ?? "Unknown",
+                        requestItemToUpdate.RequestType,
+                        requestItemToUpdate.Status,
+                        requestItemToUpdate.NextApproverId);
+
                     TempData["SuccessMessage"] = "Request updated successfully!";
                     return RedirectToAction(nameof(Index));
                 }
                 catch (DbUpdateConcurrencyException)
                 {
+                    _logger.LogWarning("Edit POST concurrency conflict for RequestId={RequestId}", viewModel.Id);
                     if (!RequestItemExists(viewModel.Id))
                     {
+                        _logger.LogWarning("Edit POST failed because RequestId={RequestId} was not found", viewModel.Id);
                         return NotFound();
                     }
                     else
@@ -890,15 +976,31 @@ namespace myapp.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
+            _logger.LogInformation("Delete POST started for RequestId={RequestId} by {Actor}", id, User?.Identity?.Name ?? "Unknown");
+
             var requestItem = await _context.RequestItems.FindAsync(id);
             if (requestItem == null)
             {
+                _logger.LogWarning("Delete POST failed because RequestId={RequestId} was not found", id);
                 TempData["ErrorMessage"] = "Request not found.";
                 return NotFound();
             }
 
             _context.RequestItems.Remove(requestItem);
             await _context.SaveChangesAsync();
+
+            await AddAuditLogAsync(
+                entityName: nameof(RequestItem),
+                entityId: requestItem.Id.ToString(),
+                action: "Delete",
+                details: $"RequestType={requestItem.RequestType}; Requester={requestItem.Requester}; Status={requestItem.Status}");
+
+            _logger.LogInformation(
+                "Delete POST succeeded for RequestId={RequestId}. RequestType={RequestType}, Requester={Requester}",
+                requestItem.Id,
+                requestItem.RequestType,
+                requestItem.Requester);
+
             TempData["SuccessMessage"] = "Request deleted successfully!";
             return RedirectToAction(nameof(Index));
         }
@@ -906,6 +1008,28 @@ namespace myapp.Controllers
         private bool RequestItemExists(int id)
         {
             return _context.RequestItems.Any(e => e.Id == id);
+        }
+
+        private async Task AddAuditLogAsync(string entityName, string? entityId, string action, string? details)
+        {
+            try
+            {
+                _context.AuditLogs.Add(new AuditLog
+                {
+                    EntityName = entityName,
+                    EntityId = entityId,
+                    Action = action,
+                    PerformedBy = User?.Identity?.Name ?? "Unknown",
+                    PerformedAt = DateTime.UtcNow,
+                    Details = details
+                });
+
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to persist audit log. Entity={EntityName}, EntityId={EntityId}, Action={Action}", entityName, entityId, action);
+            }
         }
 
         [HttpPost]
@@ -1433,7 +1557,14 @@ namespace myapp.Controllers
                 headerRange.Style.Font.Bold = true;
                 headerRange.Style.Fill.BackgroundColor = XLColor.LightGray;
 
-                worksheet.Columns().AdjustToContents();
+                try
+                {
+                    worksheet.Columns().AdjustToContents();
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Failed to auto-size Requests template columns. Returning default column widths.");
+                }
 
                 using (var stream = new MemoryStream())
                 {

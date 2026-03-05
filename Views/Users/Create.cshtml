@@ -18,11 +18,21 @@
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-floating mb-3">
+                                <input asp-for="UserName" class="form-control" placeholder="Username" />
+                                <label asp-for="UserName">Username</label>
+                                <span asp-validation-for="UserName" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating mb-3">
                                 <input asp-for="FirstName" class="form-control" placeholder="First Name" />
                                 <label asp-for="FirstName">First Name</label>
                                 <span asp-validation-for="FirstName" class="text-danger"></span>
                             </div>
                         </div>
+                    </div>
+
+                    <div class="row">
                         <div class="col-md-6">
                             <div class="form-floating mb-3">
                                 <input asp-for="LastName" class="form-control" placeholder="Last Name" />

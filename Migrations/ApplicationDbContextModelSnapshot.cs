@@ -242,6 +242,43 @@ namespace myapp.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
+            modelBuilder.Entity("myapp.Models.AuditLog", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Action")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Details")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("EntityId")
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("EntityName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("PerformedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("PerformedBy")
+                        .HasMaxLength(256)
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PerformedAt");
+
+                    b.ToTable("AuditLogs");
+                });
+
             modelBuilder.Entity("myapp.Models.BomComponent", b =>
                 {
                     b.Property<int>("Id")
@@ -406,6 +443,28 @@ namespace myapp.Migrations
                     b.HasKey("DocumentTypeId");
 
                     b.ToTable("DocumentTypes");
+                });
+
+            modelBuilder.Entity("myapp.Models.LicensePermissionItem", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("RequestItemId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("SapUsername")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("TCode")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RequestItemId");
+
+                    b.ToTable("LicensePermissionItems");
                 });
 
             modelBuilder.Entity("myapp.Models.MasterDataCombination", b =>
@@ -892,25 +951,25 @@ namespace myapp.Migrations
                     b.HasOne("myapp.Models.Department", "Department")
                         .WithMany()
                         .HasForeignKey("DepartmentId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.HasOne("myapp.Models.DocumentType", "DocumentType")
                         .WithMany("DocumentRoutings")
                         .HasForeignKey("DocumentTypeId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.HasOne("myapp.Models.Plant", "Plant")
                         .WithMany()
                         .HasForeignKey("PlantId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.HasOne("myapp.Models.Section", "Section")
                         .WithMany()
                         .HasForeignKey("SectionId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("Department");
@@ -920,6 +979,17 @@ namespace myapp.Migrations
                     b.Navigation("Plant");
 
                     b.Navigation("Section");
+                });
+
+            modelBuilder.Entity("myapp.Models.LicensePermissionItem", b =>
+                {
+                    b.HasOne("myapp.Models.RequestItem", "RequestItem")
+                        .WithMany("LicensePermissions")
+                        .HasForeignKey("RequestItemId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("RequestItem");
                 });
 
             modelBuilder.Entity("myapp.Models.Plant", b =>
@@ -963,6 +1033,8 @@ namespace myapp.Migrations
             modelBuilder.Entity("myapp.Models.RequestItem", b =>
                 {
                     b.Navigation("BomComponents");
+
+                    b.Navigation("LicensePermissions");
 
                     b.Navigation("Routings");
 

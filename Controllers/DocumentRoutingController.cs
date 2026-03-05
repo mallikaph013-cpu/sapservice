@@ -9,6 +9,11 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using System;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
+using System.IO;
+using Microsoft.Extensions.Logging;
+using ClosedXML.Excel;
+using System.Text;
 
 namespace myapp.Controllers
 {
@@ -16,10 +21,12 @@ namespace myapp.Controllers
     public class DocumentRoutingController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly ILogger<DocumentRoutingController> _logger;
 
-        public DocumentRoutingController(ApplicationDbContext context)
+        public DocumentRoutingController(ApplicationDbContext context, ILogger<DocumentRoutingController> logger)
         {
             _context = context;
+            _logger = logger;
         }
 
         private async Task<DocumentRoutingViewModel> PopulateViewModelAsync(DocumentRoutingViewModel? viewModel = null)
@@ -266,6 +273,249 @@ namespace myapp.Controllers
             }
 
             return RedirectToAction(nameof(Index));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Import(IFormFile? importFile)
+        {
+            var actor = User.Identity?.Name ?? "System";
+            var startedAt = DateTime.UtcNow;
+
+            if (importFile == null || importFile.Length == 0)
+            {
+                TempData["ErrorMessage"] = "Please select a CSV file.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            var extension = Path.GetExtension(importFile.FileName).ToLowerInvariant();
+            if (extension != ".csv" && extension != ".xlsx")
+            {
+                TempData["ErrorMessage"] = "Only .csv and .xlsx files are supported.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            _logger.LogInformation(
+                "DocumentRouting import started by {Actor}. File={FileName}, Size={Size}, StartedAt={StartedAt}",
+                actor,
+                importFile.FileName,
+                importFile.Length,
+                startedAt);
+
+            var imported = 0;
+            var skipped = 0;
+            var reports = new List<string>();
+            var seenKeys = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+            try
+            {
+                IEnumerable<(int RowNumber, string DocumentTypeName, string DepartmentName, string SectionName, string PlantName, string StepText)> rows;
+                if (extension == ".csv")
+                {
+                    rows = await ReadRoutingRowsFromCsvAsync(importFile);
+                }
+                else
+                {
+                    rows = ReadRoutingRowsFromXlsx(importFile);
+                }
+
+                foreach (var row in rows)
+                {
+                    if (string.IsNullOrWhiteSpace(row.DocumentTypeName) ||
+                        string.IsNullOrWhiteSpace(row.DepartmentName) ||
+                        string.IsNullOrWhiteSpace(row.SectionName) ||
+                        string.IsNullOrWhiteSpace(row.PlantName) ||
+                        !int.TryParse(row.StepText, out var step))
+                    {
+                        skipped++;
+                        reports.Add($"Row {row.RowNumber}: Required fields missing or Step is invalid.");
+                        continue;
+                    }
+
+                    var uniqueKey = $"{row.DocumentTypeName}|{row.DepartmentName}|{row.SectionName}|{row.PlantName}|{step}";
+                    if (!seenKeys.Add(uniqueKey))
+                    {
+                        skipped++;
+                        reports.Add($"Row {row.RowNumber}: Duplicate routing entry in file.");
+                        continue;
+                    }
+
+                    var documentType = await _context.DocumentTypes.FirstOrDefaultAsync(d => d.Name == row.DocumentTypeName);
+                    if (documentType == null)
+                    {
+                        documentType = new DocumentType { Name = row.DocumentTypeName };
+                        _context.DocumentTypes.Add(documentType);
+                        await _context.SaveChangesAsync();
+                    }
+
+                    var department = await _context.Departments.FirstOrDefaultAsync(d => d.DepartmentName == row.DepartmentName);
+                    if (department == null)
+                    {
+                        department = new Department { DepartmentName = row.DepartmentName };
+                        _context.Departments.Add(department);
+                        await _context.SaveChangesAsync();
+                    }
+
+                    var section = await _context.Sections.FirstOrDefaultAsync(s => s.SectionName == row.SectionName && s.DepartmentId == department.DepartmentId);
+                    if (section == null)
+                    {
+                        section = new Section { SectionName = row.SectionName, DepartmentId = department.DepartmentId };
+                        _context.Sections.Add(section);
+                        await _context.SaveChangesAsync();
+                    }
+
+                    var plant = await _context.Plants.FirstOrDefaultAsync(p => p.PlantName == row.PlantName);
+                    if (plant == null)
+                    {
+                        plant = new Plant { PlantName = row.PlantName };
+                        _context.Plants.Add(plant);
+                        await _context.SaveChangesAsync();
+                    }
+
+                    var exists = await _context.DocumentRoutings.AnyAsync(dr =>
+                        dr.DocumentTypeId == documentType.DocumentTypeId &&
+                        dr.DepartmentId == department.DepartmentId &&
+                        dr.SectionId == section.SectionId &&
+                        dr.PlantId == plant.PlantId &&
+                        dr.Step == step);
+
+                    if (exists)
+                    {
+                        skipped++;
+                        reports.Add($"Row {row.RowNumber}: Routing already exists.");
+                        continue;
+                    }
+
+                    _context.DocumentRoutings.Add(new DocumentRouting
+                    {
+                        DocumentTypeId = documentType.DocumentTypeId,
+                        DepartmentId = department.DepartmentId,
+                        SectionId = section.SectionId,
+                        PlantId = plant.PlantId,
+                        Step = step
+                    });
+
+                    imported++;
+                }
+
+                await _context.SaveChangesAsync();
+                var finishedAt = DateTime.UtcNow;
+
+                _logger.LogInformation(
+                    "DocumentRouting import completed by {Actor}. File={FileName}, StartedAt={StartedAt}, FinishedAt={FinishedAt}, Imported={Imported}, Skipped={Skipped}",
+                    actor,
+                    importFile.FileName,
+                    startedAt,
+                    finishedAt,
+                    imported,
+                    skipped);
+
+                foreach (var report in reports.Take(20))
+                {
+                    _logger.LogWarning("DocumentRouting import row issue: {Issue}", report);
+                }
+
+                TempData["SuccessMessage"] = $"Document routing import completed. Imported: {imported}, Skipped: {skipped}";
+                if (reports.Count > 0)
+                {
+                    TempData["ImportReport"] = string.Join("\n", reports.Take(50));
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "DocumentRouting import failed by {Actor}. File={FileName}", actor, importFile.FileName);
+                TempData["ErrorMessage"] = "Document routing import failed. Please verify template/data.";
+            }
+            return RedirectToAction(nameof(Index));
+        }
+
+        [HttpGet]
+        public IActionResult DownloadImportTemplate()
+        {
+            using var workbook = new XLWorkbook();
+            var worksheet = workbook.Worksheets.Add("DocumentRouting");
+            worksheet.Cell(1, 1).Value = "DocumentType";
+            worksheet.Cell(1, 2).Value = "DepartmentName";
+            worksheet.Cell(1, 3).Value = "SectionName";
+            worksheet.Cell(1, 4).Value = "PlantName";
+            worksheet.Cell(1, 5).Value = "Step";
+
+            worksheet.Cell(2, 1).Value = "FG";
+            worksheet.Cell(2, 2).Value = "Production";
+            worksheet.Cell(2, 3).Value = "Assembly";
+            worksheet.Cell(2, 4).Value = "6031";
+            worksheet.Cell(2, 5).Value = "1";
+
+            worksheet.Cell(3, 1).Value = "FG";
+            worksheet.Cell(3, 2).Value = "Production";
+            worksheet.Cell(3, 3).Value = "Injection";
+            worksheet.Cell(3, 4).Value = "6051";
+            worksheet.Cell(3, 5).Value = "2";
+            try
+            {
+                worksheet.Columns().AdjustToContents();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to auto-size DocumentRouting import template columns. Returning default column widths.");
+            }
+
+            using var stream = new MemoryStream();
+            workbook.SaveAs(stream);
+            return File(
+                stream.ToArray(),
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                "document-routing-template.xlsx");
+        }
+
+        private static async Task<IEnumerable<(int RowNumber, string DocumentTypeName, string DepartmentName, string SectionName, string PlantName, string StepText)>> ReadRoutingRowsFromCsvAsync(IFormFile importFile)
+        {
+            var result = new List<(int RowNumber, string DocumentTypeName, string DepartmentName, string SectionName, string PlantName, string StepText)>();
+            using var reader = new StreamReader(importFile.OpenReadStream());
+            var rowNumber = 0;
+
+            while (!reader.EndOfStream)
+            {
+                var line = await reader.ReadLineAsync();
+                rowNumber++;
+                if (string.IsNullOrWhiteSpace(line))
+                {
+                    continue;
+                }
+
+                if (rowNumber == 1 && line.Contains("DocumentType", StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+
+                var parts = line.Split(',');
+                var documentTypeName = parts.Length > 0 ? parts[0].Trim() : string.Empty;
+                var departmentName = parts.Length > 1 ? parts[1].Trim() : string.Empty;
+                var sectionName = parts.Length > 2 ? parts[2].Trim() : string.Empty;
+                var plantName = parts.Length > 3 ? parts[3].Trim() : string.Empty;
+                var stepText = parts.Length > 4 ? parts[4].Trim() : string.Empty;
+                result.Add((rowNumber, documentTypeName, departmentName, sectionName, plantName, stepText));
+            }
+
+            return result;
+        }
+
+        private static IEnumerable<(int RowNumber, string DocumentTypeName, string DepartmentName, string SectionName, string PlantName, string StepText)> ReadRoutingRowsFromXlsx(IFormFile importFile)
+        {
+            using var stream = importFile.OpenReadStream();
+            using var workbook = new XLWorkbook(stream);
+            var worksheet = workbook.Worksheets.First();
+            var lastRow = worksheet.LastRowUsed()?.RowNumber() ?? 0;
+
+            for (var row = 2; row <= lastRow; row++)
+            {
+                var documentTypeName = worksheet.Cell(row, 1).GetString().Trim();
+                var departmentName = worksheet.Cell(row, 2).GetString().Trim();
+                var sectionName = worksheet.Cell(row, 3).GetString().Trim();
+                var plantName = worksheet.Cell(row, 4).GetString().Trim();
+                var stepText = worksheet.Cell(row, 5).GetString().Trim();
+                yield return (row, documentTypeName, departmentName, sectionName, plantName, stepText);
+            }
         }
     }
 }

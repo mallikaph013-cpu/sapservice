@@ -28,7 +28,7 @@
         <div class="main-content-card mb-5 create-manual-card">
             <div class="text-center mb-4">
                 <h2>Create New Service Request</h2>
-                <p class="text-light">Please fill in the details of your request below.</p>
+               @*<p class="text-light">Please fill in the details of your request below.</p>*@ 
             </div>
 
             <form id="create-form" asp-action="Create">
@@ -49,7 +49,7 @@
                 <div class="row g-3 mb-4">
                     <div class="col-md-6">
                         <div class="form-group">
-                            <label asp-for="RequestType" class="form-label"></label>
+                            <label asp-for="RequestType" class="form-label">Request Type</label>
                             <select asp-for="RequestType" id="RequestType" class="form-select" asp-items="Html.GetEnumSelectList<myapp.Models.RequestType>()">
                                 <option value="">-- Select Type --</option>
                             </select>
@@ -86,7 +86,7 @@
                 <div class="row mb-4">
                     <div class="col-md-6">
                         <div class="form-group">
-                            <label for="NextResponsibleUserId" class="form-label">Next Responsible User</label>
+                            <label for="NextResponsibleUserId" class="form-label">ผู้รับผิดชอบลำดับถัดไป</label>
                             <select name="NextResponsibleUserId" id="NextResponsibleUserId" class="form-select" required>
                                 <option value="">-- Please select a request type first --</option>
                             </select>
@@ -130,7 +130,7 @@
         <div class="main-content-card create-import-card">
              <div class="text-center mb-4">
                 <h2>Import from Excel</h2>
-                <p class="text-light">Quickly add multiple requests by uploading a pre-filled Excel file.</p>
+                @*<p class="text-light">Quickly add multiple requests by uploading a pre-filled Excel file.</p>*@
             </div>
             <form id="import-form" asp-action="Import" method="post" enctype="multipart/form-data">
                 <div class="mb-3">
@@ -172,6 +172,7 @@
             const bomContainer = document.getElementById('bom-fields-container');
             const bomEditContainer = document.getElementById('bom-edit-fields-container');
             const routingContainer = document.getElementById('routing-fields-container');
+            const licensePermissionContainer = document.getElementById('license-permission-fields-container');
             const nextResponsibleUserSelect = document.getElementById('NextResponsibleUserId');
             const importNextResponsibleUserIdInput = document.getElementById('importNextResponsibleUserId');
             const createForm = document.getElementById('create-form');
@@ -197,7 +198,8 @@
                 '10': 'IPO',
                 '11': 'Passthrough',
                 '12': 'CrossPlantPurchase',
-                '13': 'EditBOM'
+                '13': 'EditBOM',
+                '14': 'LicensePermission'
 
                 
 
@@ -232,11 +234,11 @@
                     selectedTypeName = typeMapping[selectedValue] || selectedValue;
                 }
                 //Treat EditBOM like BOM for field visibility
-                if (selectedTypeName === 'EditBOM' || selectedTypeName === '�� BOM') {
+                if (selectedTypeName === 'EditBOM' || selectedTypeName === 'แก้ BOM') {
                     selectedTypeName = 'EditBOM';
                 }
 
-                const showMaterialFields = selectedValue && selectedTypeName !== 'Routing';
+                const showMaterialFields = selectedValue && selectedTypeName !== 'Routing' && selectedTypeName !== 'LicensePermission';
                 if (materialFieldsContainer) materialFieldsContainer.style.display = showMaterialFields ? 'block' : 'none';
 
                 if (showMaterialFields && allMaterialFields.length) {
@@ -253,14 +255,16 @@
                     });
                 }
 
-                        const isBom = selectedTypeName === 'BOM';
-                        const isEditBom = selectedTypeName === 'EditBOM';
+                    const isBom = selectedTypeName === 'BOM';
+                    const isEditBom = selectedTypeName === 'EditBOM';
+                    const isLicensePermission = selectedTypeName === 'LicensePermission';
 
                 //��� block �����ʴ� UI �ͧ BOM EditBom Routing
 
                 if (bomEditContainer) bomEditContainer.style.display = (isEditBom) ? 'block' : 'none';
                 if (routingContainer) routingContainer.style.display = selectedTypeName === 'Routing' ? 'block' : 'none';
                 if (bomContainer) bomContainer.style.display = (isBom) ? 'block' : 'none';
+                if (licensePermissionContainer) licensePermissionContainer.style.display = isLicensePermission ? 'block' : 'none';
 
                 // After toggling all fields, specifically check for BOI code visibility
                 toggleBoiCode();
@@ -436,10 +440,117 @@
                 });
             }
 
+            const addLicensePermissionBtn = document.getElementById('add-license-permission-item');
+            const licenseRequestOptionSelect = document.getElementById('LicenseRequestOption');
+            const licenseNewUsernameFields = document.getElementById('license-new-username-fields');
+            const licenseAddPermissionFields = document.getElementById('license-add-permission-fields');
+            const licensePrimaryUsernameInput = document.getElementById('LicensePrimaryUsername');
+            const licenseSecondaryUsernameInput = document.getElementById('LicenseSecondaryUsername');
+
+            function setSectionEnabled(section, enabled) {
+                if (!section) return;
+                const controls = section.querySelectorAll('input, select, textarea, button');
+                controls.forEach(control => {
+                    control.disabled = !enabled;
+                });
+            }
+
+            function toggleLicenseRequestOptionFields() {
+                const selectedOption = licenseRequestOptionSelect ? licenseRequestOptionSelect.value : '';
+                const isNewUsernameRequest = selectedOption === 'NewUsername';
+                const isAddPermissionRequest = selectedOption === 'AddPermission';
+
+                if (licenseNewUsernameFields) {
+                    licenseNewUsernameFields.style.display = isNewUsernameRequest ? 'block' : 'none';
+                    setSectionEnabled(licenseNewUsernameFields, isNewUsernameRequest);
+                }
+
+                if (licenseAddPermissionFields) {
+                    licenseAddPermissionFields.style.display = isAddPermissionRequest ? 'block' : 'none';
+                    setSectionEnabled(licenseAddPermissionFields, isAddPermissionRequest);
+                }
+            }
+
+            function getLicenseUsernames() {
+                const usernames = [];
+                const primary = licensePrimaryUsernameInput ? licensePrimaryUsernameInput.value.trim() : '';
+                const secondary = licenseSecondaryUsernameInput ? licenseSecondaryUsernameInput.value.trim() : '';
+                if (primary) usernames.push(primary);
+                if (secondary) usernames.push(secondary);
+                return usernames;
+            }
+
+            function getCombinedLicenseUsernames() {
+                return getLicenseUsernames().join(' / ');
+            }
+
+            function syncLicensePermissionUsernames() {
+                const combinedUsernames = getCombinedLicenseUsernames();
+                const usernameInputs = document.querySelectorAll('#license-permission-items-body .license-permission-username');
+                usernameInputs.forEach(input => {
+                    input.value = combinedUsernames;
+                });
+            }
+
+            function hydrateLicenseUsernameInputsFromRows() {
+                if (!licensePrimaryUsernameInput || !licenseSecondaryUsernameInput) return;
+                const usernameInputs = document.querySelectorAll('#license-permission-items-body .license-permission-username');
+                const rawValues = Array.from(usernameInputs)
+                    .map(input => (input.value || '').trim())
+                    .filter(value => value.length > 0);
+
+                if (!rawValues.length) return;
+
+                const parsedUsers = [];
+                rawValues.forEach(value => {
+                    value.split(/\s*\/\s*|\s*,\s*/)
+                        .map(part => part.trim())
+                        .filter(part => part.length > 0)
+                        .forEach(user => {
+                            if (!parsedUsers.includes(user)) {
+                                parsedUsers.push(user);
+                            }
+                        });
+                });
+
+                if (parsedUsers[0]) licensePrimaryUsernameInput.value = parsedUsers[0];
+                if (parsedUsers[1]) licenseSecondaryUsernameInput.value = parsedUsers[1];
+                syncLicensePermissionUsernames();
+            }
+
+            if (addLicensePermissionBtn) {
+                addLicensePermissionBtn.addEventListener('click', function() {
+                    const tbody = document.getElementById('license-permission-items-body');
+                    if (!tbody) return;
+                    const index = tbody.getElementsByTagName('tr').length;
+                    const combinedUsernames = getCombinedLicenseUsernames();
+                    const row = `
+                        <tr>
+                            <td>
+                                <input class="license-permission-username" type="hidden" name="LicensePermissions[${index}].SapUsername" value="${combinedUsernames}">
+                                <input class="form-control" type="text" name="LicensePermissions[${index}].TCode">
+                            </td>
+                            <td><button type="button" class="btn btn-danger btn-sm remove-license-permission-item">Remove</button></td>
+                        </tr>`;
+                    tbody.insertAdjacentHTML('beforeend', row);
+                });
+            }
+
+            const licensePermissionBody = document.getElementById('license-permission-items-body');
+            if (licensePermissionBody) {
+                licensePermissionBody.addEventListener('click', function(e) {
+                    if (e.target && e.target.classList.contains('remove-license-permission-item')) {
+                        e.target.closest('tr').remove();
+                    }
+                });
+            }
+
             // Initial setup
             toggleMaterialFields();
             updateDownloadLink();
             fetchNextApprovers(); // Fetch approvers on page load if a type is already selected
+            hydrateLicenseUsernameInputsFromRows();
+            toggleLicenseRequestOptionFields();
 
             // Event Listeners
             requestTypeSelect.addEventListener('change', () => {
@@ -463,6 +574,16 @@
             nextResponsibleUserSelect.addEventListener('change', () => {
                  importNextResponsibleUserIdInput.value = nextResponsibleUserSelect.value;
             });
+            if (licensePrimaryUsernameInput) {
+                licensePrimaryUsernameInput.addEventListener('input', syncLicensePermissionUsernames);
+            }
+            if (licenseSecondaryUsernameInput) {
+                licenseSecondaryUsernameInput.addEventListener('input', syncLicensePermissionUsernames);
+            }
+            if (licenseRequestOptionSelect) {
+                licenseRequestOptionSelect.addEventListener('change', toggleLicenseRequestOptionFields);
+            }
+            createForm.addEventListener('submit', syncLicensePermissionUsernames);
             createForm.addEventListener('submit', checkResponsibleUser);
             importForm.addEventListener('submit', checkResponsibleUser);
         });

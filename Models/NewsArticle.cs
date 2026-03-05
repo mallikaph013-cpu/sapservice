@@ -17,7 +17,6 @@ namespace myapp.Models
 
         [Display(Name = "Image URL")]
         [StringLength(500)]
-        [Url]
         public string? ImageUrl { get; set; }
 
         [Display(Name = "Published Date")]

@@ -4,6 +4,9 @@ using myapp.Data;
 using myapp.Models;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
+using System.IO;
 
 namespace myapp.Controllers
 {
@@ -11,10 +14,12 @@ namespace myapp.Controllers
     public class NewsController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly IWebHostEnvironment _environment;
 
-        public NewsController(ApplicationDbContext context)
+        public NewsController(ApplicationDbContext context, IWebHostEnvironment environment)
         {
             _context = context;
+            _environment = environment;
         }
 
         // GET: News
@@ -54,10 +59,27 @@ namespace myapp.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "IT")]
-        public async Task<IActionResult> Create(NewsArticle article)
+        public async Task<IActionResult> Create(NewsArticle article, IFormFile? imageFile)
         {
             if (ModelState.IsValid)
             {
+                if (imageFile != null && imageFile.Length > 0)
+                {
+                    var uploadsDirectory = Path.Combine(_environment.WebRootPath, "uploads", "news");
+                    Directory.CreateDirectory(uploadsDirectory);
+
+                    var extension = Path.GetExtension(imageFile.FileName);
+                    var fileName = $"{Guid.NewGuid():N}{extension}";
+                    var filePath = Path.Combine(uploadsDirectory, fileName);
+
+                    await using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await imageFile.CopyToAsync(stream);
+                    }
+
+                    article.ImageUrl = $"/uploads/news/{fileName}";
+                }
+
                 _context.Add(article);
                 await _context.SaveChangesAsync();
                 TempData["SuccessMessage"] = "Article created successfully!";

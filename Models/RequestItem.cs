@@ -106,6 +106,7 @@ namespace myapp.Models
         // Navigation properties
         public ICollection<BomComponent> BomComponents { get; set; } = new List<BomComponent>();
         public ICollection<Routing> Routings { get; set; } = new List<Routing>();
+        public ICollection<LicensePermissionItem> LicensePermissions { get; set; } = new List<LicensePermissionItem>();
 
         public ICollection<BomEditComponent> bomEditComponents { get; set; } = new List<BomEditComponent>();
 

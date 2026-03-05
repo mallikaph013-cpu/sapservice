@@ -109,6 +109,7 @@ namespace myapp.Models.ViewModels
         // Flag to indicate this view was opened for an imported record
 
         public List<BomEditComponentViewModel> EditBOM { get; set; } = new List<BomEditComponentViewModel>();
+        public List<LicensePermissionViewModel> LicensePermissions { get; set; } = new List<LicensePermissionViewModel>();
 
         public bool FromImport { get; set; }
     }

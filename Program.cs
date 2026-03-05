@@ -8,9 +8,27 @@ using myapp.Services;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+var databaseProvider = builder.Configuration["DatabaseProvider"]?.Trim() ?? "Sqlite";
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlite(connectionString));
+{
+    if (databaseProvider.Equals("SqlServer", StringComparison.OrdinalIgnoreCase))
+    {
+        var sqlServerConnection = builder.Configuration.GetConnectionString("DefaultConnectionSqlServer")
+            ?? throw new InvalidOperationException("Connection string 'DefaultConnectionSqlServer' not found.");
+        options.UseSqlServer(sqlServerConnection);
+        return;
+    }
+
+    if (databaseProvider.Equals("Sqlite", StringComparison.OrdinalIgnoreCase))
+    {
+        var sqliteConnection = builder.Configuration.GetConnectionString("DefaultConnectionSqlite")
+            ?? throw new InvalidOperationException("Connection string 'DefaultConnectionSqlite' not found.");
+        options.UseSqlite(sqliteConnection);
+        return;
+    }
+
+    throw new InvalidOperationException("Invalid DatabaseProvider. Use 'Sqlite' or 'SqlServer'.");
+});
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 // Add Identity services & configure IT role claim

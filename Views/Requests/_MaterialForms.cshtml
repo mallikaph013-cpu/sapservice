@@ -402,3 +402,80 @@
         <button type="button" class="btn btn-primary btn-sm" id="add-routing-item">+ Add Routing</button>
     </div>
 </div>
+
+<div id="license-permission-fields-container" style="display: none;">
+    <hr />
+    <h4>สิทธิ์การใช้งาน SAP</h4>
+    <div class="row g-3 mb-3">
+        <div class="col-md-6">
+            <div class="form-group">
+                <label for="LicenseRequestOption" class="control-label">ประเภทคำร้องขอ</label>
+                <select id="LicenseRequestOption" name="LicenseRequestOption" class="form-select">
+                    <option value="">-- กรุณาเลือก --</option>
+                    <option value="NewUsername">ขอ Username ใหม่</option>
+                    <option value="AddPermission">ขอเพิ่มสิทธิ์การใช้งาน</option>
+                </select>
+            </div>
+        </div>
+    </div>
+    <div id="license-new-username-fields" style="display: none;">
+        <div class="row g-3 mb-3">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="LicenseUsernameFrom" class="control-label">Username From</label>
+                    <input type="text" id="LicenseUsernameFrom" name="LicenseUsernameFrom" class="form-control" autocomplete="off" />
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="LicenseUsernameTo" class="control-label">Username To</label>
+                    <input type="text" id="LicenseUsernameTo" name="LicenseUsernameTo" class="form-control" autocomplete="off" />
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="license-add-permission-fields" style="display: none;">
+        <div class="row g-3 mb-3">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="LicensePrimaryUsername" class="control-label">Username SAP 1</label>
+                    <input type="text" id="LicensePrimaryUsername" class="form-control" autocomplete="off" />
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="LicenseSecondaryUsername" class="control-label">Username SAP 2</label>
+                    <input type="text" id="LicenseSecondaryUsername" class="form-control" autocomplete="off" />
+                </div>
+            </div>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>T Code</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="license-permission-items-body">
+                    @if (Model.LicensePermissions != null)
+                    {
+                        @for (int i = 0; i < Model.LicensePermissions.Count; i++)
+                        {
+                            <tr>
+                                <td>
+                                    <input type="hidden" class="license-permission-username" asp-for="LicensePermissions[i].SapUsername" />
+                                    <input asp-for="LicensePermissions[i].TCode" class="form-control" />
+                                </td>
+                                <td><button type="button" class="btn btn-danger btn-sm remove-license-permission-item">Remove</button></td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+        <div class="mt-2">
+            <button type="button" class="btn btn-primary btn-sm" id="add-license-permission-item">+ Add Row</button>
+        </div>
+    </div>
+</div>

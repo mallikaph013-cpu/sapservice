@@ -67,6 +67,37 @@
     </div>
 </div>
 
+@if (TempData["ImportReport"] != null)
+{
+    <div class="alert alert-warning">
+        <strong>Import row report</strong>
+        <pre class="mb-0 mt-2" style="white-space: pre-wrap;">@TempData["ImportReport"]</pre>
+    </div>
+}
+
+<div class="card mb-4">
+    <div class="card-header">
+        <h2 class="card-title mb-0">Import Document Routing</h2>
+    </div>
+    <div class="card-body">
+        <form asp-action="Import" method="post" enctype="multipart/form-data">
+            <div class="row g-3 align-items-end">
+                <div class="col-md-9">
+                    <label for="documentRoutingImportFile" class="form-label">CSV/XLSX File</label>
+                    <input type="file" id="documentRoutingImportFile" name="importFile" class="form-control" accept=".csv,.xlsx" required />
+                    <small class="text-muted">Columns: DocumentType,DepartmentName,SectionName,PlantName,Step</small>
+                </div>
+                <div class="col-md-3">
+                    <div class="d-grid gap-2">
+                        <a asp-action="DownloadImportTemplate" class="btn btn-outline-secondary"><i class="fas fa-download me-1"></i> Download Template</a>
+                        <button type="submit" class="btn btn-success"><i class="fas fa-upload me-1"></i> Import</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
 @if (TempData["SuccessMessage"] != null)
 {
     <div class="alert alert-success">
