@@ -29,5 +29,14 @@ namespace myapp.Models
         
         [Display(Name = "Is Featured?")]
         public bool IsFeatured { get; set; } = false;
+
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+
+        [StringLength(256)]
+        public string CreatedBy { get; set; } = string.Empty;
+
+        [StringLength(256)]
+        public string UpdatedBy { get; set; } = string.Empty;
     }
 }

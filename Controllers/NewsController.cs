@@ -63,6 +63,9 @@ namespace myapp.Controllers
         {
             if (ModelState.IsValid)
             {
+                var actor = User.Identity?.Name ?? "System";
+                var now = DateTime.UtcNow;
+
                 if (imageFile != null && imageFile.Length > 0)
                 {
                     var uploadsDirectory = Path.Combine(_environment.WebRootPath, "uploads", "news");
@@ -79,6 +82,11 @@ namespace myapp.Controllers
 
                     article.ImageUrl = $"/uploads/news/{fileName}";
                 }
+
+                article.CreatedAt = now;
+                article.UpdatedAt = now;
+                article.CreatedBy = actor;
+                article.UpdatedBy = actor;
 
                 _context.Add(article);
                 await _context.SaveChangesAsync();
@@ -120,7 +128,21 @@ namespace myapp.Controllers
             {
                 try
                 {
-                    _context.Update(article);
+                    var existing = await _context.NewsArticles.FindAsync(id);
+                    if (existing == null)
+                    {
+                        return NotFound();
+                    }
+
+                    existing.Title = article.Title;
+                    existing.Content = article.Content;
+                    existing.ImageUrl = article.ImageUrl;
+                    existing.PublishedDate = article.PublishedDate;
+                    existing.Author = article.Author;
+                    existing.IsFeatured = article.IsFeatured;
+                    existing.UpdatedAt = DateTime.UtcNow;
+                    existing.UpdatedBy = User.Identity?.Name ?? "System";
+
                     await _context.SaveChangesAsync();
                      TempData["SuccessMessage"] = "Article updated successfully!";
                 }

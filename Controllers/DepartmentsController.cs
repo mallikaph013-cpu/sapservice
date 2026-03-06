@@ -46,6 +46,13 @@ namespace myapp.Controllers
         {
             if (ModelState.IsValid)
             {
+                var actor = User.Identity?.Name ?? "System";
+                var now = DateTime.UtcNow;
+                department.CreatedAt = now;
+                department.UpdatedAt = now;
+                department.CreatedBy = actor;
+                department.UpdatedBy = actor;
+
                 _context.Add(department);
                 await _context.SaveChangesAsync();
                 TempData["SuccessMessage"] = "Department created successfully!";
@@ -84,7 +91,16 @@ namespace myapp.Controllers
             {
                 try
                 {
-                    _context.Update(department);
+                    var existing = await _context.Departments.FindAsync(id);
+                    if (existing == null)
+                    {
+                        return NotFound();
+                    }
+
+                    existing.DepartmentName = department.DepartmentName;
+                    existing.UpdatedAt = DateTime.UtcNow;
+                    existing.UpdatedBy = User.Identity?.Name ?? "System";
+
                     await _context.SaveChangesAsync();
                     TempData["SuccessMessage"] = "Department updated successfully!";
                 }
@@ -214,7 +230,15 @@ namespace myapp.Controllers
                         continue;
                     }
 
-                    _context.Departments.Add(new Department { DepartmentName = row.DepartmentName });
+                    var now = DateTime.UtcNow;
+                    _context.Departments.Add(new Department
+                    {
+                        DepartmentName = row.DepartmentName,
+                        CreatedAt = now,
+                        UpdatedAt = now,
+                        CreatedBy = actor,
+                        UpdatedBy = actor
+                    });
                     imported++;
                 }
 

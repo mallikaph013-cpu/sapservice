@@ -270,13 +270,16 @@
                 toggleBoiCode();
             }
 
+            const getNextApproversUrl = '@Url.Action("GetNextApprovers", "Requests")';
+            const downloadTemplateUrl = '@Url.Action("DownloadTemplate", "Requests")';
+
             @* Check next Approve *@
             function fetchNextApprovers() {
                 const requestTypeValue = requestTypeSelect.value;
                 nextResponsibleUserSelect.innerHTML = '<option value="">-- Loading...--</option>';
 
                 if (requestTypeValue) {
-                    fetch(`/Requests/GetNextApprovers?requestType=${requestTypeValue}`)
+                    fetch(`${getNextApproversUrl}?requestType=${encodeURIComponent(requestTypeValue)}`)
                         .then(response => response.json())
                         .then(data => {
                             nextResponsibleUserSelect.innerHTML = '<option value="">-- Please select a responsible user --</option>';
@@ -301,7 +304,7 @@
             function updateDownloadLink() {
                 const selectedValue = importRequestTypeSelect ? importRequestTypeSelect.value : '';
                 if (selectedValue) {
-                    downloadLink.href = `/Requests/DownloadTemplate?requestType=${selectedValue}`;
+                    downloadLink.href = `${downloadTemplateUrl}?requestType=${encodeURIComponent(selectedValue)}`;
                     downloadLink.classList.remove('disabled');
                 } else {
                     downloadLink.href = '#';

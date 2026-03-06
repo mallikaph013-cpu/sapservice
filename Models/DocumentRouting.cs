@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System;
 
 namespace myapp.Models
 {
@@ -34,5 +35,14 @@ namespace myapp.Models
 
         [Required]
         public int Step { get; set; }
+
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+
+        [StringLength(256)]
+        public string CreatedBy { get; set; } = string.Empty;
+
+        [StringLength(256)]
+        public string UpdatedBy { get; set; } = string.Empty;
     }
 }

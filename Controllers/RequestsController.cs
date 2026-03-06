@@ -95,7 +95,9 @@ namespace myapp.Controllers
                 return Challenge(); // Should not happen for authorized users
             }
 
-            IQueryable<RequestItem> requestsQuery = _context.RequestItems.AsQueryable();
+            IQueryable<RequestItem> requestsQuery = _context.RequestItems
+                .Where(r => r.UsageStatus != 9)
+                .AsQueryable();
 
             // If the user is not in the "IT" role, filter the requests.
             if (!User.IsInRole("IT"))
@@ -489,6 +491,7 @@ namespace myapp.Controllers
                     Description = viewModel.Description,
                     Requester = viewModel.RequesterName,
                     Status = User.IsInRole("IT") ? viewModel.Status : "Pending",
+                    UsageStatus = 1,
                     RequestDate = DateTime.UtcNow,
                     NextApproverId = nextApproverId, // Set the next approver
 
@@ -821,6 +824,8 @@ namespace myapp.Controllers
                     requestItemToUpdate.RequestType = viewModel.RequestType.ToString();
                     requestItemToUpdate.Description = viewModel.Description;
                     requestItemToUpdate.Status = User.IsInRole("IT") ? viewModel.Status : requestItemToUpdate.Status;
+                    requestItemToUpdate.UpdatedAt = DateTime.UtcNow;
+                    requestItemToUpdate.UpdatedBy = User?.Identity?.Name ?? "Unknown";
 
                     if (!string.IsNullOrWhiteSpace(viewModel.NextResponsibleUserId))
                     {
@@ -986,14 +991,16 @@ namespace myapp.Controllers
                 return NotFound();
             }
 
-            _context.RequestItems.Remove(requestItem);
+            requestItem.UsageStatus = 9;
+            requestItem.UpdatedAt = DateTime.UtcNow;
+            requestItem.UpdatedBy = User?.Identity?.Name ?? "Unknown";
             await _context.SaveChangesAsync();
 
             await AddAuditLogAsync(
                 entityName: nameof(RequestItem),
                 entityId: requestItem.Id.ToString(),
-                action: "Delete",
-                details: $"RequestType={requestItem.RequestType}; Requester={requestItem.Requester}; Status={requestItem.Status}");
+                action: "SoftDelete",
+                details: $"RequestType={requestItem.RequestType}; Requester={requestItem.Requester}; Status={requestItem.Status}; UsageStatus=9");
 
             _logger.LogInformation(
                 "Delete POST succeeded for RequestId={RequestId}. RequestType={RequestType}, Requester={Requester}",
@@ -1001,7 +1008,7 @@ namespace myapp.Controllers
                 requestItem.RequestType,
                 requestItem.Requester);
 
-            TempData["SuccessMessage"] = "Request deleted successfully!";
+            TempData["SuccessMessage"] = "Request removed from active list successfully.";
             return RedirectToAction(nameof(Index));
         }
 
@@ -1067,6 +1074,7 @@ namespace myapp.Controllers
             {
                 r.Requester = r.Requester ?? $"{user.FirstName} {user.LastName}";
                 r.Status = r.Status ?? "Pending";
+                r.UsageStatus = r.UsageStatus == 0 ? 1 : r.UsageStatus;
                 r.RequestDate = r.RequestDate == default ? DateTime.UtcNow : r.RequestDate;
             }
 

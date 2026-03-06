@@ -69,6 +69,8 @@ namespace myapp.Controllers
         {
             if (ModelState.IsValid)
             {
+                var actor = User.Identity?.Name ?? "System";
+
                 var documentType = await _context.DocumentTypes.FirstOrDefaultAsync(d => d.Name == createModel.NewDocumentTypeName);
                 if (documentType == null)
                 {
@@ -91,7 +93,16 @@ namespace myapp.Controllers
                 var section = await _context.Sections.FirstOrDefaultAsync(s => s.SectionName == createModel.NewSectionName && s.DepartmentId == department.DepartmentId);
                 if (section == null)
                 {
-                    section = new Section { SectionName = createModel.NewSectionName, DepartmentId = department.DepartmentId };
+                    var sectionNow = DateTime.UtcNow;
+                    section = new Section
+                    {
+                        SectionName = createModel.NewSectionName,
+                        DepartmentId = department.DepartmentId,
+                        CreatedAt = sectionNow,
+                        UpdatedAt = sectionNow,
+                        CreatedBy = actor,
+                        UpdatedBy = actor
+                    };
                     _context.Sections.Add(section);
                 }
 
@@ -112,13 +123,18 @@ namespace myapp.Controllers
 
                 if (!routingExists)
                 {
+                    var now = DateTime.UtcNow;
                     var newRouting = new DocumentRouting
                     {
                         DocumentTypeId = documentType.DocumentTypeId,
                         DepartmentId = department.DepartmentId,
                         SectionId = section.SectionId,
                         PlantId = plant.PlantId,
-                        Step = createModel.Step
+                        Step = createModel.Step,
+                        CreatedAt = now,
+                        UpdatedAt = now,
+                        CreatedBy = actor,
+                        UpdatedBy = actor
                     };
                     _context.DocumentRoutings.Add(newRouting);
                     await _context.SaveChangesAsync();
@@ -190,6 +206,8 @@ namespace myapp.Controllers
             routingToUpdate.SectionId = documentRoutingFromForm.SectionId;
             routingToUpdate.PlantId = documentRoutingFromForm.PlantId;
             routingToUpdate.Step = documentRoutingFromForm.Step;
+            routingToUpdate.UpdatedAt = DateTime.UtcNow;
+            routingToUpdate.UpdatedBy = User.Identity?.Name ?? "System";
 
             try
             {
@@ -351,7 +369,15 @@ namespace myapp.Controllers
                     var department = await _context.Departments.FirstOrDefaultAsync(d => d.DepartmentName == row.DepartmentName);
                     if (department == null)
                     {
-                        department = new Department { DepartmentName = row.DepartmentName };
+                        var departmentNow = DateTime.UtcNow;
+                        department = new Department
+                        {
+                            DepartmentName = row.DepartmentName,
+                            CreatedAt = departmentNow,
+                            UpdatedAt = departmentNow,
+                            CreatedBy = actor,
+                            UpdatedBy = actor
+                        };
                         _context.Departments.Add(department);
                         await _context.SaveChangesAsync();
                     }
@@ -359,7 +385,16 @@ namespace myapp.Controllers
                     var section = await _context.Sections.FirstOrDefaultAsync(s => s.SectionName == row.SectionName && s.DepartmentId == department.DepartmentId);
                     if (section == null)
                     {
-                        section = new Section { SectionName = row.SectionName, DepartmentId = department.DepartmentId };
+                        var sectionNow = DateTime.UtcNow;
+                        section = new Section
+                        {
+                            SectionName = row.SectionName,
+                            DepartmentId = department.DepartmentId,
+                            CreatedAt = sectionNow,
+                            UpdatedAt = sectionNow,
+                            CreatedBy = actor,
+                            UpdatedBy = actor
+                        };
                         _context.Sections.Add(section);
                         await _context.SaveChangesAsync();
                     }
@@ -386,13 +421,18 @@ namespace myapp.Controllers
                         continue;
                     }
 
+                    var routingNow = DateTime.UtcNow;
                     _context.DocumentRoutings.Add(new DocumentRouting
                     {
                         DocumentTypeId = documentType.DocumentTypeId,
                         DepartmentId = department.DepartmentId,
                         SectionId = section.SectionId,
                         PlantId = plant.PlantId,
-                        Step = step
+                        Step = step,
+                        CreatedAt = routingNow,
+                        UpdatedAt = routingNow,
+                        CreatedBy = actor,
+                        UpdatedBy = actor
                     });
 
                     imported++;

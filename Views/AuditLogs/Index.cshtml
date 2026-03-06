@@ -73,7 +73,7 @@
                                     <td>@log.EntityName</td>
                                     <td>@log.EntityId</td>
                                     <td>@log.Action</td>
-                                    <td>@log.PerformedBy</td>
+                                    <td>@(string.IsNullOrWhiteSpace(log.PerformedBy) ? "Unknown" : log.PerformedBy)</td>
                                     <td class="pe-4">@log.Details</td>
                                 </tr>
                             }

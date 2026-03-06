@@ -78,7 +78,11 @@ namespace myapp.Controllers
                         LastName = model.LastName,
                         Department = department.DepartmentName,
                         Section = section.SectionName,
-                        IsIT = model.IsIT
+                        IsIT = model.IsIT,
+                        CreatedBy = User.Identity?.Name ?? "System",
+                        UpdatedBy = User.Identity?.Name ?? "System",
+                        CreatedAt = DateTime.UtcNow,
+                        UpdatedAt = DateTime.UtcNow
                     };
                     var result = await _userManager.CreateAsync(user, model.Password);
                     if (result.Succeeded)
@@ -164,6 +168,8 @@ namespace myapp.Controllers
                     user.Department = department.DepartmentName;
                     user.Section = section.SectionName;
                     user.IsIT = model.IsIT;
+                    user.UpdatedBy = User.Identity?.Name ?? "System";
+                    user.UpdatedAt = DateTime.UtcNow;
 
                     var result = await _userManager.UpdateAsync(user);
 

@@ -49,6 +49,13 @@ namespace myapp.Controllers
         {
             if (ModelState.IsValid)
             {
+                var actor = User.Identity?.Name ?? "System";
+                var now = DateTime.UtcNow;
+                section.CreatedAt = now;
+                section.UpdatedAt = now;
+                section.CreatedBy = actor;
+                section.UpdatedBy = actor;
+
                 _context.Add(section);
                 await _context.SaveChangesAsync();
                 TempData["SuccessMessage"] = "Section created successfully!";
@@ -89,7 +96,17 @@ namespace myapp.Controllers
             {
                 try
                 {
-                    _context.Update(section);
+                    var existing = await _context.Sections.FindAsync(id);
+                    if (existing == null)
+                    {
+                        return NotFound();
+                    }
+
+                    existing.SectionName = section.SectionName;
+                    existing.DepartmentId = section.DepartmentId;
+                    existing.UpdatedAt = DateTime.UtcNow;
+                    existing.UpdatedBy = User.Identity?.Name ?? "System";
+
                     await _context.SaveChangesAsync();
                     TempData["SuccessMessage"] = "Section updated successfully!";
                 }
@@ -213,7 +230,15 @@ namespace myapp.Controllers
                     var department = await _context.Departments.FirstOrDefaultAsync(d => d.DepartmentName == row.DepartmentName);
                     if (department == null)
                     {
-                        department = new Department { DepartmentName = row.DepartmentName };
+                        var now = DateTime.UtcNow;
+                        department = new Department
+                        {
+                            DepartmentName = row.DepartmentName,
+                            CreatedAt = now,
+                            UpdatedAt = now,
+                            CreatedBy = actor,
+                            UpdatedBy = actor
+                        };
                         _context.Departments.Add(department);
                         await _context.SaveChangesAsync();
                     }
@@ -226,7 +251,16 @@ namespace myapp.Controllers
                         continue;
                     }
 
-                    _context.Sections.Add(new Section { SectionName = row.SectionName, DepartmentId = department.DepartmentId });
+                    var sectionNow = DateTime.UtcNow;
+                    _context.Sections.Add(new Section
+                    {
+                        SectionName = row.SectionName,
+                        DepartmentId = department.DepartmentId,
+                        CreatedAt = sectionNow,
+                        UpdatedAt = sectionNow,
+                        CreatedBy = actor,
+                        UpdatedBy = actor
+                    });
                     imported++;
                 }
 

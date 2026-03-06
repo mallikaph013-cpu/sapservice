@@ -21,8 +21,16 @@ namespace myapp.Models
 
         public string Status { get; set; } = "Pending";
 
+        // 1 = Active, 9 = Soft deleted
+        public int UsageStatus { get; set; } = 1;
+
         [DataType(DataType.Date)]
         public DateTime RequestDate { get; set; } = DateTime.UtcNow;
+
+        public DateTime? UpdatedAt { get; set; }
+
+        [StringLength(256)]
+        public string? UpdatedBy { get; set; }
 
         // ID of the next person responsible for approval
         public string? NextApproverId { get; set; }

@@ -30,7 +30,7 @@ namespace myapp.Controllers
                                          Id = a.Id,
                                          IsFeatured = a.IsFeatured,
                                          Title = a.Title,
-                                         Excerpt = a.Content.Substring(0, Math.Min(a.Content.Length, 150)) + "...", // Create a short excerpt
+                                         Excerpt = a.Content.Substring(0, Math.Min(a.Content.Length, 150)) + "...",
                                          ImageUrl = a.ImageUrl,
                                          PublishedDate = a.PublishedDate,
                                          Author = a.Author,
