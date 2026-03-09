@@ -2018,8 +2018,10 @@ namespace myapp.Controllers
                 case RequestType.Routing:
                     headers.AddRange(new[] 
                     {
-                        "Counter", "Plant", "Material", "Description", "WorkCenter", "BaseQty", "Unit",
-                        "DirectLaborCosts", "DirectExpenses", "AllocationExpense"
+                        "Counter", "Plant", "Material", "Description", "WorkCenter",
+                        "BaseQty", "Unit", "DirectLaborCosts", "DirectExpenses", "AllocationExpense",
+                        "ProductionVersionCode", "Version", "ValidFrom", "ValidTo", "MaximumLotSize",
+                        "BomUsage", "Operation", "Alternative", "Group", "GroupCounter"
                     });
                     break;
                 case RequestType.AddStorage:

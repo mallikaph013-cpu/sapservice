@@ -357,6 +357,13 @@
             width: 28px;
             min-width: 28px;
             padding: 0.25rem;
+            background-color: #e9ecef;
+        }
+
+        #routing-fields-container input.form-control[readonly] {
+            background-color: #e9ecef;
+            color: #6c757d;
+            cursor: not-allowed;
         }
     </style>
     <hr />
@@ -374,7 +381,6 @@
                     <th class="routing-spacer-col"></th>
                     <th class="routing-spacer-col"></th>
                     <th class="routing-spacer-col"></th>
-                    <th class="routing-spacer-col"></th>
                     <th>Base Qty</th>
                     <th>Unit</th>
                     <th>Direct Labor Cost</th>
@@ -385,6 +391,18 @@
                     <th class="routing-spacer-col"></th>
                     <th class="routing-spacer-col"></th>
                     <th>Allocation Expense</th>
+                    <th>Production Version</th>
+                    <th>Version</th>
+                    <th class="routing-spacer-col"></th>
+                    <th>Valid From</th>
+                    <th>Valid To</th>
+                    <th>Maximum Lot Size</th>
+                    <th>Unit</th>
+                    <th>Operation</th>
+                    <th>Alternative</th>
+                    <th class="routing-spacer-col"></th>
+                    <th>Group</th>
+                    <th>Group Counter</th>
                     <th>Action</th>
                 </tr>
             </thead>
@@ -401,9 +419,8 @@
                             <td class="routing-spacer-col"></td>
                             <td class="routing-spacer-col"></td>
                             <td class="routing-spacer-col"></td>
-                            <td class="routing-spacer-col"></td>
-                            <td><input asp-for="Routings[i].BaseQty" class="form-control" /></td>
-                            <td><input asp-for="Routings[i].Unit" class="form-control" /></td>
+                            <td><input asp-for="Routings[i].BaseQty" class="form-control" value="@(Model.Routings[i].BaseQty ?? 1)" /></td>
+                            <td><input asp-for="Routings[i].Unit" class="form-control routing-unit-source" /></td>
                             <td><input asp-for="Routings[i].DirectLaborCosts" class="form-control" /></td>
                             <td><input asp-for="Routings[i].DirectExpenses" class="form-control" /></td>
                             <td class="routing-spacer-col"></td>
@@ -412,6 +429,18 @@
                             <td class="routing-spacer-col"></td>
                             <td class="routing-spacer-col"></td>
                             <td><input asp-for="Routings[i].AllocationExpense" class="form-control" /></td>
+                            <td><input asp-for="Routings[i].ProductionVersionCode" class="form-control" /></td>
+                            <td><input asp-for="Routings[i].Version" class="form-control" /></td>
+                            <td class="routing-spacer-col"></td>
+                            <td><input asp-for="Routings[i].ValidFrom" class="form-control" type="date" /></td>
+                            <td><input asp-for="Routings[i].ValidTo" class="form-control" type="date" /></td>
+                            <td><input asp-for="Routings[i].MaximumLotSize" class="form-control" /></td>
+                            <td><input asp-for="Routings[i].BomUsage" class="form-control routing-unit-mirror" readonly value="@(string.IsNullOrWhiteSpace(Model.Routings[i].BomUsage) ? Model.Routings[i].Unit : Model.Routings[i].BomUsage)" /></td>
+                            <td><input asp-for="Routings[i].Operation" class="form-control" value="@(string.IsNullOrWhiteSpace(Model.Routings[i].Operation) ? "1" : Model.Routings[i].Operation)" readonly /></td>
+                            <td><input asp-for="Routings[i].Alternative" class="form-control" value="@(string.IsNullOrWhiteSpace(Model.Routings[i].Alternative) ? "1" : Model.Routings[i].Alternative)" readonly /></td>
+                            <td class="routing-spacer-col"></td>
+                            <td><input asp-for="Routings[i].Group" class="form-control" /></td>
+                            <td><input asp-for="Routings[i].GroupCounter" class="form-control" value="@(string.IsNullOrWhiteSpace(Model.Routings[i].GroupCounter) ? "1" : Model.Routings[i].GroupCounter)" /></td>
                             <td><button type="button" class="btn btn-danger btn-sm remove-routing-item">Remove</button></td>
                         </tr>
                     }
