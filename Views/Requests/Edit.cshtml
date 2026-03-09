@@ -4,6 +4,7 @@
 
 @{
     ViewData["Title"] = "Edit Service Request";
+    var isRequesterEditor = ViewBag.IsRequesterEditor as bool? ?? false;
 }
 
 <style>
@@ -82,6 +83,26 @@
         transform: translateY(-2px);
         box-shadow: 0 6px 20px rgba(52, 152, 219, 0.3);
     }
+
+    .btn-save-orange {
+        background-color: #f97316;
+        border-color: #f97316;
+        color: #fff;
+        padding: 12px 30px;
+        font-size: 1rem;
+        font-weight: 600;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(249, 115, 22, 0.25);
+    }
+
+    .btn-save-orange:hover {
+        background-color: #ea580c;
+        border-color: #ea580c;
+        color: #fff;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(234, 88, 12, 0.35);
+    }
     
     .back-to-list {
         display: inline-block;
@@ -133,8 +154,8 @@
 
         <h4>Request Details</h4>
         <div class="row g-3 mb-4">
-             <div class="col-md-6"><div class="form-group"><label asp-for="RequestType" class="control-label"></label><select asp-for="RequestType" id="RequestType" class="form-select" asp-items="Html.GetEnumSelectList<myapp.Models.RequestType>()"></select><span asp-validation-for="RequestType" class="text-danger"></span></div></div>
-             <div class="col-md-6"><div class="form-group"><label asp-for="Plant" class="control-label"></label><select asp-for="Plant" class="form-select"><option value="">-- Select Plant --</option><option value="6021">6021 (Device)</option><option value="6031">6031 (Assembly)</option><option value="6051">6051 (Injection)</option><option value="6081">6081 (IPO)</option><option value="6060">6060</option></select><span asp-validation-for="Plant" class="text-danger"></span></div></div>
+             <div class="col-md-6"><div class="form-group"><label asp-for="RequestType" class="control-label"></label><select asp-for="RequestType" id="RequestType" class="form-select" asp-items="Html.GetEnumSelectList<myapp.Models.RequestType>()" disabled="@(!isRequesterEditor)"></select>@if (!isRequesterEditor) { <input type="hidden" asp-for="RequestType" /> }<span asp-validation-for="RequestType" class="text-danger"></span></div></div>
+             <div class="col-md-6"><div class="form-group"><label asp-for="Plant" class="control-label"></label><select asp-for="Plant" id="RequestPlant" class="form-select" disabled="@(!isRequesterEditor)"><option value="">-- Select Plant --</option><option value="6021">6021 (Device)</option><option value="6031">6031 (Assembly)</option><option value="6051">6051 (Injection)</option><option value="6081">6081 (IPO)</option><option value="6060">6060</option></select>@if (!isRequesterEditor) { <input type="hidden" asp-for="Plant" /> }<span asp-validation-for="Plant" class="text-danger"></span></div></div>
              <div class="col-md-12">
                  <div class="form-group">
                     <label asp-for="Description" class="control-label"></label>
@@ -194,7 +215,7 @@
                 <i class="fas fa-save me-2"></i>Save Changes
             </button> *@
 
-            <button type="button" id="create-submit-button" class="btn btn-primary" onclick="saveForm()">
+            <button type="button" id="create-submit-button" class="btn btn-save-orange" onclick="saveForm()">
                 <i class="fas fa-save me-2"></i>Save Changes
             </button>
 
@@ -214,6 +235,8 @@
     <script>
     document.addEventListener('DOMContentLoaded', function () {
         const requestTypeSelect = document.getElementById('RequestType');
+        const requestPlantSelect = document.getElementById('RequestPlant');
+        const requesterNameInput = document.getElementById('RequesterName');
         const materialFieldsContainer = document.getElementById('material-fields-container');
         const allMaterialFields = materialFieldsContainer ? materialFieldsContainer.querySelectorAll('[data-types]') : [];
         const bomContainer = document.getElementById('bom-fields-container');
@@ -323,47 +346,59 @@
             if (!requestTypeSelect || !nextResponsibleUserSelect) return;
 
             const requestTypeValue = requestTypeSelect.value;
+            const selectedPlant = requestPlantSelect ? requestPlantSelect.value : '';
+            const requesterNameValue = requesterNameInput ? requesterNameInput.value : '';
             nextResponsibleUserSelect.innerHTML = '<option value="">-- Loading... --</option>';
+
+            const renderApproverOptions = (data) => {
+                nextResponsibleUserSelect.innerHTML = '<option value="">-- Please select a responsible user --</option>';
+
+                let matchedCurrentApprover = false;
+
+                data.forEach(user => {
+                    const stepPrefix = user.step ? `Step ${user.step} - ` : '';
+                    const option = new Option(`${stepPrefix}${user.fullName}`, user.id);
+                    if (currentNextApproverId && (user.id === currentNextApproverId || user.id.startsWith(currentNextApproverId + '|'))) {
+                        option.selected = true;
+                        matchedCurrentApprover = true;
+                    }
+                    nextResponsibleUserSelect.add(option);
+                });
+
+                if (currentNextApproverId && !matchedCurrentApprover) {
+                    const fallbackOption = new Option(`${currentNextApproverName} (Current)`, currentNextApproverId);
+                    fallbackOption.selected = true;
+                    nextResponsibleUserSelect.add(fallbackOption);
+                }
+            };
 
             if (!requestTypeValue) {
                 nextResponsibleUserSelect.innerHTML = '<option value="">-- Please select a request type first --</option>';
                 return;
             }
 
-            fetch(`/Requests/GetNextApprovers?requestType=${requestTypeValue}`)
+            fetch(`/Requests/GetNextApprovers?requestType=${encodeURIComponent(requestTypeValue)}&plant=${encodeURIComponent(selectedPlant)}&requesterName=${encodeURIComponent(requesterNameValue)}&currentApproverId=${encodeURIComponent(currentNextApproverId || '')}`)
                 .then(response => response.json())
                 .then(data => {
-                    nextResponsibleUserSelect.innerHTML = '<option value="">-- Please select a responsible user --</option>';
-
-                    let matchedCurrentApprover = false;
-
                     if (!data || data.length === 0) {
-                        if (currentNextApproverId) {
-                            nextResponsibleUserSelect.innerHTML = '';
-                            const fallbackOption = new Option(currentNextApproverName, currentNextApproverId);
-                            fallbackOption.selected = true;
-                            nextResponsibleUserSelect.add(fallbackOption);
-                        }
-                        else {
-                        nextResponsibleUserSelect.innerHTML = '<option value="">-- No users found --</option>';
-                        }
-                        return;
+                        // Fallback: retry without plant filter in case route config uses different plant labels.
+                        return fetch(`/Requests/GetNextApprovers?requestType=${encodeURIComponent(requestTypeValue)}&requesterName=${encodeURIComponent(requesterNameValue)}&currentApproverId=${encodeURIComponent(currentNextApproverId || '')}`)
+                            .then(r => r.json())
+                            .then(fallbackData => {
+                                if (fallbackData && fallbackData.length > 0) {
+                                    renderApproverOptions(fallbackData);
+                                } else if (currentNextApproverId) {
+                                    nextResponsibleUserSelect.innerHTML = '';
+                                    const fallbackOption = new Option(currentNextApproverName, currentNextApproverId);
+                                    fallbackOption.selected = true;
+                                    nextResponsibleUserSelect.add(fallbackOption);
+                                } else {
+                                    nextResponsibleUserSelect.innerHTML = '<option value="">-- No users found --</option>';
+                                }
+                            });
                     }
 
-                    data.forEach(user => {
-                        const option = new Option(user.fullName, user.id);
-                        if (currentNextApproverId && (user.id === currentNextApproverId || user.id.startsWith(currentNextApproverId + '|'))) {
-                            option.selected = true;
-                            matchedCurrentApprover = true;
-                        }
-                        nextResponsibleUserSelect.add(option);
-                    });
-
-                    if (currentNextApproverId && !matchedCurrentApprover) {
-                        const fallbackOption = new Option(`${currentNextApproverName} (Current)`, currentNextApproverId);
-                        fallbackOption.selected = true;
-                        nextResponsibleUserSelect.add(fallbackOption);
-                    }
+                    renderApproverOptions(data);
                 })
                 .catch(() => {
                     if (currentNextApproverId) {
@@ -412,19 +447,27 @@
             const index = tbody.rows.length;
             const row = `
                 <tr>
+                    <td><input class="form-control" type="text" name="Routings[${index}].Counter"></td>
+                    <td><input class="form-control" type="text" name="Routings[${index}].Plant"></td>
                     <td><input class="form-control" type="text" name="Routings[${index}].Material"></td>
+                    <td><input class="form-control" type="text" name="Routings[${index}].Description"></td>
                     <td><input class="form-control" type="text" name="Routings[${index}].WorkCenter"></td>
-                    <td><input class="form-control" type="text" name="Routings[${index}].Operation"></td>
+                    <td class="routing-spacer-col"></td>
+                    <td class="routing-spacer-col"></td>
+                    <td class="routing-spacer-col"></td>
+                    <td class="routing-spacer-col"></td>
+                    <td class="routing-spacer-col"></td>
                     <td><input class="form-control" type="number" name="Routings[${index}].BaseQty"></td>
                     <td><input class="form-control" type="text" name="Routings[${index}].Unit"></td>
                     <td><input class="form-control" type="number" step="0.01" name="Routings[${index}].DirectLaborCosts"></td>
-                    <td><input class="form-control" type="text" name="Routings[${index}].ProductionVersionCode"></td>
-                    <td><input class="form-control" type="text" name="Routings[${index}].Version"></td>
-                    <td><input class="form-control" type="date" name="Routings[${index}].ValidFrom"></td>
-                    <td><input class="form-control" type="date" name="Routings[${index}].ValidTo"></td>
-                    <td><input class="form-control" type="number" step="0.01" name="Routings[${index}].MaximumLotSize"></td>
-                    <td><input class="form-control" type="text" name="Routings[${index}].Group"></td>
-                    <td><input class="form-control" type="text" name="Routings[${index}].GroupCounter"></td>
+                    <td><input class="form-control" type="number" step="0.01" name="Routings[${index}].DirectExpenses"></td>
+                    <td class="routing-spacer-col"></td>
+                    <td class="routing-spacer-col"></td>
+                    <td class="routing-spacer-col"></td>
+                    <td class="routing-spacer-col"></td>
+                    <td class="routing-spacer-col"></td>
+                    <td><input class="form-control" type="number" step="0.01" name="Routings[${index}].AllocationExpense"></td>
+                   
                     <td><button type="button" class="btn btn-danger btn-sm remove-routing-item">Remove</button></td>
                 </tr>`;
             tbody.insertAdjacentHTML('beforeend', row);
@@ -522,6 +565,10 @@
             toggleMaterialFields();
             fetchNextApprovers();
         });
+
+        if (requestPlantSelect) {
+            requestPlantSelect.addEventListener('change', fetchNextApprovers);
+        }
         if (licenseRequestOptionSelect) {
             licenseRequestOptionSelect.addEventListener('change', toggleLicenseRequestOptionFields);
         }

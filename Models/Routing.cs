@@ -15,6 +15,8 @@ namespace myapp.Models
         
         public string? Material { get; set; }
         public string? Description { get; set; }
+        public string? Counter { get; set; }
+        public string? Plant { get; set; }
         public string? WorkCenter { get; set; }
         public string? Operation { get; set; }
 
@@ -37,6 +39,8 @@ namespace myapp.Models
 
         [Column(TypeName = "decimal(18, 5)")]
         public decimal? MaximumLotSize { get; set; }
+        public string? Alternative { get; set; }
+        public string? BomUsage { get; set; }
         public string? Group { get; set; }
         public string? GroupCounter { get; set; }
     }

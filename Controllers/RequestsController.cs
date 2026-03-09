@@ -87,6 +87,35 @@ namespace myapp.Controllers
             }
         }
 
+        private void SetRoutingProperty(Routing routing, string propertyName, string value)
+        {
+            if (string.IsNullOrWhiteSpace(value)) return;
+
+            try
+            {
+                var propertyInfo = GetPropertyByHeader(typeof(Routing), propertyName);
+                if (propertyInfo == null || !propertyInfo.CanWrite) return;
+
+                var targetType = Nullable.GetUnderlyingType(propertyInfo.PropertyType) ?? propertyInfo.PropertyType;
+                object convertedValue;
+
+                if (targetType == typeof(decimal))
+                    convertedValue = decimal.Parse(value, CultureInfo.InvariantCulture);
+                else if (targetType == typeof(int))
+                    convertedValue = int.Parse(value, CultureInfo.InvariantCulture);
+                else if (targetType == typeof(DateTime))
+                    convertedValue = DateTime.Parse(value, CultureInfo.InvariantCulture);
+                else
+                    convertedValue = Convert.ChangeType(value, targetType, CultureInfo.InvariantCulture);
+
+                propertyInfo.SetValue(routing, convertedValue, null);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Could not set Routing property {PropertyName} with value {Value}", propertyName, value);
+            }
+        }
+
         public async Task<IActionResult> Index(string? searchTerm)
         {
             var user = await _userManager.GetUserAsync(User);
@@ -95,18 +124,81 @@ namespace myapp.Controllers
                 return Challenge(); // Should not happen for authorized users
             }
 
-            IQueryable<RequestItem> requestsQuery = _context.RequestItems
+            var allRequests = await _context.RequestItems
                 .Where(r => r.UsageStatus != 9)
-                .AsQueryable();
+                .ToListAsync();
 
-            // If the user is not in the "IT" role, filter the requests.
-            if (!User.IsInRole("IT"))
+            List<RequestItem> requests;
+
+            if (User.IsInRole("IT"))
             {
-                var currentUserName = $"{user.FirstName} {user.LastName}";
-                var userId = user.Id;
+                requests = allRequests;
+            }
+            else
+            {
+                var currentUserName = $"{user.FirstName} {user.LastName}".Trim();
+                var currentUserId = user.Id;
+                var currentActor = (User?.Identity?.Name ?? string.Empty).Trim();
+                var currentUserDepartment = (user.Department ?? string.Empty).Trim();
+                var currentUserSection = (user.Section ?? string.Empty).Trim();
 
-                // A user sees their own requests OR requests where they are the next approver.
-                requestsQuery = requestsQuery.Where(r => r.Requester == currentUserName || r.NextApproverId == userId);
+                var participatedRequestIds = await _context.AuditLogs
+                    .Where(a => a.EntityName == nameof(RequestItem)
+                        && (a.Action == "Create" || a.Action == "Update")
+                        && (
+                            (!string.IsNullOrWhiteSpace(currentActor) && a.PerformedBy == currentActor)
+                            || a.PerformedBy == currentUserName))
+                    .Select(a => a.EntityId)
+                    .ToListAsync();
+
+                var participatedIdSet = participatedRequestIds
+                    .Where(id => int.TryParse(id, out _))
+                    .Select(id => int.Parse(id!))
+                    .ToHashSet();
+
+                var routingRules = await _context.DocumentRoutings
+                    .Include(dr => dr.DocumentType)
+                    .Include(dr => dr.Department)
+                    .Include(dr => dr.Section)
+                    .Include(dr => dr.Plant)
+                    .ToListAsync();
+
+                bool IsUserInvolvedByRouting(RequestItem request)
+                {
+                    if (string.IsNullOrWhiteSpace(request.RequestType)) return false;
+
+                    var normalizedPlant = (request.Plant ?? string.Empty).Trim();
+
+                    var matchedRules = routingRules.Where(dr =>
+                        dr.DocumentType?.Name == request.RequestType &&
+                        (string.IsNullOrWhiteSpace(normalizedPlant)
+                            || dr.Plant.PlantName == normalizedPlant
+                            || dr.Plant.PlantName.StartsWith(normalizedPlant + " ")
+                            || dr.Plant.PlantName.StartsWith(normalizedPlant + "(")));
+
+                    return matchedRules.Any(dr =>
+                    {
+                        var departmentName = (dr.Department?.DepartmentName ?? string.Empty).Trim();
+                        var sectionName = (dr.Section?.SectionName ?? string.Empty).Trim();
+
+                        var departmentMatched = string.IsNullOrWhiteSpace(departmentName)
+                            || string.Equals(departmentName, currentUserDepartment, StringComparison.OrdinalIgnoreCase);
+                        var sectionMatched = string.IsNullOrWhiteSpace(sectionName)
+                            || string.Equals(sectionName, currentUserSection, StringComparison.OrdinalIgnoreCase);
+
+                        return departmentMatched && sectionMatched;
+                    });
+                }
+
+                requests = allRequests
+                    .Where(r =>
+                        string.Equals(r.Requester, currentUserName, StringComparison.OrdinalIgnoreCase)
+                        || string.Equals(r.NextApproverId, currentUserId, StringComparison.Ordinal)
+                        || (!string.IsNullOrWhiteSpace(r.UpdatedBy)
+                            && (!string.IsNullOrWhiteSpace(currentActor) && string.Equals(r.UpdatedBy, currentActor, StringComparison.OrdinalIgnoreCase)))
+                        || participatedIdSet.Contains(r.Id)
+                        || IsUserInvolvedByRouting(r))
+                    .ToList();
             }
 
             if (!string.IsNullOrWhiteSpace(searchTerm))
@@ -115,18 +207,135 @@ namespace myapp.Controllers
                 var isDateSearch = DateTime.TryParse(searchTerm, out var parsedDate);
                 var searchDate = parsedDate.Date;
 
-                requestsQuery = requestsQuery.Where(r =>
-                    (r.RequestType != null && r.RequestType.Contains(searchTerm)) ||
-                    (r.Status != null && r.Status.Contains(searchTerm)) ||
-                    (r.ItemCode != null && r.ItemCode.Contains(searchTerm)) ||
-                    (isDateSearch && r.RequestDate.Date == searchDate)
-                );
+                requests = requests.Where(r =>
+                    (!string.IsNullOrWhiteSpace(r.RequestType) && r.RequestType.Contains(searchTerm, StringComparison.OrdinalIgnoreCase))
+                    || (!string.IsNullOrWhiteSpace(r.Status) && r.Status.Contains(searchTerm, StringComparison.OrdinalIgnoreCase))
+                    || (!string.IsNullOrWhiteSpace(r.ItemCode) && r.ItemCode.Contains(searchTerm, StringComparison.OrdinalIgnoreCase))
+                    || (isDateSearch && r.RequestDate.Date == searchDate)
+                ).ToList();
             }
 
             ViewBag.SearchTerm = searchTerm;
 
-            // Order the results and execute the query.
-            var requests = await requestsQuery.OrderByDescending(r => r.RequestDate).ToListAsync();
+            requests = requests.OrderByDescending(r => r.RequestDate).ToList();
+
+            var requestIds = requests.Select(r => r.Id.ToString()).ToList();
+            var updatedRequestIdSet = (await _context.AuditLogs
+                .Where(a => a.EntityName == nameof(RequestItem)
+                    && a.Action == "Update"
+                    && a.EntityId != null
+                    && requestIds.Contains(a.EntityId))
+                .Select(a => a.EntityId!)
+                .ToListAsync())
+                .Where(id => int.TryParse(id, out _))
+                .Select(id => int.Parse(id))
+                .ToHashSet();
+
+            var allUsers = await _userManager.Users.ToListAsync();
+            var usersById = allUsers.ToDictionary(u => u.Id, u => u);
+
+            var nextApproverNameByRequestId = requests.ToDictionary(
+                r => r.Id,
+                r =>
+                {
+                    if (string.IsNullOrWhiteSpace(r.NextApproverId))
+                    {
+                        return "-";
+                    }
+
+                    return usersById.TryGetValue(r.NextApproverId, out var nextApprover)
+                        ? $"{nextApprover.FirstName} {nextApprover.LastName}".Trim()
+                        : "-";
+                });
+
+            var allRoutingRules = await _context.DocumentRoutings
+                .Include(dr => dr.DocumentType)
+                .Include(dr => dr.Department)
+                .Include(dr => dr.Section)
+                .Include(dr => dr.Plant)
+                .OrderBy(dr => dr.Step)
+                .ThenBy(dr => dr.Id)
+                .ToListAsync();
+
+            bool IsAtFinalStep(RequestItem request)
+            {
+                if (string.IsNullOrWhiteSpace(request.RequestType) || string.IsNullOrWhiteSpace(request.NextApproverId))
+                {
+                    return false;
+                }
+
+                if (!usersById.TryGetValue(request.NextApproverId, out var currentApprover))
+                {
+                    return false;
+                }
+
+                var normalizedPlant = (request.Plant ?? string.Empty).Trim();
+                var matchedRules = allRoutingRules
+                    .Where(dr => dr.DocumentType?.Name == request.RequestType)
+                    .Where(dr => string.IsNullOrWhiteSpace(normalizedPlant)
+                        || dr.Plant.PlantName == normalizedPlant
+                        || dr.Plant.PlantName.StartsWith(normalizedPlant + " ")
+                        || dr.Plant.PlantName.StartsWith(normalizedPlant + "("))
+                    .ToList();
+
+                if (!matchedRules.Any())
+                {
+                    return false;
+                }
+
+                var stepCandidates = new List<(int Step, List<ApplicationUser> Users)>();
+                foreach (var rule in matchedRules)
+                {
+                    var departmentName = (rule.Department?.DepartmentName ?? string.Empty).Trim();
+                    var sectionName = (rule.Section?.SectionName ?? string.Empty).Trim();
+
+                    var usersInRule = allUsers.AsEnumerable();
+
+                    if (!string.IsNullOrWhiteSpace(departmentName))
+                    {
+                        usersInRule = usersInRule.Where(u => !string.IsNullOrWhiteSpace(u.Department)
+                            && string.Equals(u.Department.Trim(), departmentName, StringComparison.OrdinalIgnoreCase));
+                    }
+
+                    if (!string.IsNullOrWhiteSpace(sectionName))
+                    {
+                        usersInRule = usersInRule.Where(u => !string.IsNullOrWhiteSpace(u.Section)
+                            && string.Equals(u.Section.Trim(), sectionName, StringComparison.OrdinalIgnoreCase));
+                    }
+
+                    var ruleUsers = usersInRule.ToList();
+                    if (ruleUsers.Any())
+                    {
+                        stepCandidates.Add((rule.Step, ruleUsers));
+                    }
+                }
+
+                if (!stepCandidates.Any())
+                {
+                    return false;
+                }
+
+                var currentStep = stepCandidates
+                    .Where(c => c.Users.Any(u => u.Id == currentApprover.Id))
+                    .Select(c => c.Step)
+                    .DefaultIfEmpty(0)
+                    .Min();
+
+                if (currentStep == 0)
+                {
+                    return false;
+                }
+
+                return !stepCandidates.Any(c => c.Step > currentStep);
+            }
+
+            var hideDeleteIdSet = requests
+                .Where(r => updatedRequestIdSet.Contains(r.Id) || IsAtFinalStep(r))
+                .Select(r => r.Id)
+                .ToHashSet();
+
+            ViewBag.HideDeleteIdSet = hideDeleteIdSet;
+            ViewBag.NextApproverNameByRequestId = nextApproverNameByRequestId;
             
             return View(requests);
         }
@@ -396,7 +605,8 @@ namespace myapp.Controllers
 
         private void ValidateRequest(CreateRequestViewModel viewModel)
         {
-            if (viewModel.RequestType == RequestType.LicensePermission)
+            if (viewModel.RequestType == RequestType.LicensePermission ||
+                viewModel.RequestType == RequestType.Routing)
             {
                 return;
             }
@@ -559,6 +769,8 @@ namespace myapp.Controllers
                     {
                         Material = r.Material,
                         Description = r.Description,
+                        Counter = r.Counter,
+                        Plant = r.Plant,
                         WorkCenter = r.WorkCenter,
                         Operation = r.Operation,
                         BaseQty = r.BaseQty,
@@ -571,6 +783,8 @@ namespace myapp.Controllers
                         ValidFrom = r.ValidFrom,
                         ValidTo = r.ValidTo,
                         MaximumLotSize = r.MaximumLotSize,
+                        Alternative = r.Alternative,
+                        BomUsage = r.BomUsage,
                         Group = r.Group,
                         GroupCounter = r.GroupCounter
                     }).ToList(),
@@ -626,6 +840,13 @@ namespace myapp.Controllers
             {
                 return NotFound();
             }
+
+            var currentUser = await _userManager.GetUserAsync(User);
+            var currentUserFullName = currentUser == null
+                ? string.Empty
+                : $"{currentUser.FirstName} {currentUser.LastName}".Trim();
+            var isRequesterEditor = !string.IsNullOrWhiteSpace(currentUserFullName)
+                && string.Equals(currentUserFullName, requestItem.Requester?.Trim(), StringComparison.OrdinalIgnoreCase);
 
             // Find the original requester to populate their details
             var requesterUser = await _userManager.Users.FirstOrDefaultAsync(u => (u.FirstName + " " + u.LastName) == requestItem.Requester);
@@ -712,6 +933,8 @@ namespace myapp.Controllers
                     Id = r.Id,
                     Material = r.Material,
                     Description = r.Description,
+                    Counter = r.Counter,
+                    Plant = r.Plant,
                     WorkCenter = r.WorkCenter,
                     Operation = r.Operation,
                     BaseQty = r.BaseQty,
@@ -724,6 +947,8 @@ namespace myapp.Controllers
                     ValidFrom = r.ValidFrom,
                     ValidTo = r.ValidTo,
                     MaximumLotSize = r.MaximumLotSize,
+                    Alternative = r.Alternative,
+                    BomUsage = r.BomUsage,
                     Group = r.Group,
                     GroupCounter = r.GroupCounter
                 }).ToList(),
@@ -745,6 +970,7 @@ namespace myapp.Controllers
             ViewBag.CurrentNextApproverName = currentApproverUser != null
                 ? $"{currentApproverUser.FirstName} {currentApproverUser.LastName}"
                 : "Current Responsible User";
+            ViewBag.IsRequesterEditor = isRequesterEditor;
 
             return View("Edit", viewModel); 
         }
@@ -819,9 +1045,19 @@ namespace myapp.Controllers
                 {
                     var previousStatus = requestItemToUpdate.Status;
                     var previousNextApproverId = requestItemToUpdate.NextApproverId;
+                    var currentUser = await _userManager.GetUserAsync(User);
+                    var currentUserFullName = currentUser == null
+                        ? string.Empty
+                        : $"{currentUser.FirstName} {currentUser.LastName}".Trim();
+                    var isRequesterEditor = !string.IsNullOrWhiteSpace(currentUserFullName)
+                        && string.Equals(currentUserFullName, requestItemToUpdate.Requester?.Trim(), StringComparison.OrdinalIgnoreCase);
 
                     // Update scalar properties from the view model
-                    requestItemToUpdate.RequestType = viewModel.RequestType.ToString();
+                    if (isRequesterEditor)
+                    {
+                        requestItemToUpdate.RequestType = viewModel.RequestType.ToString();
+                        requestItemToUpdate.Plant = viewModel.Plant;
+                    }
                     requestItemToUpdate.Description = viewModel.Description;
                     requestItemToUpdate.Status = User.IsInRole("IT") ? viewModel.Status : requestItemToUpdate.Status;
                     requestItemToUpdate.UpdatedAt = DateTime.UtcNow;
@@ -832,7 +1068,6 @@ namespace myapp.Controllers
                         var nextApproverParts = viewModel.NextResponsibleUserId.Split('|');
                         requestItemToUpdate.NextApproverId = nextApproverParts.Length > 0 ? nextApproverParts[0] : viewModel.NextResponsibleUserId;
                     }
-                    requestItemToUpdate.Plant = viewModel.Plant;
                     requestItemToUpdate.ItemCode = viewModel.ItemCode;
                     requestItemToUpdate.EnglishMatDescription = viewModel.EnglishMatDescription;
                     requestItemToUpdate.ModelName = viewModel.ModelName;
@@ -900,6 +1135,8 @@ namespace myapp.Controllers
                     {
                         Material = r.Material,
                         Description = r.Description,
+                        Counter = r.Counter,
+                        Plant = r.Plant,
                         WorkCenter = r.WorkCenter,
                         Operation = r.Operation,
                         BaseQty = r.BaseQty,
@@ -912,6 +1149,8 @@ namespace myapp.Controllers
                         ValidFrom = r.ValidFrom,
                         ValidTo = r.ValidTo,
                         MaximumLotSize = r.MaximumLotSize,
+                        Alternative = r.Alternative,
+                        BomUsage = r.BomUsage,
                         Group = r.Group,
                         GroupCounter = r.GroupCounter
                     }).ToList();
@@ -1354,6 +1593,54 @@ namespace myapp.Controllers
                                 TempData["ErrorMessage"] = "The file was processed but no Edit BOM rows were found. Please check the template and data.";
                             }
                         }
+                        else if (requestType == RequestType.Routing)
+                        {
+                            var routings = new List<Routing>();
+                            var headerColumns = headerMap.Values.ToList();
+
+                            for (int rowNum = 2; rowNum <= lastRowNumber; rowNum++)
+                            {
+                                var row = worksheet.Row(rowNum);
+                                if (row == null)
+                                    continue;
+
+                                bool hasData = headerColumns.Any(col => !string.IsNullOrWhiteSpace(row.Cell(col).GetFormattedString()));
+                                if (!hasData)
+                                    continue;
+
+                                var routing = new Routing();
+                                foreach (var header in headerMap)
+                                {
+                                    var cellValue = row.Cell(header.Value).GetFormattedString();
+                                    SetRoutingProperty(routing, header.Key, cellValue);
+                                }
+
+                                routings.Add(routing);
+                            }
+
+                            parsedDataRows = routings.Count;
+
+                            if (routings.Any())
+                            {
+                                var requestItem = new RequestItem
+                                {
+                                    RequestType = requestType.ToString(),
+                                    Requester = $"{user.FirstName} {user.LastName}",
+                                    Status = "Pending",
+                                    RequestDate = DateTime.UtcNow,
+                                    NextApproverId = nextApproverId,
+                                    Description = $"Imported {requestTypeString} routing data on {DateTime.UtcNow.ToShortDateString()}",
+                                    Plant = routings.FirstOrDefault(r => !string.IsNullOrWhiteSpace(r.Plant))?.Plant,
+                                    Routings = routings
+                                };
+
+                                newRequests.Add(requestItem);
+                            }
+                            else
+                            {
+                                TempData["ErrorMessage"] = "The file was processed but no Routing rows were found. Please check the template and data.";
+                            }
+                        }
                         else
                         {
                             for (int rowNum = 2; rowNum <= lastRowNumber; rowNum++)
@@ -1482,15 +1769,22 @@ namespace myapp.Controllers
         }
         
         [HttpGet]
-        public async Task<IActionResult> GetNextApprovers(RequestType requestType)
+        public async Task<IActionResult> GetNextApprovers(RequestType requestType, string? plant, string? requesterName, string? currentApproverId)
         {
             var requestTypeName = requestType.ToString();
+            var normalizedPlant = (plant ?? string.Empty).Trim();
             var routings = await _context.DocumentRoutings
                 .Include(dr => dr.DocumentType)
                 .Include(dr => dr.Department)
                 .Include(dr => dr.Section) // Include Section data
+                .Include(dr => dr.Plant)
                 .Where(dr => dr.DocumentType.Name == requestTypeName)
+                .Where(dr => string.IsNullOrWhiteSpace(normalizedPlant)
+                    || dr.Plant.PlantName == normalizedPlant
+                    || dr.Plant.PlantName.StartsWith(normalizedPlant + " ")
+                    || dr.Plant.PlantName.StartsWith(normalizedPlant + "("))
                 .OrderBy(dr => dr.Step)
+                .ThenBy(dr => dr.Id)
                 .ToListAsync();
 
             if (!routings.Any())
@@ -1499,7 +1793,7 @@ namespace myapp.Controllers
             }
 
             var allUsers = await _userManager.Users.OrderBy(u => u.FirstName).ThenBy(u => u.LastName).ToListAsync();
-            var approvers = new List<object>();
+            var stepCandidates = new List<(int Step, int RoutingId, string Rule, List<ApplicationUser> Users)>();
 
             foreach (var stepRouting in routings)
             {
@@ -1527,23 +1821,78 @@ namespace myapp.Controllers
                     var ruleForDisplay = $"Step {stepRouting.Step}: {departmentName}" + 
                                          (string.IsNullOrEmpty(sectionName) ? "" : $" / {sectionName}");
 
-                    foreach (var user in foundUsers)
-                    {
-                        approvers.Add(new
-                        {
-                            Id = $"{user.Id}|{stepRouting.Id}",
-                            FullName = $"{user.FirstName} {user.LastName} (Assign to {ruleForDisplay})"
-                        });
-                    }
+                    stepCandidates.Add((stepRouting.Step, stepRouting.Id, ruleForDisplay, foundUsers));
                 }
             }
-            
-            var distinctApprovers = approvers
-                .GroupBy(a => ((dynamic)a).Id)
-                .Select(g => g.First())
+
+            if (!stepCandidates.Any())
+            {
+                return Json(new List<object>());
+            }
+
+            var availableSteps = stepCandidates
+                .Select(c => c.Step)
+                .Distinct()
+                .OrderBy(s => s)
                 .ToList();
 
-            return Json(distinctApprovers);
+            var currentUser = await _userManager.GetUserAsync(User);
+            int currentUserStep = 0;
+
+            // Prefer the routing id from current approver selection (format: userId|routingId)
+            // to identify the exact current step in the workflow.
+            if (!string.IsNullOrWhiteSpace(currentApproverId))
+            {
+                var idParts = currentApproverId.Split('|', StringSplitOptions.RemoveEmptyEntries);
+                if (idParts.Length == 2 && int.TryParse(idParts[1], out var currentRoutingId))
+                {
+                    currentUserStep = stepCandidates
+                        .Where(c => c.RoutingId == currentRoutingId)
+                        .Select(c => c.Step)
+                        .DefaultIfEmpty(0)
+                        .First();
+                }
+            }
+
+            if (currentUserStep == 0 && currentUser != null)
+            {
+                // If exact routing id is unavailable, use the earliest matched step
+                // to avoid skipping intermediate steps (e.g., step 2).
+                currentUserStep = stepCandidates
+                    .Where(c => c.Users.Any(u => u.Id == currentUser.Id))
+                    .Select(c => c.Step)
+                    .DefaultIfEmpty(0)
+                    .Min();
+            }
+
+            // Show only the immediate next step.
+            // - Create flow (unknown current step): start at step 1.
+            // - Edit flow by current approver: show the next step after current.
+            int targetStep = currentUserStep == 0
+                ? availableSteps.First()
+                : availableSteps.FirstOrDefault(s => s > currentUserStep);
+
+            if (targetStep == 0)
+            {
+                return Json(new List<object>());
+            }
+
+            var nextStepApprovers = stepCandidates
+                .Where(c => c.Step == targetStep)
+                .SelectMany(c => c.Users.Select(u => new
+                {
+                    Id = $"{u.Id}|{c.RoutingId}",
+                    Step = c.Step,
+                    Rule = c.Rule,
+                    FullName = $"{u.FirstName} {u.LastName}"
+                }))
+                .GroupBy(a => a.Id)
+                .Select(g => g.First())
+                .OrderBy(a => a.Step)
+                .ThenBy(a => a.FullName)
+                .ToList();
+
+            return Json(nextStepApprovers);
         }
 
         [HttpGet]
@@ -1669,9 +2018,8 @@ namespace myapp.Controllers
                 case RequestType.Routing:
                     headers.AddRange(new[] 
                     {
-                        "Material", "Description", "WorkCenter", "Operation", "BaseQty", "Unit", "DirectLaborCosts", 
-                        "DirectExpenses", "AllocationExpense", "ProductionVersionCode", "Version", "ValidFrom", "ValidTo", 
-                        "MaximumLotSize", "Group", "GroupCounter"
+                        "Counter", "Plant", "Material", "Description", "WorkCenter", "BaseQty", "Unit",
+                        "DirectLaborCosts", "DirectExpenses", "AllocationExpense"
                     });
                     break;
                 case RequestType.AddStorage:

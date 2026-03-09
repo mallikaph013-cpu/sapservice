@@ -352,25 +352,39 @@
 @*routing*@
 
 <div id="routing-fields-container" style="display: none;">
+    <style>
+        #routing-fields-container .routing-spacer-col {
+            width: 28px;
+            min-width: 28px;
+            padding: 0.25rem;
+        }
+    </style>
     <hr />
     <h4>Material Information (Routing)</h4>
     <div class="table-responsive">
         <table class="table table-bordered routing-table">
             <thead>
                 <tr>
+                    <th>Counter</th>
+                    <th>Plant</th>
                     <th>Material</th>
+                    <th>Material Description</th>
                     <th>Work Center</th>
-                    <th>Operation</th>
+                    <th class="routing-spacer-col"></th>
+                    <th class="routing-spacer-col"></th>
+                    <th class="routing-spacer-col"></th>
+                    <th class="routing-spacer-col"></th>
+                    <th class="routing-spacer-col"></th>
                     <th>Base Qty</th>
                     <th>Unit</th>
-                    <th>Labor Costs</th>
-                    <th>Production Version</th>
-                    <th>Version</th>
-                    <th>Valid from</th>
-                    <th>Valid To</th>
-                    <th>Maximum Lot Size</th>
-                    <th>Group</th>
-                    <th>Group Counter</th>
+                    <th>Direct Labor Cost</th>
+                    <th>Direct Expenses</th>
+                    <th class="routing-spacer-col"></th>
+                    <th class="routing-spacer-col"></th>
+                    <th class="routing-spacer-col"></th>
+                    <th class="routing-spacer-col"></th>
+                    <th class="routing-spacer-col"></th>
+                    <th>Allocation Expense</th>
                     <th>Action</th>
                 </tr>
             </thead>
@@ -378,19 +392,26 @@
                  @if (Model.Routings != null) {
                     @for (int i = 0; i < Model.Routings.Count; i++) {
                         <tr>
+                            <td><input asp-for="Routings[i].Counter" class="form-control" /></td>
+                            <td><input asp-for="Routings[i].Plant" class="form-control" /></td>
                             <td><input asp-for="Routings[i].Material" class="form-control" /></td>
+                            <td><input asp-for="Routings[i].Description" class="form-control" /></td>
                             <td><input asp-for="Routings[i].WorkCenter" class="form-control" /></td>
-                            <td><input asp-for="Routings[i].Operation" class="form-control" /></td>
+                            <td class="routing-spacer-col"></td>
+                            <td class="routing-spacer-col"></td>
+                            <td class="routing-spacer-col"></td>
+                            <td class="routing-spacer-col"></td>
+                            <td class="routing-spacer-col"></td>
                             <td><input asp-for="Routings[i].BaseQty" class="form-control" /></td>
                             <td><input asp-for="Routings[i].Unit" class="form-control" /></td>
                             <td><input asp-for="Routings[i].DirectLaborCosts" class="form-control" /></td>
-                            <td><input asp-for="Routings[i].ProductionVersionCode" class="form-control" /></td>
-                            <td><input asp-for="Routings[i].Version" class="form-control" /></td>
-                            <td><input asp-for="Routings[i].ValidFrom" class="form-control" type="date" /></td>
-                            <td><input asp-for="Routings[i].ValidTo" class="form-control" type="date" /></td>
-                            <td><input asp-for="Routings[i].MaximumLotSize" class="form-control" /></td>
-                            <td><input asp-for="Routings[i].Group" class="form-control" /></td>
-                            <td><input asp-for="Routings[i].GroupCounter" class="form-control" /></td>
+                            <td><input asp-for="Routings[i].DirectExpenses" class="form-control" /></td>
+                            <td class="routing-spacer-col"></td>
+                            <td class="routing-spacer-col"></td>
+                            <td class="routing-spacer-col"></td>
+                            <td class="routing-spacer-col"></td>
+                            <td class="routing-spacer-col"></td>
+                            <td><input asp-for="Routings[i].AllocationExpense" class="form-control" /></td>
                             <td><button type="button" class="btn btn-danger btn-sm remove-routing-item">Remove</button></td>
                         </tr>
                     }
@@ -399,7 +420,7 @@
         </table>
     </div>
     <div class="mt-2">
-        <button type="button" class="btn btn-primary btn-sm" id="add-routing-item">+ Add Routing</button>
+        <button type="button" class="btn btn-sm text-white" id="add-routing-item" style="background-color: #f97316; border-color: #f97316;">+ Add Routing</button>
     </div>
 </div>
 

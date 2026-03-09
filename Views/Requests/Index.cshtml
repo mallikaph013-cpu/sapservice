@@ -2,6 +2,8 @@
 
 @{
     ViewData["Title"] = "Service Requests";
+    var hideDeleteIdSet = ViewBag.HideDeleteIdSet as HashSet<int> ?? new HashSet<int>();
+    var nextApproverNameByRequestId = ViewBag.NextApproverNameByRequestId as Dictionary<int, string> ?? new Dictionary<int, string>();
 
     // Helper to get Bootstrap badge color class
     Func<string, string> GetBadgeClass = (status) => {
@@ -45,6 +47,7 @@
                             <th class="py-3 ps-4">Request</th>
                             <th class="py-3">Description</th>
                             <th class="py-3">Requester</th>
+                            <th class="py-3">Next Approver</th>
                             <th class="py-3">Request Date</th>
                             <th class="py-3 text-center">Status</th>
                             <th class="py-3 text-center pe-4">Actions</th>
@@ -57,6 +60,7 @@
                                 <td class="ps-4">@Html.DisplayFor(modelItem => item.RequestType)</td>
                                 <td>@Html.DisplayFor(modelItem => item.Description)</td>
                                 <td>@Html.DisplayFor(modelItem => item.Requester)</td>
+                                <td>@(nextApproverNameByRequestId.TryGetValue(item.Id, out var nextApproverName) ? nextApproverName : "-")</td>
                                 <td>@item.RequestDate.ToString("MMM dd, yyyy")</td>
                                 <td class="text-center">
                                     <span class="badge @GetBadgeClass(item.Status)">@Html.DisplayFor(modelItem => item.Status)</span>
@@ -68,9 +72,12 @@
                                     <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-icon btn-sm btn-warning me-1" data-bs-toggle="tooltip" title="Edit">
                                         <i class="fas fa-pencil-alt"></i>
                                     </a>
-                                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-icon btn-sm btn-danger" data-bs-toggle="tooltip" title="Delete">
-                                        <i class="fas fa-trash-alt"></i>
-                                    </a>
+                                    @if (!hideDeleteIdSet.Contains(item.Id))
+                                    {
+                                        <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-icon btn-sm btn-danger" data-bs-toggle="tooltip" title="Delete">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </a>
+                                    }
                                 </td>
                             </tr>
                         }

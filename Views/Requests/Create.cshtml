@@ -31,7 +31,8 @@
                @*<p class="text-light">Please fill in the details of your request below.</p>*@ 
             </div>
 
-            <form id="create-form" asp-action="Create">
+            <form id="create-form" asp-action="Create" method="post">
+                @Html.AntiForgeryToken()
                 <div asp-validation-summary="ModelOnly" class="text-danger mb-4"></div>
 
                 <h5>Requester Information</h5>
@@ -59,7 +60,7 @@
                     <div class="col-md-6">
                         <div class="form-group">
                             <label asp-for="Plant" class="form-label"></label>
-                            <select asp-for="Plant" class="form-select">
+                            <select asp-for="Plant" id="RequestPlant" class="form-select">
                                 <option value="">-- Select Plant --</option>
                                 <option value="6021">6021 (Device)</option>
                                 <option value="6031">6031 (Assembly)</option>
@@ -87,7 +88,7 @@
                     <div class="col-md-6">
                         <div class="form-group">
                             <label for="NextResponsibleUserId" class="form-label">ผู้รับผิดชอบลำดับถัดไป</label>
-                            <select name="NextResponsibleUserId" id="NextResponsibleUserId" class="form-select" required>
+                            <select name="NextResponsibleUserId" id="NextResponsibleUserId" class="form-select">
                                 <option value="">-- Please select a request type first --</option>
                             </select>
                         </div>
@@ -167,6 +168,8 @@
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const requestTypeSelect = document.getElementById('RequestType');
+            const requestPlantSelect = document.getElementById('RequestPlant');
+            const requesterNameInput = document.getElementById('RequesterName');
             const materialFieldsContainer = document.getElementById('material-fields-container');
             const allMaterialFields = materialFieldsContainer ? materialFieldsContainer.querySelectorAll('[data-types]') : [];
             const bomContainer = document.getElementById('bom-fields-container');
@@ -183,6 +186,7 @@
             const boiCodeContainer = document.getElementById('boi-code-container');
             const editBomFgInput = document.getElementById('EditBomFg');
             const editBomAllFgCheckbox = document.getElementById('EditBomAllFg');
+            let lastSuccessfulApprovers = [];
 
             const typeMapping = {
                 '0': 'FG',
@@ -276,28 +280,68 @@
             @* Check next Approve *@
             function fetchNextApprovers() {
                 const requestTypeValue = requestTypeSelect.value;
+                const selectedPlant = requestPlantSelect ? requestPlantSelect.value : '';
+                const requesterNameValue = requesterNameInput ? requesterNameInput.value : '';
                 nextResponsibleUserSelect.innerHTML = '<option value="">-- Loading...--</option>';
 
+                const renderApproverOptions = (data) => {
+                    nextResponsibleUserSelect.innerHTML = '<option value="">-- Please select a responsible user --</option>';
+                    data.forEach(user => {
+                        const stepPrefix = user.step ? `Step ${user.step} - ` : '';
+                        const option = new Option(`${stepPrefix}${user.fullName}`, user.id);
+                        nextResponsibleUserSelect.add(option);
+                    });
+
+                    if (data.length === 1) {
+                        nextResponsibleUserSelect.value = data[0].id;
+                    }
+
+                    importNextResponsibleUserIdInput.value = nextResponsibleUserSelect.value || '';
+                    lastSuccessfulApprovers = data;
+                };
+
                 if (requestTypeValue) {
-                    fetch(`${getNextApproversUrl}?requestType=${encodeURIComponent(requestTypeValue)}`)
+                    fetch(`${getNextApproversUrl}?requestType=${encodeURIComponent(requestTypeValue)}&plant=${encodeURIComponent(selectedPlant)}&requesterName=${encodeURIComponent(requesterNameValue)}`)
                         .then(response => response.json())
                         .then(data => {
-                            nextResponsibleUserSelect.innerHTML = '<option value="">-- Please select a responsible user --</option>';
                             if (data && data.length > 0) {
-                                data.forEach(user => {
-                                    const option = new Option(user.fullName, user.id);
-                                    nextResponsibleUserSelect.add(option);
-                                });
+                                renderApproverOptions(data);
                             } else {
-                                nextResponsibleUserSelect.innerHTML = '<option value="">-- No users found --</option>';
+                                // Fallback: retry without plant filter in case route config uses different plant labels.
+                                fetch(`${getNextApproversUrl}?requestType=${encodeURIComponent(requestTypeValue)}&requesterName=${encodeURIComponent(requesterNameValue)}`)
+                                    .then(r => r.json())
+                                    .then(fallbackData => {
+                                        if (fallbackData && fallbackData.length > 0) {
+                                            renderApproverOptions(fallbackData);
+                                        } else if (lastSuccessfulApprovers.length > 0) {
+                                            renderApproverOptions(lastSuccessfulApprovers);
+                                        } else {
+                                            nextResponsibleUserSelect.innerHTML = '<option value="">-- No users found --</option>';
+                                            importNextResponsibleUserIdInput.value = '';
+                                        }
+                                    })
+                                    .catch(() => {
+                                        if (lastSuccessfulApprovers.length > 0) {
+                                            renderApproverOptions(lastSuccessfulApprovers);
+                                        } else {
+                                            nextResponsibleUserSelect.innerHTML = '<option value="">-- Error loading data --</option>';
+                                            importNextResponsibleUserIdInput.value = '';
+                                        }
+                                    });
                             }
                         })
                         .catch(error => {
                             console.error('Error fetching approvers:', error);
-                            nextResponsibleUserSelect.innerHTML = '<option value="">-- Error loading data --</option>';
+                            if (lastSuccessfulApprovers.length > 0) {
+                                renderApproverOptions(lastSuccessfulApprovers);
+                            } else {
+                                nextResponsibleUserSelect.innerHTML = '<option value="">-- Error loading data --</option>';
+                                importNextResponsibleUserIdInput.value = '';
+                            }
                         });
                 } else {
                     nextResponsibleUserSelect.innerHTML = '<option value="">-- Please select a request type first --</option>';
+                    importNextResponsibleUserIdInput.value = '';
                 }
             }
             
@@ -313,7 +357,10 @@
             }
 
             function checkResponsibleUser(event) {
-                if (nextResponsibleUserSelect.value === '') {
+                const hasApproverOptions = Array.from(nextResponsibleUserSelect.options || [])
+                    .some(option => option.value && option.value.trim() !== '');
+
+                if (hasApproverOptions && nextResponsibleUserSelect.value === '') {
                     event.preventDefault(); // Stop form submission
                     Swal.fire({
                         title: 'Incomplete Information',
@@ -416,19 +463,26 @@
                 const index = tbody.rows.length;
                 const row = `
                     <tr>
+                        <td><input class="form-control" type="text" name="Routings[${index}].Counter"></td>
+                        <td><input class="form-control" type="text" name="Routings[${index}].Plant"></td>
                         <td><input class="form-control" type="text" name="Routings[${index}].Material"></td>
+                        <td><input class="form-control" type="text" name="Routings[${index}].Description"></td>
                         <td><input class="form-control" type="text" name="Routings[${index}].WorkCenter"></td>
-                        <td><input class="form-control" type="text" name="Routings[${index}].Operation"></td>
+                        <td class="routing-spacer-col"></td>
+                        <td class="routing-spacer-col"></td>
+                        <td class="routing-spacer-col"></td>
+                        <td class="routing-spacer-col"></td>
+                        <td class="routing-spacer-col"></td>
                         <td><input class="form-control" type="number" name="Routings[${index}].BaseQty"></td>
                         <td><input class="form-control" type="text" name="Routings[${index}].Unit"></td>
                         <td><input class="form-control" type="number" step="0.01" name="Routings[${index}].DirectLaborCosts"></td>
-                        <td><input class="form-control" type="text" name="Routings[${index}].ProductionVersionCode"></td>
-                        <td><input class="form-control" type="text" name="Routings[${index}].Version"></td>
-                        <td><input class="form-control" type="date" name="Routings[${index}].ValidFrom"></td>
-                        <td><input class="form-control" type="date" name="Routings[${index}].ValidTo"></td>
-                        <td><input class="form-control" type="number" step="0.01" name="Routings[${index}].MaximumLotSize"></td>
-                        <td><input class="form-control" type="text" name="Routings[${index}].Group"></td>
-                        <td><input class="form-control" type="text" name="Routings[${index}].GroupCounter"></td>
+                        <td><input class="form-control" type="number" step="0.01" name="Routings[${index}].DirectExpenses"></td>
+                        <td class="routing-spacer-col"></td>
+                        <td class="routing-spacer-col"></td>
+                        <td class="routing-spacer-col"></td>
+                        <td class="routing-spacer-col"></td>
+                        <td class="routing-spacer-col"></td>
+                        <td><input class="form-control" type="number" step="0.01" name="Routings[${index}].AllocationExpense"></td>
                         <td><button type="button" class="btn btn-danger btn-sm remove-routing-item">Remove</button></td>
                     </tr>`;
                 tbody.insertAdjacentHTML('beforeend', row);
@@ -561,6 +615,10 @@
                 fetchNextApprovers();
             });
 
+            if (requestPlantSelect) {
+                requestPlantSelect.addEventListener('change', fetchNextApprovers);
+            }
+
             if (importRequestTypeSelect) {
                 importRequestTypeSelect.addEventListener('change', updateDownloadLink);
             }
@@ -587,7 +645,6 @@
                 licenseRequestOptionSelect.addEventListener('change', toggleLicenseRequestOptionFields);
             }
             createForm.addEventListener('submit', syncLicensePermissionUsernames);
-            createForm.addEventListener('submit', checkResponsibleUser);
             importForm.addEventListener('submit', checkResponsibleUser);
         });
     </script>
