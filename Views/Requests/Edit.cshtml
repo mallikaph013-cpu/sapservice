@@ -196,13 +196,14 @@
                 <div class="col-md-6">
                     <div class="form-group">
                         <label asp-for="Status" class="control-label"></label>
-                        <select asp-for="Status" class="form-select">
+                        <select asp-for="Status" id="EditStatus" class="form-select">
                             <option value="Pending">Pending</option>
                             <option value="Run Standard Cost">Run Standard Cost</option>
                             <option value="Check and Confirm">Check and Confirm</option>
                             <option value="Release">Release</option>
                             <option value="Input Price">Input Price</option>
                             <option value="Complete">Complete</option>
+                            <option value="Rejected">Rejected</option>
                         </select>
                     </div>
                 </div>
@@ -210,6 +211,13 @@
         }
 
         <div class="form-group text-center mt-5">
+
+            @if (SignInManager.IsSignedIn(User) && User.IsInRole("IT"))
+            {
+                <button type="button" id="edit-reject-button" class="btn btn-danger me-2" onclick="rejectForm()">
+                    <i class="fas fa-undo me-2"></i>ตีกลับ
+                </button>
+            }
 
            @*  <button type="button" class="btn btn-primary" onclick="saveForm()">
                 <i class="fas fa-save me-2"></i>Save Changes
@@ -470,11 +478,11 @@
                     <td><input class="form-control" type="text" name="Routings[${index}].Version"></td>
                     <td class="routing-spacer-col"></td>
                     <td><input class="form-control" type="date" name="Routings[${index}].ValidFrom"></td>
-                    <td><input class="form-control" type="date" name="Routings[${index}].ValidTo"></td>
-                    <td><input class="form-control" type="number" step="0.01" name="Routings[${index}].MaximumLotSize"></td>
-                    <td><input class="form-control routing-unit-mirror" type="text" name="Routings[${index}].BomUsage" readonly></td>
-                    <td><input class="form-control" type="text" name="Routings[${index}].Operation" value="1" readonly></td>
+                    <td><input class="form-control" type="date" name="Routings[${index}].ValidTo" value="9999-12-13"></td>
+                    <td><input class="form-control" type="number" step="0.01" name="Routings[${index}].MaximumLotSize" value="99999999"></td>
+                    <td><input class="form-control routing-unit-mirror" type="text" readonly></td>
                     <td><input class="form-control" type="text" name="Routings[${index}].Alternative" value="1" readonly></td>
+                    <td><input class="form-control" type="text" name="Routings[${index}].BomUsage" value="1"></td>
                     <td class="routing-spacer-col"></td>
                     <td><input class="form-control" type="text" name="Routings[${index}].Group"></td>
                     <td><input class="form-control" type="text" name="Routings[${index}].GroupCounter" value="1"></td>
@@ -619,6 +627,19 @@
         window.saveForm = function () {
             const form = document.getElementById('editForm');
             if (!form) return;
+            const statusSelect = document.getElementById('EditStatus');
+            const descriptionInput = document.getElementById('Description');
+            const isRejected = statusSelect && statusSelect.value === 'Rejected';
+            const hasRemark = descriptionInput && descriptionInput.value && descriptionInput.value.trim().length > 0;
+
+            if (isRejected && !hasRemark) {
+                alert('กรุณากรอกหมายเหตุก่อนตีกลับ (Reject)');
+                if (descriptionInput) {
+                    descriptionInput.focus();
+                }
+                return;
+            }
+
             // If this edit was opened from import, bypass client-side HTML5 validation
             const fromImportInput = form.querySelector('input[name="FromImport"]');
             const fromImport = fromImportInput && (fromImportInput.value === 'True' || fromImportInput.value === 'true');
@@ -636,6 +657,14 @@
             } else if (typeof form.reportValidity === 'function') {
                 form.reportValidity();
             }
+        };
+
+        window.rejectForm = function () {
+            const statusSelect = document.getElementById('EditStatus');
+            if (statusSelect) {
+                statusSelect.value = 'Rejected';
+            }
+            window.saveForm();
         };
     });
     </script>

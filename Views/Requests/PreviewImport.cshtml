@@ -143,6 +143,7 @@
                     <input type="hidden" name="requests[@i].RequestType" value="@req.RequestType" />
                     <input type="hidden" name="requests[@i].Requester" value="@req.Requester" />
                     <input type="hidden" name="requests[@i].Description" value="@req.Description" />
+                    <input type="hidden" name="requests[@i].NextApproverId" value="@req.NextApproverId" />
                     @if (req.BomComponents != null)
                     {
                         for (int j = 0; j < req.BomComponents.Count; j++)
@@ -165,6 +166,193 @@
                 <button type="submit" class="btn btn-success btn-lg">Confirm & Save</button>
                 <a asp-action="Create" class="btn btn-danger btn-lg">Cancel</a>
             </div>
+            </form>
+        }
+        else if (!string.IsNullOrEmpty(first.RequestType) && string.Equals(first.RequestType, "Routing", StringComparison.OrdinalIgnoreCase))
+        {
+            <h4>Routing Preview</h4>
+            <form asp-action="SaveImported" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="serializedRequests" value="@System.Text.Json.JsonSerializer.Serialize(Model)" />
+
+                @for (int i = 0; i < Model.Count(); i++)
+                {
+                    var reqDetail = Model.ElementAt(i);
+                    var plantVal = reqDetail.Plant ?? (reqDetail.Routings != null && reqDetail.Routings.Any() ? reqDetail.Routings.First().Plant : "");
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <h5 class="card-title">Request Details (Row @i)</h5>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Requester</label>
+                                    <input type="text" class="form-control" value="@reqDetail.Requester" readonly />
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Plant</label>
+                                    <select name="requests[@i].Plant" class="form-select">
+                                        <option value="">-- Select Plant --</option>
+                                        @{
+                                            var plants = new[] {
+                                                new { Code = "6021", Text = "6021 (Device)" },
+                                                new { Code = "6031", Text = "6031 (Assembly)" },
+                                                new { Code = "6051", Text = "6051 (Injection)" },
+                                                new { Code = "6081", Text = "6081 (IPO)" },
+                                                new { Code = "6090", Text = "6090" }
+                                            };
+                                        }
+                                        @foreach (var p in plants)
+                                        {
+                                            if (p.Code == plantVal)
+                                            {
+                                                <option value="@p.Code" selected="selected">@p.Text</option>
+                                            }
+                                            else
+                                            {
+                                                <option value="@p.Code">@p.Text</option>
+                                            }
+                                        }
+                                    </select>
+                                    <span data-valmsg-for="requests[@i].Plant" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="row g-3 mt-3">
+                                <div class="col-12">
+                                    <label class="form-label">Description</label>
+                                    <textarea class="form-control" readonly>@reqDetail.Description</textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive shadow-sm mb-4">
+                        <table class="table table-bordered table-striped table-hover">
+                            <thead class="thead-dark">
+                                <tr>
+                                    <th>#</th>
+                                    <th>Counter</th>
+                                    <th>Plant</th>
+                                    <th>Material</th>
+                                    <th>Material Description</th>
+                                    <th>Work Center</th>
+                                    <th></th>
+                                    <th></th>
+                                    <th></th>
+                                    <th></th>
+                                    <th></th>
+                                    <th>Base Qty</th>
+                                    <th>Unit</th>
+                                    <th>Direct Labor Cost</th>
+                                    <th></th>
+                                    <th></th>
+                                    <th>Direct Expenses</th>
+                                    <th>Allocation Expense</th>
+                                    <th></th>
+                                    <th>Production Version</th>
+                                    <th>Version</th>
+                                    <th></th>
+                                    <th></th>
+                                    <th></th>
+                                    <th></th>
+                                    <th></th>
+                                    <th>Valid From</th>
+                                    <th>Valid To</th>
+                                    <th></th>
+                                    <th>Maximum Lot Size</th>
+                                    <th>Unit</th>
+                                    <th>Alternative</th>
+                                    <th>Bom Usage</th>
+                                    <th>Group</th>
+                                    <th>Group Counter</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (reqDetail.Routings != null && reqDetail.Routings.Any())
+                                {
+                                    for (int j = 0; j < reqDetail.Routings.Count; j++)
+                                    {
+                                        var r = reqDetail.Routings.ElementAt(j);
+                                        <tr>
+                                            <td>@(j + 1)</td>
+                                            <td>@r.Counter</td>
+                                            <td>@r.Plant</td>
+                                            <td>@r.Material</td>
+                                            <td>@r.Description</td>
+                                            <td>@r.WorkCenter</td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td>@r.BaseQty</td>
+                                            <td>@r.Unit</td>
+                                            <td>@r.DirectLaborCosts</td>
+                                            <td></td>
+                                            <td></td>
+                                            <td>@r.DirectExpenses</td>
+                                            <td>@r.AllocationExpense</td>
+                                            <td></td>
+                                            <td>@r.ProductionVersionCode</td>
+                                            <td>@r.Version</td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td>@r.ValidFrom?.ToString("yyyy-MM-dd")</td>
+                                            <td>@r.ValidTo?.ToString("yyyy-MM-dd")</td>
+                                            <td></td>
+                                            <td>@r.MaximumLotSize</td>
+                                            <td>@r.Unit</td>
+                                            <td>@r.Alternative</td>
+                                            <td>@(string.IsNullOrWhiteSpace(r.BomUsage) ? "1" : r.BomUsage)</td>
+                                            <td>@r.Group</td>
+                                            <td>@r.GroupCounter</td>
+                                        </tr>
+                                    }
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+
+                <div class="text-center btn-container">
+                    @for (int i = 0; i < Model.Count(); i++)
+                    {
+                        var req = Model.ElementAt(i);
+                        <input type="hidden" name="requests[@i].RequestType" value="@req.RequestType" />
+                        <input type="hidden" name="requests[@i].Requester" value="@req.Requester" />
+                        <input type="hidden" name="requests[@i].Description" value="@req.Description" />
+                        <input type="hidden" name="requests[@i].NextApproverId" value="@req.NextApproverId" />
+                        if (req.Routings != null)
+                        {
+                            for (int j = 0; j < req.Routings.Count; j++)
+                            {
+                                var r = req.Routings.ElementAt(j);
+                                <input type="hidden" name="requests[@i].Routings[@j].Counter" value="@r.Counter" />
+                                <input type="hidden" name="requests[@i].Routings[@j].Plant" value="@r.Plant" />
+                                <input type="hidden" name="requests[@i].Routings[@j].Material" value="@r.Material" />
+                                <input type="hidden" name="requests[@i].Routings[@j].Description" value="@r.Description" />
+                                <input type="hidden" name="requests[@i].Routings[@j].WorkCenter" value="@r.WorkCenter" />
+                                <input type="hidden" name="requests[@i].Routings[@j].BaseQty" value="@r.BaseQty" />
+                                <input type="hidden" name="requests[@i].Routings[@j].Unit" value="@r.Unit" />
+                                <input type="hidden" name="requests[@i].Routings[@j].DirectLaborCosts" value="@r.DirectLaborCosts" />
+                                <input type="hidden" name="requests[@i].Routings[@j].DirectExpenses" value="@r.DirectExpenses" />
+                                <input type="hidden" name="requests[@i].Routings[@j].AllocationExpense" value="@r.AllocationExpense" />
+                                <input type="hidden" name="requests[@i].Routings[@j].ProductionVersionCode" value="@r.ProductionVersionCode" />
+                                <input type="hidden" name="requests[@i].Routings[@j].Version" value="@r.Version" />
+                                <input type="hidden" name="requests[@i].Routings[@j].ValidFrom" value="@r.ValidFrom?.ToString("yyyy-MM-dd")" />
+                                <input type="hidden" name="requests[@i].Routings[@j].ValidTo" value="@r.ValidTo?.ToString("yyyy-MM-dd")" />
+                                <input type="hidden" name="requests[@i].Routings[@j].MaximumLotSize" value="@r.MaximumLotSize" />
+                                <input type="hidden" name="requests[@i].Routings[@j].BomUsage" value="@r.BomUsage" />
+                                <input type="hidden" name="requests[@i].Routings[@j].Alternative" value="@r.Alternative" />
+                                <input type="hidden" name="requests[@i].Routings[@j].Group" value="@r.Group" />
+                                <input type="hidden" name="requests[@i].Routings[@j].GroupCounter" value="@r.GroupCounter" />
+                            }
+                        }
+                    }
+                    <button type="submit" class="btn btn-success btn-lg">Confirm & Save</button>
+                    <a asp-action="Create" class="btn btn-danger btn-lg">Cancel</a>
+                </div>
             </form>
         }
         else
@@ -227,6 +415,9 @@
                     <input type="hidden" name="serializedRequests" value="@System.Text.Json.JsonSerializer.Serialize(Model)" />
                     @for (int i = 0; i < Model.Count(); i++)
                     {
+                        <input type="hidden" name="requests[@i].RequestType" value="@Model.ElementAt(i).RequestType" />
+                        <input type="hidden" name="requests[@i].Requester" value="@Model.ElementAt(i).Requester" />
+                        <input type="hidden" name="requests[@i].NextApproverId" value="@Model.ElementAt(i).NextApproverId" />
                         <input type="hidden" name="requests[@i].Plant" value="@Model.ElementAt(i).Plant" />
                         <input type="hidden" name="requests[@i].Description" value="@Model.ElementAt(i).Description" />
                         <input type="hidden" name="requests[@i].ItemCode" value="@Model.ElementAt(i).ItemCode" />

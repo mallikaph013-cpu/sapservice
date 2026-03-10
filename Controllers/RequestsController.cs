@@ -220,19 +220,47 @@ namespace myapp.Controllers
             requests = requests.OrderByDescending(r => r.RequestDate).ToList();
 
             var requestIds = requests.Select(r => r.Id.ToString()).ToList();
-            var updatedRequestIdSet = (await _context.AuditLogs
+            var updateAuditLogs = await _context.AuditLogs
                 .Where(a => a.EntityName == nameof(RequestItem)
                     && a.Action == "Update"
                     && a.EntityId != null
                     && requestIds.Contains(a.EntityId))
-                .Select(a => a.EntityId!)
-                .ToListAsync())
-                .Where(id => int.TryParse(id, out _))
-                .Select(id => int.Parse(id))
-                .ToHashSet();
+                .Select(a => new { a.EntityId, a.PerformedBy })
+                .ToListAsync();
 
             var allUsers = await _userManager.Users.ToListAsync();
             var usersById = allUsers.ToDictionary(u => u.Id, u => u);
+
+            bool IsUpdatedByNextApprover(RequestItem request)
+            {
+                if (string.IsNullOrWhiteSpace(request.NextApproverId))
+                {
+                    return false;
+                }
+
+                if (!usersById.TryGetValue(request.NextApproverId, out var nextApprover))
+                {
+                    return false;
+                }
+
+                var nextApproverCandidates = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                if (!string.IsNullOrWhiteSpace(nextApprover.UserName)) nextApproverCandidates.Add(nextApprover.UserName.Trim());
+                if (!string.IsNullOrWhiteSpace(nextApprover.Email)) nextApproverCandidates.Add(nextApprover.Email.Trim());
+
+                var fullName = $"{nextApprover.FirstName} {nextApprover.LastName}".Trim();
+                if (!string.IsNullOrWhiteSpace(fullName)) nextApproverCandidates.Add(fullName);
+
+                if (!nextApproverCandidates.Any())
+                {
+                    return false;
+                }
+
+                return updateAuditLogs.Any(a =>
+                    int.TryParse(a.EntityId, out var auditRequestId)
+                    && auditRequestId == request.Id
+                    && !string.IsNullOrWhiteSpace(a.PerformedBy)
+                    && nextApproverCandidates.Contains(a.PerformedBy.Trim()));
+            }
 
             var nextApproverNameByRequestId = requests.ToDictionary(
                 r => r.Id,
@@ -330,7 +358,7 @@ namespace myapp.Controllers
             }
 
             var hideDeleteIdSet = requests
-                .Where(r => updatedRequestIdSet.Contains(r.Id) || IsAtFinalStep(r))
+                .Where(r => IsUpdatedByNextApprover(r) || IsAtFinalStep(r))
                 .Select(r => r.Id)
                 .ToHashSet();
 
@@ -535,14 +563,9 @@ namespace myapp.Controllers
             if (requestItem.Routings != null && requestItem.Routings.Any())
             {
                 var routingSheet = workbook.Worksheets.Add("Routings");
-                var routingHeaders = new[]
-                {
-                    "Material", "Description", "Work Center", "Operation", "Base Qty", "Unit",
-                    "Labor Costs", "Direct Expenses", "Allocation Expense", "Production Version Code",
-                    "Version", "Valid From", "Valid To", "Maximum Lot Size", "Group", "Group Counter"
-                };
+                var routingHeaders = GetHeadersForRequestType(RequestType.Routing);
 
-                for (var i = 0; i < routingHeaders.Length; i++)
+                for (var i = 0; i < routingHeaders.Count; i++)
                 {
                     routingSheet.Cell(1, i + 1).Value = routingHeaders[i];
                 }
@@ -550,26 +573,53 @@ namespace myapp.Controllers
                 var routingRow = 2;
                 foreach (var item in requestItem.Routings)
                 {
-                    routingSheet.Cell(routingRow, 1).Value = item.Material ?? string.Empty;
-                    routingSheet.Cell(routingRow, 2).Value = item.Description ?? string.Empty;
-                    routingSheet.Cell(routingRow, 3).Value = item.WorkCenter ?? string.Empty;
-                    routingSheet.Cell(routingRow, 4).Value = item.Operation ?? string.Empty;
-                    routingSheet.Cell(routingRow, 5).Value = item.BaseQty;
-                    routingSheet.Cell(routingRow, 6).Value = item.Unit ?? string.Empty;
-                    routingSheet.Cell(routingRow, 7).Value = item.DirectLaborCosts;
-                    routingSheet.Cell(routingRow, 8).Value = item.DirectExpenses;
-                    routingSheet.Cell(routingRow, 9).Value = item.AllocationExpense;
-                    routingSheet.Cell(routingRow, 10).Value = item.ProductionVersionCode ?? string.Empty;
-                    routingSheet.Cell(routingRow, 11).Value = item.Version ?? string.Empty;
-                    routingSheet.Cell(routingRow, 12).Value = item.ValidFrom;
-                    routingSheet.Cell(routingRow, 13).Value = item.ValidTo;
-                    routingSheet.Cell(routingRow, 14).Value = item.MaximumLotSize;
-                    routingSheet.Cell(routingRow, 15).Value = item.Group ?? string.Empty;
-                    routingSheet.Cell(routingRow, 16).Value = item.GroupCounter ?? string.Empty;
+                    var unitHeaderSeen = 0;
+                    for (var i = 0; i < routingHeaders.Count; i++)
+                    {
+                        var header = routingHeaders[i];
+                        if (string.IsNullOrWhiteSpace(header))
+                        {
+                            routingSheet.Cell(routingRow, i + 1).Value = string.Empty;
+                            continue;
+                        }
+
+                        object? propertyValue;
+                        if (string.Equals(header, "Unit", StringComparison.OrdinalIgnoreCase))
+                        {
+                            unitHeaderSeen++;
+                            // First Unit column is Routing.Unit, second Unit column mirrors Unit/BomUsage display in UI.
+                            propertyValue = unitHeaderSeen == 1
+                                ? item.Unit
+                                : (string.IsNullOrWhiteSpace(item.Unit) ? item.BomUsage : item.Unit);
+                        }
+                        else if (string.Equals(header, "BomUsage", StringComparison.OrdinalIgnoreCase))
+                        {
+                            propertyValue = string.IsNullOrWhiteSpace(item.BomUsage) ? "1" : item.BomUsage;
+                        }
+                        else if (string.Equals(header, "Alternative", StringComparison.OrdinalIgnoreCase))
+                        {
+                            propertyValue = string.IsNullOrWhiteSpace(item.Alternative) ? "1" : item.Alternative;
+                        }
+                        else if (string.Equals(header, "ValidTo", StringComparison.OrdinalIgnoreCase))
+                        {
+                            propertyValue = (item.ValidTo ?? new DateTime(9999, 12, 13)).ToString("yyyy-MM-dd");
+                        }
+                        else if (string.Equals(header, "MaximumLotSize", StringComparison.OrdinalIgnoreCase))
+                        {
+                            propertyValue = item.MaximumLotSize ?? 99999999m;
+                        }
+                        else
+                        {
+                            propertyValue = GetPropertyByHeader(typeof(Routing), header)?.GetValue(item);
+                        }
+
+                        routingSheet.Cell(routingRow, i + 1).Value = propertyValue?.ToString() ?? string.Empty;
+                    }
+
                     routingRow++;
                 }
 
-                var routingHeader = routingSheet.Range(1, 1, 1, routingHeaders.Length);
+                var routingHeader = routingSheet.Range(1, 1, 1, routingHeaders.Count);
                 routingHeader.Style.Font.Bold = true;
                 routingHeader.Style.Fill.BackgroundColor = XLColor.LightGray;
                 routingSheet.Columns().AdjustToContents();
@@ -987,6 +1037,16 @@ namespace myapp.Controllers
                 return NotFound();
             }
 
+            if (User.IsInRole("IT")
+                && string.Equals(viewModel.Status, "Rejected", StringComparison.OrdinalIgnoreCase)
+                && string.IsNullOrWhiteSpace(viewModel.Description))
+            {
+                ModelState.AddModelError(nameof(viewModel.Description), "Please provide a remark before rejecting.");
+                ViewBag.IsRequesterEditor = false;
+                ViewBag.CurrentNextApproverName = "Current Responsible User";
+                return View("Edit", viewModel);
+            }
+
             // Only validate strictly when not coming from import preview
             if (!viewModel.FromImport)
             {
@@ -1302,6 +1362,41 @@ namespace myapp.Controllers
                 return RedirectToAction(nameof(Create));
             }
 
+            List<RequestItem> serializedRequestSnapshot = new();
+            if (!string.IsNullOrWhiteSpace(serializedRequests))
+            {
+                try
+                {
+                    var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                    serializedRequestSnapshot = JsonSerializer.Deserialize<List<RequestItem>>(serializedRequests, options) ?? new List<RequestItem>();
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Failed to deserialize snapshot for SaveImported fallback");
+                }
+            }
+
+            for (int i = 0; i < requests.Count && i < serializedRequestSnapshot.Count; i++)
+            {
+                var posted = requests[i];
+                var source = serializedRequestSnapshot[i];
+
+                if (string.IsNullOrWhiteSpace(posted.NextApproverId))
+                {
+                    posted.NextApproverId = source.NextApproverId;
+                }
+
+                if (string.IsNullOrWhiteSpace(posted.RequestType))
+                {
+                    posted.RequestType = source.RequestType;
+                }
+
+                if (string.IsNullOrWhiteSpace(posted.Requester))
+                {
+                    posted.Requester = source.Requester;
+                }
+            }
+
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
@@ -1471,7 +1566,10 @@ namespace myapp.Controllers
                             var headerText = cell.GetString()?.Trim();
                             if (!string.IsNullOrEmpty(headerText))
                             {
-                                headerMap[headerText] = cell.Address.ColumnNumber;
+                                if (!headerMap.ContainsKey(headerText))
+                                {
+                                    headerMap[headerText] = cell.Address.ColumnNumber;
+                                }
                             }
                         }
 
@@ -1613,6 +1711,24 @@ namespace myapp.Controllers
                                 {
                                     var cellValue = row.Cell(header.Value).GetFormattedString();
                                     SetRoutingProperty(routing, header.Key, cellValue);
+                                }
+
+                                // Import rule: Allocation Expense follows Direct Expenses.
+                                routing.AllocationExpense = routing.DirectExpenses;
+
+                                if (!routing.ValidTo.HasValue)
+                                {
+                                    routing.ValidTo = new DateTime(9999, 12, 13);
+                                }
+
+                                if (!routing.MaximumLotSize.HasValue)
+                                {
+                                    routing.MaximumLotSize = 99999999m;
+                                }
+
+                                if (string.IsNullOrWhiteSpace(routing.BomUsage))
+                                {
+                                    routing.BomUsage = "1";
                                 }
 
                                 routings.Add(routing);
@@ -2019,9 +2135,15 @@ namespace myapp.Controllers
                     headers.AddRange(new[] 
                     {
                         "Counter", "Plant", "Material", "Description", "WorkCenter",
-                        "BaseQty", "Unit", "DirectLaborCosts", "DirectExpenses", "AllocationExpense",
-                        "ProductionVersionCode", "Version", "ValidFrom", "ValidTo", "MaximumLotSize",
-                        "BomUsage", "Operation", "Alternative", "Group", "GroupCounter"
+                        "", "", "", "", "",
+                        "BaseQty", "Unit", "DirectLaborCosts", "", "", "DirectExpenses",
+                        "", "", "", "", "",
+                        "AllocationExpense", "", "ProductionVersionCode", "Version",
+                        "", "", "", "", "",
+                        "",
+                        "ValidFrom", "ValidTo", "", "MaximumLotSize", "Unit", "Alternative", "BomUsage",
+                        "",
+                        "Group", "GroupCounter"
                     });
                     break;
                 case RequestType.AddStorage:

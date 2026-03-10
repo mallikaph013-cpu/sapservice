@@ -127,14 +127,96 @@
                         <table class="table table-sm table-bordered table-striped">
                             <thead class="table-light">
                                 <tr>
-                                    <th>Material</th><th>Work Center</th><th>Operation</th><th>Base Qty</th><th>Unit</th><th>Labor Costs</th>
+                                    <th>Counter</th>
+                                    <th>Plant</th>
+                                    <th>Material</th>
+                                    <th>Material Description</th>
+                                    <th>Work Center</th>
+                                    <th></th>
+                                    <th></th>
+                                    <th></th>
+                                    <th></th>
+                                    <th></th>
+                                    <th>Base Qty</th>
+                                    <th>Unit</th>
+                                    <th>Direct Labor Cost</th>
+                                    <th></th>
+                                    <th></th>
+                                    <th>Direct Expenses</th>
+                                    <th></th>
+                                    <th></th>
+                                    <th></th>
+                                    <th></th>
+                                    <th></th>
+                                    <th>Allocation Expense</th>
+                                    <th></th>
+                                    <th>Production Version</th>
+                                    <th>Version</th>
+                                    <th></th>
+                                    <th></th>
+                                    <th></th>
+                                    <th></th>
+                                    <th></th>
+                                    <th></th>
+                                    <th>Valid From</th>
+                                    <th>Valid To</th>
+                                    <th></th>
+                                    <th>Maximum Lot Size</th>
+                                    <th>Unit</th>
+                                    <th>Alternative</th>
+                                    <th>Bom Usage</th>
+                                    <th></th>
+                                    <th>Group</th>
+                                    <th>Group Counter</th>
+                                    <th>Action</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @foreach (var item in Model.Routings)
                                 {
                                     <tr>
-                                       <td>@item.Material</td><td>@item.WorkCenter</td><td>@item.Operation</td><td>@item.BaseQty</td><td>@item.Unit</td><td>@item.DirectLaborCosts?.ToString("C")</td>
+                                       <td>@item.Counter</td>
+                                       <td>@item.Plant</td>
+                                       <td>@item.Material</td>
+                                       <td>@item.Description</td>
+                                       <td>@item.WorkCenter</td>
+                                       <td></td>
+                                       <td></td>
+                                       <td></td>
+                                       <td></td>
+                                       <td></td>
+                                       <td>@item.BaseQty</td>
+                                       <td>@item.Unit</td>
+                                       <td>@item.DirectLaborCosts</td>
+                                       <td></td>
+                                       <td></td>
+                                       <td>@item.DirectExpenses</td>
+                                       <td></td>
+                                       <td></td>
+                                       <td></td>
+                                       <td></td>
+                                       <td></td>
+                                       <td>@item.AllocationExpense</td>
+                                       <td></td>
+                                       <td>@item.ProductionVersionCode</td>
+                                       <td>@item.Version</td>
+                                       <td></td>
+                                       <td></td>
+                                       <td></td>
+                                       <td></td>
+                                       <td></td>
+                                       <td></td>
+                                       <td>@item.ValidFrom?.ToString("yyyy-MM-dd")</td>
+                                       <td>@item.ValidTo?.ToString("yyyy-MM-dd")</td>
+                                       <td></td>
+                                       <td>@item.MaximumLotSize</td>
+                                       <td>@(string.IsNullOrWhiteSpace(item.Unit) ? item.BomUsage : item.Unit)</td>
+                                       <td>@item.Alternative</td>
+                                       <td>@(string.IsNullOrWhiteSpace(item.BomUsage) ? "1" : item.BomUsage)</td>
+                                       <td></td>
+                                       <td>@item.Group</td>
+                                       <td>@item.GroupCounter</td>
+                                       <td></td>
                                     </tr>
                                 }
                             </tbody>
