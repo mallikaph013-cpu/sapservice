@@ -14,7 +14,6 @@
 
             <h2 class="mb-3">Confirm Deletion</h2>
             <p class="text-light">Are you sure you want to permanently delete the section <strong class="text-white">@Model.SectionName</strong> from the <strong class="text-white">@Model.Department?.DepartmentName</strong> department?</p>
-            <p class="text-danger">This action cannot be undone.</p>
 
             <form asp-action="Delete" class="mt-4">
                 <input type="hidden" asp-for="SectionId" />

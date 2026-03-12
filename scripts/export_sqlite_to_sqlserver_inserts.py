@@ -109,8 +109,23 @@ def main():
     ordered_tables = topo_sort_tables(tables, deps, reverse)
 
     lines = []
+    lines.append("SET ANSI_NULLS ON;")
+    lines.append("SET QUOTED_IDENTIFIER ON;")
+    lines.append("SET ANSI_PADDING ON;")
+    lines.append("SET ANSI_WARNINGS ON;")
+    lines.append("SET ARITHABORT ON;")
+    lines.append("SET CONCAT_NULL_YIELDS_NULL ON;")
+    lines.append("SET NUMERIC_ROUNDABORT OFF;")
     lines.append("SET NOCOUNT ON;")
     lines.append("BEGIN TRANSACTION;")
+    lines.append("")
+
+    # Make script rerunnable: clear existing data child-to-parent first.
+    lines.append("-- Clear existing data (child -> parent) to avoid PK conflicts on re-run")
+    for table in reversed(ordered_tables):
+        lines.append(
+            f"IF OBJECT_ID(N'{quote_ident(table)}', N'U') IS NOT NULL DELETE FROM {quote_ident(table)};"
+        )
     lines.append("")
 
     total_rows = 0

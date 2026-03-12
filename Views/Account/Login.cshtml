@@ -103,7 +103,7 @@
                 <label asp-for="UserName" class="visually-hidden">Username</label>
                 <div class="input-group">
                      <span class="input-group-text"><i class="fas fa-user"></i></span>
-                    <input asp-for="UserName" class="form-control" placeholder="Username" required autofocus/>
+                    <input asp-for="UserName" class="form-control" placeholder="Username" autocomplete="username" required autofocus/>
                 </div>
                 <span asp-validation-for="UserName" class="text-danger"></span>
             </div>
@@ -112,7 +112,7 @@
                 <label asp-for="Password" class="visually-hidden">Password</label>
                 <div class="input-group">
                     <span class="input-group-text"><i class="fas fa-lock"></i></span>
-                    <input asp-for="Password" class="form-control" placeholder="Password" required/>
+                    <input asp-for="Password" class="form-control" placeholder="Password" autocomplete="current-password" required/>
                 </div>
                 <span asp-validation-for="Password" class="text-danger"></span>
             </div>

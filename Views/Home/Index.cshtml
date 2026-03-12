@@ -88,7 +88,7 @@
         {
             foreach (var article in Model)
             {
-                <a href="@article.ArticleUrl" class="news-list-item">
+                <a asp-controller="News" asp-action="Details" asp-route-id="@article.Id" class="news-list-item">
                     <div class="news-item-icon">
                         <i class="fas fa-desktop"></i>
                     </div>

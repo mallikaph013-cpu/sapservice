@@ -1,16 +1,4 @@
-﻿USE [master];
-GO
-
-IF DB_ID(N'SAP_Service') IS NULL
-BEGIN
-    CREATE DATABASE [SAP_Service];
-END
-GO
-
-USE [SAP_Service];
-GO
-
-CREATE TABLE [AspNetRoles] (
+﻿CREATE TABLE [AspNetRoles] (
     [Id] nvarchar(450) NOT NULL,
     [Name] nvarchar(256) NULL,
     [NormalizedName] nvarchar(256) NULL,
@@ -69,8 +57,8 @@ CREATE TABLE [Departments] (
     [DepartmentId] int NOT NULL IDENTITY,
     [DepartmentName] nvarchar(max) NOT NULL,
     [CreatedAt] datetime2 NOT NULL,
-    [CreatedBy] nvarchar(256) NOT NULL,
     [UpdatedAt] datetime2 NOT NULL,
+    [CreatedBy] nvarchar(256) NOT NULL,
     [UpdatedBy] nvarchar(256) NOT NULL,
     CONSTRAINT [PK_Departments] PRIMARY KEY ([DepartmentId])
 );
@@ -103,13 +91,13 @@ CREATE TABLE [NewsArticles] (
     [Id] int NOT NULL IDENTITY,
     [Title] nvarchar(200) NOT NULL,
     [Content] nvarchar(max) NOT NULL,
-    [CreatedAt] datetime2 NOT NULL,
-    [CreatedBy] nvarchar(256) NOT NULL,
     [ImageUrl] nvarchar(500) NULL,
     [PublishedDate] datetime2 NOT NULL,
     [Author] nvarchar(100) NOT NULL,
     [IsFeatured] bit NOT NULL,
+    [CreatedAt] datetime2 NOT NULL,
     [UpdatedAt] datetime2 NOT NULL,
+    [CreatedBy] nvarchar(256) NOT NULL,
     [UpdatedBy] nvarchar(256) NOT NULL,
     CONSTRAINT [PK_NewsArticles] PRIMARY KEY ([Id])
 );
@@ -122,7 +110,7 @@ CREATE TABLE [RequestItems] (
     [Description] nvarchar(max) NOT NULL,
     [Requester] nvarchar(max) NOT NULL,
     [Status] nvarchar(max) NOT NULL,
-    [UsageStatus] int NOT NULL CONSTRAINT [DF_RequestItems_UsageStatus] DEFAULT (1),
+    [UsageStatus] int NOT NULL,
     [RequestDate] datetime2 NOT NULL,
     [UpdatedAt] datetime2 NULL,
     [UpdatedBy] nvarchar(256) NULL,
@@ -265,11 +253,11 @@ GO
 
 CREATE TABLE [Sections] (
     [SectionId] int NOT NULL IDENTITY,
-    [CreatedAt] datetime2 NOT NULL,
-    [CreatedBy] nvarchar(256) NOT NULL,
     [SectionName] nvarchar(max) NOT NULL,
     [DepartmentId] int NOT NULL,
+    [CreatedAt] datetime2 NOT NULL,
     [UpdatedAt] datetime2 NOT NULL,
+    [CreatedBy] nvarchar(256) NOT NULL,
     [UpdatedBy] nvarchar(256) NOT NULL,
     CONSTRAINT [PK_Sections] PRIMARY KEY ([SectionId]),
     CONSTRAINT [FK_Sections_Departments_DepartmentId] FOREIGN KEY ([DepartmentId]) REFERENCES [Departments] ([DepartmentId]) ON DELETE CASCADE
@@ -334,6 +322,8 @@ CREATE TABLE [Routings] (
     [RequestItemId] int NOT NULL,
     [Material] nvarchar(max) NULL,
     [Description] nvarchar(max) NULL,
+    [Counter] nvarchar(max) NULL,
+    [Plant] nvarchar(max) NULL,
     [WorkCenter] nvarchar(max) NULL,
     [Operation] nvarchar(max) NULL,
     [BaseQty] decimal(18,5) NULL,
@@ -346,6 +336,8 @@ CREATE TABLE [Routings] (
     [ValidFrom] datetime2 NULL,
     [ValidTo] datetime2 NULL,
     [MaximumLotSize] decimal(18,5) NULL,
+    [Alternative] nvarchar(max) NULL,
+    [BomUsage] nvarchar(max) NULL,
     [Group] nvarchar(max) NULL,
     [GroupCounter] nvarchar(max) NULL,
     CONSTRAINT [PK_Routings] PRIMARY KEY ([Id]),
@@ -356,14 +348,14 @@ GO
 
 CREATE TABLE [DocumentRoutings] (
     [Id] int NOT NULL IDENTITY,
-    [CreatedAt] datetime2 NOT NULL,
-    [CreatedBy] nvarchar(256) NOT NULL,
     [DocumentTypeId] int NOT NULL,
     [DepartmentId] int NOT NULL,
     [SectionId] int NOT NULL,
     [PlantId] int NOT NULL,
     [Step] int NOT NULL,
+    [CreatedAt] datetime2 NOT NULL,
     [UpdatedAt] datetime2 NOT NULL,
+    [CreatedBy] nvarchar(256) NOT NULL,
     [UpdatedBy] nvarchar(256) NOT NULL,
     CONSTRAINT [PK_DocumentRoutings] PRIMARY KEY ([Id]),
     CONSTRAINT [FK_DocumentRoutings_Departments_DepartmentId] FOREIGN KEY ([DepartmentId]) REFERENCES [Departments] ([DepartmentId]),
