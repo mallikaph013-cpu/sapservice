@@ -662,6 +662,15 @@
         if (requestPlantSelect) {
             requestPlantSelect.addEventListener('change', fetchNextApprovers);
         }
+
+        // Sync header Plant dropdown → Material section Plant display field
+        const materialSectionPlant = document.getElementById('MaterialSectionPlant');
+        if (requestPlantSelect && materialSectionPlant) {
+            const syncMaterialPlant = () => { materialSectionPlant.value = requestPlantSelect.value; };
+            requestPlantSelect.addEventListener('change', syncMaterialPlant);
+            syncMaterialPlant();
+        }
+
         if (licenseRequestOptionSelect) {
             licenseRequestOptionSelect.addEventListener('change', toggleLicenseRequestOptionFields);
         }

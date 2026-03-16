@@ -718,6 +718,9 @@ namespace myapp.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(CreateRequestViewModel viewModel, IFormFile? requestAttachment)
         {
+            var currentUser = await _userManager.GetUserAsync(User);
+            var isITUser = User.IsInRole("IT");
+
             _logger.LogInformation(
                 "Create POST started by {Actor}. RequestType={RequestType}, Requester={Requester}, NextResponsible={NextResponsibleUserId}",
                 User?.Identity?.Name ?? "Unknown",
@@ -725,7 +728,16 @@ namespace myapp.Controllers
                 viewModel.RequesterName,
                 viewModel.NextResponsibleUserId);
 
-            ValidateRequest(viewModel);
+            // IT users can create requests with partial data and complete details later in Edit.
+            if (!isITUser)
+            {
+                ValidateRequest(viewModel);
+            }
+            else
+            {
+                // Plant has [Required] on the view model; allow IT to submit incomplete data in Create.
+                ModelState.Remove(nameof(viewModel.Plant));
+            }
 
             if (viewModel.RequestType == RequestType.Request)
             {
@@ -737,7 +749,7 @@ namespace myapp.Controllers
                     ModelState.AddModelError("requestAttachment", "Attachment file is required for this request type.");
                 }
 
-                if (string.IsNullOrWhiteSpace(viewModel.NextResponsibleUserId))
+                if (!isITUser && string.IsNullOrWhiteSpace(viewModel.NextResponsibleUserId))
                 {
                     ModelState.AddModelError(nameof(viewModel.NextResponsibleUserId), "Please select the next responsible user.");
                 }
@@ -785,7 +797,12 @@ namespace myapp.Controllers
                 }
 
                 string? nextApproverId = null;
-                if (!string.IsNullOrEmpty(viewModel.NextResponsibleUserId))
+                if (isITUser && currentUser != null)
+                {
+                    // Business rule: IT creators route to themselves as next responsible user.
+                    nextApproverId = currentUser.Id;
+                }
+                else if (!string.IsNullOrEmpty(viewModel.NextResponsibleUserId))
                 {
                     var parts = viewModel.NextResponsibleUserId.Split('|');
                     if (parts.Length > 0)

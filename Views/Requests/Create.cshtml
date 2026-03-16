@@ -96,6 +96,10 @@
                                 <select name="NextResponsibleUserId" id="NextResponsibleUserId" class="form-select">
                                     <option value="">-- Please select a request type first --</option>
                                 </select>
+                                @if (SignInManager.IsSignedIn(User) && User.IsInRole("IT"))
+                                {
+                                    <small class="text-muted">ระบบจะกำหนดเป็นตัวเองอัตโนมัติสำหรับผู้ใช้ IT</small>
+                                }
                             </div>
                         </div>
                     </div>
@@ -197,6 +201,7 @@
             const requestUploadContainer = document.getElementById('request-upload-container');
             const requestAttachmentInput = document.getElementById('RequestAttachment');
             const workflowSection = document.getElementById('workflow-section');
+            const isITCreator = @Html.Raw((SignInManager.IsSignedIn(User) && User.IsInRole("IT")).ToString().ToLowerInvariant());
             let lastSuccessfulApprovers = [];
 
             const typeMapping = {
@@ -322,6 +327,16 @@
                 const requestTypeValue = requestTypeSelect.value;
                 const selectedPlant = requestPlantSelect ? requestPlantSelect.value : '';
                 const requesterNameValue = requesterNameInput ? requesterNameInput.value : '';
+
+                if (isITCreator) {
+                    nextResponsibleUserSelect.innerHTML = '';
+                    nextResponsibleUserSelect.add(new Option('ระบบจะกำหนดเป็นตัวเองอัตโนมัติ', ''));
+                    nextResponsibleUserSelect.disabled = true;
+                    importNextResponsibleUserIdInput.value = '';
+                    return;
+                }
+
+                nextResponsibleUserSelect.disabled = false;
                 nextResponsibleUserSelect.innerHTML = '<option value="">-- Loading...--</option>';
 
                 const renderApproverOptions = (data) => {
@@ -697,6 +712,19 @@
 
             if (requestPlantSelect) {
                 requestPlantSelect.addEventListener('change', fetchNextApprovers);
+
+                        // Sync header Plant dropdown → Material section Plant display field
+                        const materialSectionPlant = document.getElementById('MaterialSectionPlant');
+                        function syncMaterialPlant() {
+                            if (materialSectionPlant && requestPlantSelect) {
+                                materialSectionPlant.value = requestPlantSelect.value;
+                            }
+                        }
+                        if (requestPlantSelect) {
+                            requestPlantSelect.addEventListener('change', syncMaterialPlant);
+                            syncMaterialPlant(); // initial sync on page load
+                        }
+
             }
 
             if (importRequestTypeSelect) {

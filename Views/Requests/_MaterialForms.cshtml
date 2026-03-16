@@ -49,8 +49,11 @@
         <div class="col-md-4" data-types="FG,SM,RM,ToolingB,ToolingBFG,ToolingBPU,IPO,Passthrough,CrossPlantPurchase,DistributionChanel">
             <div class="form-group">
                 <label asp-for="Plant" class="control-label"></label>
-                <input asp-for="Plant" class="form-control" />
-                <span asp-validation-for="Plant" class="text-danger"></span>
+                  <input type="text" id="MaterialSectionPlant" class="form-control"
+                      value="@Model.Plant"
+                      placeholder="(Synced from Plant dropdown above)"
+                      disabled />
+                  <small class="text-muted">ค่าจาก Plant ที่เลือกด้านบน</small>
             </div>
         </div>
         <div class="col-md-4" data-types="FG,SM,RM,ToolingB,ToolingBFG,ToolingBPU,DistributionChanel,IPO,Passthrough,CrossPlantPurchase">
