@@ -12,7 +12,8 @@
                 <p class="text-light mb-0">Add a new department for routing and user assignment.</p>
             </div>
 
-            <form asp-action="Create">
+            <form asp-action="Create" method="post">
+                @Html.AntiForgeryToken()
                 <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
                 <div class="form-group mb-3">
                     <label asp-for="DepartmentName" class="form-label"></label>

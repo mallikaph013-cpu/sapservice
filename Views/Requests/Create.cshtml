@@ -31,7 +31,7 @@
                @*<p class="text-light">Please fill in the details of your request below.</p>*@ 
             </div>
 
-            <form id="create-form" asp-action="Create" method="post">
+            <form id="create-form" asp-action="Create" method="post" enctype="multipart/form-data">
                 @Html.AntiForgeryToken()
                 <div asp-validation-summary="ModelOnly" class="text-danger mb-4"></div>
 
@@ -56,7 +56,7 @@
                             <span asp-validation-for="RequestType" class="text-danger"></span>
                         </div>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-6" id="request-plant-container">
                         <div class="form-group">
                             <label asp-for="Plant" class="form-label"></label>
                             <select asp-for="Plant" id="RequestPlant" class="form-select">
@@ -71,24 +71,32 @@
                         </div>
                     </div>
                 </div>
-                <div class="form-group mb-4">
+                <div class="form-group mb-4" id="request-description-container">
                     <label asp-for="Description" class="form-label"></label>
                     <textarea asp-for="Description" class="form-control" rows="3" placeholder="Provide a detailed description of the request..."></textarea>
                     <span asp-validation-for="Description" class="text-danger"></span>
                 </div>
 
+                <div class="form-group mb-4" id="request-upload-container" style="display: none;">
+                    <label for="RequestAttachment" class="form-label">Upload File</label>
+                    <input class="form-control" type="file" id="RequestAttachment" name="requestAttachment">
+                    <span class="text-danger field-validation-valid" data-valmsg-for="requestAttachment" data-valmsg-replace="true"></span>
+                </div>
+
                 <partial name="_MaterialForms" model="Model" />
 
-                <hr class="my-4">
+                <div id="workflow-section">
+                    <hr class="my-4">
 
-                <h5>Work Flow</h5>
-                <div class="row mb-4">
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label for="NextResponsibleUserId" class="form-label">ผู้รับผิดชอบลำดับถัดไป</label>
-                            <select name="NextResponsibleUserId" id="NextResponsibleUserId" class="form-select">
-                                <option value="">-- Please select a request type first --</option>
-                            </select>
+                    <h5>Work Flow</h5>
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="NextResponsibleUserId" class="form-label">ผู้รับผิดชอบลำดับถัดไป</label>
+                                <select name="NextResponsibleUserId" id="NextResponsibleUserId" class="form-select">
+                                    <option value="">-- Please select a request type first --</option>
+                                </select>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -185,24 +193,29 @@
             const boiCodeContainer = document.getElementById('boi-code-container');
             const editBomFgInput = document.getElementById('EditBomFg');
             const editBomAllFgCheckbox = document.getElementById('EditBomAllFg');
+            const requestPlantContainer = document.getElementById('request-plant-container');
+            const requestUploadContainer = document.getElementById('request-upload-container');
+            const requestAttachmentInput = document.getElementById('RequestAttachment');
+            const workflowSection = document.getElementById('workflow-section');
             let lastSuccessfulApprovers = [];
 
             const typeMapping = {
-                '0': 'FG',
-                '1': 'SM',
-                '2': 'RM',
-                '3': 'ToolingB',
-                '4': 'ToolingBFG',
-                '5': 'ToolingBPU',
-                '6': 'BOM',
-                '7': 'Routing',
-                '8': 'AddStorage',
-                '9': 'DistributionChanel',
-                '10': 'IPO',
-                '11': 'Passthrough',
-                '12': 'CrossPlantPurchase',
-                '13': 'EditBOM',
-                '14': 'LicensePermission'
+                '0': 'Request',
+                '1': 'FG',
+                '2': 'SM',
+                '3': 'RM',
+                '4': 'ToolingB',
+                '5': 'ToolingBFG',
+                '6': 'ToolingBPU',
+                '7': 'BOM',
+                '8': 'Routing',
+                '9': 'AddStorage',
+                '10': 'DistributionChanel',
+                '11': 'IPO',
+                '12': 'Passthrough',
+                '13': 'CrossPlantPurchase',
+                '14': 'EditBOM',
+                '15': 'LicensePermission'
 
                 
 
@@ -240,9 +253,37 @@
                 if (selectedTypeName === 'EditBOM' || selectedTypeName === 'แก้ BOM') {
                     selectedTypeName = 'EditBOM';
                 }
+                const isSimpleRequest = selectedTypeName === 'Request' || selectedTypeName === 'ร้องขอ';
 
-                const showMaterialFields = selectedValue && selectedTypeName !== 'Routing' && selectedTypeName !== 'LicensePermission';
+                const showMaterialFields = selectedValue && !isSimpleRequest && selectedTypeName !== 'Routing' && selectedTypeName !== 'LicensePermission';
                 if (materialFieldsContainer) materialFieldsContainer.style.display = showMaterialFields ? 'block' : 'none';
+
+                if (requestPlantContainer) {
+                    requestPlantContainer.style.display = isSimpleRequest ? 'none' : 'block';
+                }
+
+                if (requestPlantSelect) {
+                    requestPlantSelect.disabled = isSimpleRequest;
+                    if (isSimpleRequest) {
+                        requestPlantSelect.value = '';
+                    }
+                }
+
+                if (workflowSection) {
+                    workflowSection.style.display = 'block';
+                }
+
+                if (requestUploadContainer) {
+                    requestUploadContainer.style.display = isSimpleRequest ? 'block' : 'none';
+                }
+
+                if (requestAttachmentInput) {
+                    requestAttachmentInput.required = isSimpleRequest;
+                    requestAttachmentInput.disabled = !isSimpleRequest;
+                    if (!isSimpleRequest) {
+                        requestAttachmentInput.value = '';
+                    }
+                }
 
                 if (showMaterialFields && allMaterialFields.length) {
                     allMaterialFields.forEach(field => {

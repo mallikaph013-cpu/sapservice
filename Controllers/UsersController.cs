@@ -41,6 +41,7 @@ namespace myapp.Controllers
         {
             ViewBag.Departments = new SelectList(_context.Departments.OrderBy(d => d.DepartmentName).ToList(), "DepartmentId", "DepartmentName");
             ViewBag.Sections = new SelectList(Enumerable.Empty<SelectListItem>(), "Value", "Text");
+            ViewBag.Plants = new SelectList(_context.Plants.OrderBy(p => p.PlantName).ToList(), "PlantName", "PlantName");
             return View();
         }
 
@@ -78,7 +79,9 @@ namespace myapp.Controllers
                         LastName = model.LastName,
                         Department = department.DepartmentName,
                         Section = section.SectionName,
+                        Plant = model.Plant,
                         IsIT = model.IsIT,
+                        MustChangePasswordOnFirstLogin = true,
                         CreatedBy = User.Identity?.Name ?? "System",
                         UpdatedBy = User.Identity?.Name ?? "System",
                         CreatedAt = DateTime.UtcNow,
@@ -98,6 +101,7 @@ namespace myapp.Controllers
             }
             ViewBag.Departments = new SelectList(_context.Departments.OrderBy(d => d.DepartmentName).ToList(), "DepartmentId", "DepartmentName", model.DepartmentId);
             ViewBag.Sections = new SelectList(await _context.Sections.Where(s => s.DepartmentId == model.DepartmentId).OrderBy(s => s.SectionName).ToListAsync(), "SectionId", "SectionName", model.SectionId);
+            ViewBag.Plants = new SelectList(_context.Plants.OrderBy(p => p.PlantName).ToList(), "PlantName", "PlantName", model.Plant);
             return View(model);
         }
 
@@ -128,11 +132,13 @@ namespace myapp.Controllers
                 LastName = user.LastName,
                 DepartmentId = department?.DepartmentId ?? 0,
                 SectionId = section?.SectionId ?? 0,
+                Plant = user.Plant ?? string.Empty,
                 IsIT = user.IsIT
             };
 
             ViewBag.Departments = new SelectList(_context.Departments.OrderBy(d => d.DepartmentName).ToList(), "DepartmentId", "DepartmentName", model.DepartmentId);
             ViewBag.Sections = new SelectList(await _context.Sections.Where(s => s.DepartmentId == model.DepartmentId).OrderBy(s => s.SectionName).ToListAsync(), "SectionId", "SectionName", model.SectionId);
+            ViewBag.Plants = new SelectList(_context.Plants.OrderBy(p => p.PlantName).ToList(), "PlantName", "PlantName", model.Plant);
             return View(model);
         }
 
@@ -167,6 +173,7 @@ namespace myapp.Controllers
                     user.LastName = model.LastName;
                     user.Department = department.DepartmentName;
                     user.Section = section.SectionName;
+                    user.Plant = model.Plant;
                     user.IsIT = model.IsIT;
                     user.UpdatedBy = User.Identity?.Name ?? "System";
                     user.UpdatedAt = DateTime.UtcNow;
@@ -188,8 +195,14 @@ namespace myapp.Controllers
                                 }
                                 ViewBag.Departments = new SelectList(_context.Departments.OrderBy(d => d.DepartmentName).ToList(), "DepartmentId", "DepartmentName", model.DepartmentId);
                                 ViewBag.Sections = new SelectList(await _context.Sections.Where(s => s.DepartmentId == model.DepartmentId).OrderBy(s => s.SectionName).ToListAsync(), "SectionId", "SectionName", model.SectionId);
+                                ViewBag.Plants = new SelectList(_context.Plants.OrderBy(p => p.PlantName).ToList(), "PlantName", "PlantName", model.Plant);
                                 return View(model);
                             }
+
+                            user.MustChangePasswordOnFirstLogin = true;
+                            user.UpdatedBy = User.Identity?.Name ?? "System";
+                            user.UpdatedAt = DateTime.UtcNow;
+                            await _userManager.UpdateAsync(user);
                         }
 
                         TempData["SuccessMessage"] = "User updated successfully!";
@@ -203,6 +216,7 @@ namespace myapp.Controllers
             }
             ViewBag.Departments = new SelectList(_context.Departments.OrderBy(d => d.DepartmentName).ToList(), "DepartmentId", "DepartmentName", model.DepartmentId);
             ViewBag.Sections = new SelectList(await _context.Sections.Where(s => s.DepartmentId == model.DepartmentId).OrderBy(s => s.SectionName).ToListAsync(), "SectionId", "SectionName", model.SectionId);
+            ViewBag.Plants = new SelectList(_context.Plants.OrderBy(p => p.PlantName).ToList(), "PlantName", "PlantName", model.Plant);
             return View(model);
         }
 
@@ -368,6 +382,7 @@ namespace myapp.Controllers
                         Section = row.SectionName,
                         Plant = row.Plant,
                         IsIT = row.IsIT,
+                        MustChangePasswordOnFirstLogin = true,
                         CreatedBy = actor,
                         UpdatedBy = actor,
                         CreatedAt = DateTime.UtcNow,

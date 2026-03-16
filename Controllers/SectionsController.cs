@@ -13,6 +13,7 @@ using ClosedXML.Excel;
 using System.Collections.Generic;
 using System.Text;
 using System.Linq;
+using Microsoft.Data.Sqlite;
 
 namespace myapp.Controllers
 {
@@ -31,26 +32,57 @@ namespace myapp.Controllers
         // GET: Sections
         public async Task<IActionResult> Index()
         {
-            var sections = _context.Sections.Include(s => s.Department);
+            var sections = _context.Sections
+                .Include(s => s.Department)
+                .OrderBy(s => s.SectionName);
             return View(await sections.ToListAsync());
         }
 
         // GET: Sections/Create
         public IActionResult Create()
         {
-            ViewBag.Departments = new SelectList(_context.Departments, "DepartmentId", "DepartmentName");
-            return View();
+            ViewBag.Departments = new SelectList(
+                _context.Departments.Where(d => d.IsActive).OrderBy(d => d.DepartmentName),
+                "DepartmentId",
+                "DepartmentName");
+            return View(new Section { IsActive = true });
         }
 
         // POST: Sections/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("SectionName,DepartmentId")] Section section)
+        public async Task<IActionResult> Create([Bind("SectionName,DepartmentId,IsActive")] Section section)
         {
+            var normalizedSectionName = section.SectionName?.Trim() ?? string.Empty;
+            if (string.IsNullOrWhiteSpace(normalizedSectionName))
+            {
+                ModelState.AddModelError(nameof(section.SectionName), "Section name is required.");
+            }
+
+            if (section.DepartmentId <= 0)
+            {
+                ModelState.AddModelError(nameof(section.DepartmentId), "Department is required.");
+            }
+
+            var departmentExists = await _context.Departments
+                .AnyAsync(d => d.DepartmentId == section.DepartmentId && d.IsActive);
+            if (!departmentExists)
+            {
+                ModelState.AddModelError(nameof(section.DepartmentId), "Selected department is invalid or inactive.");
+            }
+
+            var isDuplicate = await _context.Sections
+                .AnyAsync(s => s.DepartmentId == section.DepartmentId && s.SectionName.ToLower() == normalizedSectionName.ToLower());
+            if (isDuplicate)
+            {
+                ModelState.AddModelError(nameof(section.SectionName), "Section name already exists in the selected department.");
+            }
+
             if (ModelState.IsValid)
             {
                 var actor = User.Identity?.Name ?? "System";
                 var now = DateTime.UtcNow;
+                section.SectionName = normalizedSectionName;
                 section.CreatedAt = now;
                 section.UpdatedAt = now;
                 section.CreatedBy = actor;
@@ -61,7 +93,11 @@ namespace myapp.Controllers
                 TempData["SuccessMessage"] = "Section created successfully!";
                 return RedirectToAction(nameof(Index));
             }
-            ViewBag.Departments = new SelectList(_context.Departments, "DepartmentId", "DepartmentName", section.DepartmentId);
+            ViewBag.Departments = new SelectList(
+                _context.Departments.Where(d => d.IsActive).OrderBy(d => d.DepartmentName),
+                "DepartmentId",
+                "DepartmentName",
+                section.DepartmentId);
             return View(section);
         }
 
@@ -85,7 +121,7 @@ namespace myapp.Controllers
         // POST: Sections/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("SectionId,SectionName,DepartmentId")] Section section)
+        public async Task<IActionResult> Edit(int id, [Bind("SectionId,SectionName,DepartmentId,IsActive")] Section section)
         {
             if (id != section.SectionId)
             {
@@ -127,6 +163,30 @@ namespace myapp.Controllers
             return View(section);
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ToggleActiveStatus(int id)
+        {
+            var section = await _context.Sections.FindAsync(id);
+            if (section == null)
+            {
+                TempData["ErrorMessage"] = "Section not found.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            section.IsActive = !section.IsActive;
+            section.UpdatedAt = DateTime.UtcNow;
+            section.UpdatedBy = User.Identity?.Name ?? "System";
+
+            await _context.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = section.IsActive
+                ? "Section has been activated."
+                : "Section has been deactivated.";
+
+            return RedirectToAction(nameof(Edit), new { id = section.SectionId });
+        }
+
         // GET: Sections/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
@@ -154,9 +214,27 @@ namespace myapp.Controllers
             var section = await _context.Sections.FindAsync(id);
             if (section != null)
             {
-                _context.Sections.Remove(section);
-                await _context.SaveChangesAsync();
-                TempData["SuccessMessage"] = "Section deleted successfully!";
+                var hasDocumentRoutings = await _context.DocumentRoutings.AnyAsync(dr => dr.SectionId == id);
+                if (hasDocumentRoutings)
+                {
+                    TempData["ErrorMessage"] = "Cannot delete this section because it is referenced by document routings.";
+                    return RedirectToAction(nameof(Index));
+                }
+
+                try
+                {
+                    _context.Sections.Remove(section);
+                    await _context.SaveChangesAsync();
+                    TempData["SuccessMessage"] = "Section deleted successfully!";
+                }
+                catch (DbUpdateException ex) when (ex.InnerException is SqliteException)
+                {
+                    TempData["ErrorMessage"] = "Cannot delete this section because it is being used by related data.";
+                }
+            }
+            else
+            {
+                TempData["ErrorMessage"] = "Section not found.";
             }
             return RedirectToAction(nameof(Index));
         }

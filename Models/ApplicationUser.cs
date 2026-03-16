@@ -12,6 +12,7 @@ namespace myapp.Models
         public string? Plant { get; set; }
         public bool IsActive { get; set; } = true;
         public bool IsIT { get; set; } = false;
+        public bool MustChangePasswordOnFirstLogin { get; set; } = false;
 
         // Audit Fields from the old User model
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

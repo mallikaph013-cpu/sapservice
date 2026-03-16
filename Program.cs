@@ -4,6 +4,7 @@ using myapp.Data;
 using myapp.Models;
 using Microsoft.AspNetCore.Identity;
 using myapp.Services;
+using Microsoft.Extensions.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -66,10 +67,45 @@ app.UseStaticFiles();
 app.UseRouting();
 
 app.UseAuthentication();
+
+app.Use(async (context, next) =>
+{
+    if (context.User.Identity?.IsAuthenticated == true)
+    {
+        var path = context.Request.Path;
+        var isPasswordChangeRoute = path.StartsWithSegments("/Account/ChangePasswordFirstLogin", StringComparison.OrdinalIgnoreCase);
+        var isLogoutRoute = path.StartsWithSegments("/Account/Logout", StringComparison.OrdinalIgnoreCase);
+
+        if (!isPasswordChangeRoute && !isLogoutRoute)
+        {
+            var userManager = context.RequestServices.GetRequiredService<UserManager<ApplicationUser>>();
+            var user = await userManager.GetUserAsync(context.User);
+
+            if (user?.MustChangePasswordOnFirstLogin == true)
+            {
+                context.Response.Redirect("/Account/ChangePasswordFirstLogin");
+                return;
+            }
+        }
+    }
+
+    await next();
+});
+
 app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
+
+// Seed initial roles and admin user on startup
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
+    var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+    var context = services.GetRequiredService<ApplicationDbContext>();
+    await IdentityDataInitializer.SeedData(userManager, roleManager, context);
+}
 
 app.Run();

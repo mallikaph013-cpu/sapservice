@@ -28,7 +28,7 @@
                     <div class="col-md-9">
                         <label for="departmentsImportFile" class="form-label">CSV/XLSX File</label>
                         <input type="file" id="departmentsImportFile" name="importFile" class="form-control" accept=".csv,.xlsx" required />
-                        <small class="text-light">Column: DepartmentName</small>
+                        <small class="text-light">Column: Department Name</small>
                     </div>
                     <div class="col-md-3">
                         <div class="d-grid gap-2">
@@ -48,6 +48,7 @@
                         <thead class="table-light">
                             <tr>
                                 <th class="py-3 ps-4">@Html.DisplayNameFor(model => model.DepartmentName)</th>
+                                <th class="py-3 text-center" style="width: 160px;">Status</th>
                                 <th class="py-3 text-center pe-4" style="width: 160px;">Actions</th>
                             </tr>
                         </thead>
@@ -56,6 +57,16 @@
                             {
                                 <tr>
                                     <td class="ps-4">@Html.DisplayFor(modelItem => item.DepartmentName)</td>
+                                    <td class="text-center">
+                                        @if (item.IsActive)
+                                        {
+                                            <span class="badge bg-success">Active</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary">Inactive</span>
+                                        }
+                                    </td>
                                     <td class="text-center pe-4">
                                         <a asp-action="Edit" asp-route-id="@item.DepartmentId" class="btn btn-icon btn-sm btn-warning me-1" data-bs-toggle="tooltip" title="Edit">
                                             <i class="fas fa-pencil-alt"></i>

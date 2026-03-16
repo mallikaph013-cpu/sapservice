@@ -40,6 +40,20 @@
                                 <span asp-validation-for="LastName" class="text-danger"></span>
                             </div>
                         </div>
+                        <div class="col-md-6">
+                            <div class="form-floating mb-3">
+                                <select asp-for="Plant" class="form-select">
+                                    <option value="">-- Select Plant --</option>
+                                    <option value="6021">6021</option>
+                                    <option value="6031">6031</option>
+                                    <option value="6051">6051</option>
+                                    <option value="6081">6081</option>
+                                    <option value="6090">6090</option>
+                                </select>
+                                <label asp-for="Plant">Plant</label>
+                                <span asp-validation-for="Plant" class="text-danger"></span>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="form-floating mb-3">
@@ -79,7 +93,7 @@
                         </div>
                         <div class="col-md-6">
                             <div class="form-floating mb-3">
-                                <select asp-for="SectionId" class="form-select">
+                                <select asp-for="SectionId" class="form-select" asp-items="ViewBag.Sections">
                                     <option value="">-- Select Section --</option>
                                 </select>
                                 <label asp-for="SectionId">Section</label>
@@ -92,6 +106,7 @@
                         <input class="form-check-input" type="checkbox" asp-for="IsIT">
                         <label class="form-check-label" asp-for="IsIT">Assign to IT Role</label>
                     </div>
+
 
                     <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
                         <a asp-action="Index" class="btn btn-outline-secondary me-md-2">

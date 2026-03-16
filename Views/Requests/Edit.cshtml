@@ -129,7 +129,7 @@
     </div>
     <hr />
 
-    <form id="editForm" asp-action="Edit" method="post">
+    <form id="editForm" asp-action="Edit" method="post" enctype="multipart/form-data">
         @Html.AntiForgeryToken()
         <input type="hidden" name="FromImport" value="@Model.FromImport" />
         <input type="hidden" asp-for="Id" />
@@ -155,7 +155,7 @@
         <h4>Request Details</h4>
         <div class="row g-3 mb-4">
              <div class="col-md-6"><div class="form-group"><label asp-for="RequestType" class="control-label"></label><select asp-for="RequestType" id="RequestType" class="form-select" asp-items="Html.GetEnumSelectList<myapp.Models.RequestType>()" disabled="@(!isRequesterEditor)"></select>@if (!isRequesterEditor) { <input type="hidden" asp-for="RequestType" /> }<span asp-validation-for="RequestType" class="text-danger"></span></div></div>
-             <div class="col-md-6"><div class="form-group"><label asp-for="Plant" class="control-label"></label><select asp-for="Plant" id="RequestPlant" class="form-select" disabled="@(!isRequesterEditor)"><option value="">-- Select Plant --</option><option value="6021">6021 (Device)</option><option value="6031">6031 (Assembly)</option><option value="6051">6051 (Injection)</option><option value="6081">6081 (IPO)</option><option value="6060">6060</option></select>@if (!isRequesterEditor) { <input type="hidden" asp-for="Plant" /> }<span asp-validation-for="Plant" class="text-danger"></span></div></div>
+             <div class="col-md-6" id="request-plant-container"><div class="form-group"><label asp-for="Plant" class="control-label"></label><select asp-for="Plant" id="RequestPlant" class="form-select" disabled="@(!isRequesterEditor)"><option value="">-- Select Plant --</option><option value="6021">6021 (Device)</option><option value="6031">6031 (Assembly)</option><option value="6051">6051 (Injection)</option><option value="6081">6081 (IPO)</option><option value="6090">6090</option></select>@if (!isRequesterEditor) { <input type="hidden" asp-for="Plant" /> }<span asp-validation-for="Plant" class="text-danger"></span></div></div>
              <div class="col-md-12">
                  <div class="form-group">
                     <label asp-for="Description" class="control-label"></label>
@@ -163,27 +163,45 @@
                     <span asp-validation-for="Description" class="text-danger"></span>
                 </div>
             </div>
+
+            <div class="col-md-12" id="request-upload-container" style="display:none;">
+                <div class="form-group">
+                    <label for="RequestAttachment" class="control-label">Upload File</label>
+                    <input class="form-control" type="file" id="RequestAttachment" name="requestAttachment" />
+                    @if (!string.IsNullOrWhiteSpace(ViewBag.CurrentAttachmentPath as string))
+                    {
+                        <div class="mt-2">
+                            <a href="@ViewBag.CurrentAttachmentPath" target="_blank" rel="noopener">
+                                Current file: @(string.IsNullOrWhiteSpace(ViewBag.CurrentAttachmentFileName as string) ? "Attached file" : ViewBag.CurrentAttachmentFileName)
+                            </a>
+                        </div>
+                    }
+                    <span class="text-danger field-validation-valid" data-valmsg-for="requestAttachment" data-valmsg-replace="true"></span>
+                </div>
+            </div>
         </div>
 
         <partial name="_MaterialForms" model="Model" />
 
-        <hr />
-        <h4>Approver</h4>
-       @* <p class="text-muted small mb-3">Select a request type to see the list of available approvers.</p>*@
-        <div class="row mb-4">
-            <div class="col-md-6">
-                <div class="form-group">
-                    <label for="NextResponsibleUserId" class="control-label">ผู้รับผิดชอบลำดับถัดไป</label>
-                    <select asp-for="NextResponsibleUserId" id="NextResponsibleUserId" class="form-select">
-                        @if (!string.IsNullOrWhiteSpace(Model.NextResponsibleUserId))
-                        {
-                            <option value="@Model.NextResponsibleUserId" selected="selected">@ViewBag.CurrentNextApproverName</option>
-                        }
-                        else
-                        {
-                            <option value="">-- Loading... --</option>
-                        }
-                    </select>
+        <div id="workflow-section">
+            <hr />
+            <h4>Approver</h4>
+           @* <p class="text-muted small mb-3">Select a request type to see the list of available approvers.</p>*@
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="NextResponsibleUserId" class="control-label">ผู้รับผิดชอบลำดับถัดไป</label>
+                        <select asp-for="NextResponsibleUserId" id="NextResponsibleUserId" class="form-select">
+                            @if (!string.IsNullOrWhiteSpace(Model.NextResponsibleUserId))
+                            {
+                                <option value="@Model.NextResponsibleUserId" selected="selected">@ViewBag.CurrentNextApproverName</option>
+                            }
+                            else
+                            {
+                                <option value="">-- Loading... --</option>
+                            }
+                        </select>
+                    </div>
                 </div>
             </div>
         </div>
@@ -253,6 +271,11 @@
         const licensePermissionContainer = document.getElementById('license-permission-fields-container');
         const editBomFgInput = document.getElementById('EditBomFg');
         const editBomAllFgCheckbox = document.getElementById('EditBomAllFg');
+        const requestPlantContainer = document.getElementById('request-plant-container');
+        const requestUploadContainer = document.getElementById('request-upload-container');
+        const requestAttachmentInput = document.getElementById('RequestAttachment');
+        const workflowSection = document.getElementById('workflow-section');
+        const hasCurrentAttachment = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(!string.IsNullOrWhiteSpace(ViewBag.CurrentAttachmentPath as string)));
         const nextResponsibleUserSelect = document.getElementById('NextResponsibleUserId');
         const licenseRequestOptionSelect = document.getElementById('LicenseRequestOption');
         const licenseNewUsernameFields = document.getElementById('license-new-username-fields');
@@ -263,21 +286,22 @@
         const currentNextApproverName = @Html.Raw(System.Text.Json.JsonSerializer.Serialize((string)(ViewBag.CurrentNextApproverName ?? "Current Responsible User")));
 
         const typeMapping = {
-            '0': 'FG',
-            '1': 'SM',
-            '2': 'RM',
-            '3': 'ToolingB',
-            '4': 'ToolingBFG',
-            '5': 'ToolingBPU',
-            '6': 'BOM',
-            '7': 'Routing',
-            '8': 'AddStorage',
-            '9': 'DistributionChanel',
-            '10':'IPO',
-            '11':'Passthrough',
-            '12':'CrossPlantPurchase',
-            '13':'EditBOM',
-            '14':'LicensePermission'
+            '0': 'Request',
+            '1': 'FG',
+            '2': 'SM',
+            '3': 'RM',
+            '4': 'ToolingB',
+            '5': 'ToolingBFG',
+            '6': 'ToolingBPU',
+            '7': 'BOM',
+            '8': 'Routing',
+            '9': 'AddStorage',
+            '10':'DistributionChanel',
+            '11':'IPO',
+            '12':'Passthrough',
+            '13':'CrossPlantPurchase',
+            '14':'EditBOM',
+            '15':'LicensePermission'
         };
 
         function toggleMaterialFields() {
@@ -291,8 +315,9 @@
             //if (selectedTypeName === 'EditBOM' || selectedTypeName === '�� BOM') {
             //    selectedTypeName = 'EditBOM';
             // }
+            const isSimpleRequest = selectedTypeName === 'Request' || selectedTypeName === 'ร้องขอ';
 
-            const showMaterialFields = selectedValue && selectedTypeName !== 'Routing' && selectedTypeName !== 'LicensePermission';
+            const showMaterialFields = selectedValue && !isSimpleRequest && selectedTypeName !== 'Routing' && selectedTypeName !== 'LicensePermission';
             if (materialFieldsContainer) {
                 materialFieldsContainer.style.display = showMaterialFields ? 'block' : 'none';
 
@@ -308,6 +333,33 @@
                             }
                         }
                     });
+                }
+            }
+
+            if (requestPlantContainer) {
+                requestPlantContainer.style.display = isSimpleRequest ? 'none' : 'block';
+            }
+
+            if (requestPlantSelect) {
+                requestPlantSelect.disabled = isSimpleRequest;
+                if (isSimpleRequest) {
+                    requestPlantSelect.value = '';
+                }
+            }
+
+            if (workflowSection) {
+                workflowSection.style.display = 'block';
+            }
+
+            if (requestUploadContainer) {
+                requestUploadContainer.style.display = isSimpleRequest ? 'block' : 'none';
+            }
+
+            if (requestAttachmentInput) {
+                requestAttachmentInput.disabled = !isSimpleRequest;
+                requestAttachmentInput.required = isSimpleRequest && !hasCurrentAttachment;
+                if (!isSimpleRequest) {
+                    requestAttachmentInput.value = '';
                 }
             }
 

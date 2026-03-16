@@ -4,6 +4,8 @@ namespace myapp.Models
 {
     public enum RequestType
     {
+        [Display(Name = "ร้องขอ")]
+        Request,
         FG,
         SM,
         RM,

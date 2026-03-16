@@ -38,6 +38,10 @@ namespace myapp.Models
         [Display(Name = "Section")]
         public int SectionId { get; set; }
 
+        [Required]
+        [Display(Name = "Plant")]
+        public string Plant { get; set; } = string.Empty;
+
         public bool IsIT { get; set; }
     }
 }

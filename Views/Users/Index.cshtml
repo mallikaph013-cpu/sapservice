@@ -51,6 +51,7 @@
                                 <th class="py-3">Full Name</th>
                                 <th class="py-3">Department</th>
                                 <th class="py-3">Section</th>
+                                <th class="py-3 text-center" style="width: 140px;">Status</th>
                                 <th class="py-3 text-center pe-4">Actions</th>
                             </tr>
                         </thead>
@@ -62,6 +63,16 @@
                                     <td>@user.FirstName @user.LastName</td>
                                     <td>@user.Department</td>
                                     <td>@user.Section</td>
+                                    <td class="text-center">
+                                        @if (user.IsActive)
+                                        {
+                                            <span class="badge bg-success">Active</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary">Inactive</span>
+                                        }
+                                    </td>
                                     <td class="text-center pe-4">
                                         <a asp-action="Details" asp-route-id="@user.Id" class="btn btn-icon btn-sm btn-outline-secondary me-1" data-bs-toggle="tooltip" title="Details">
                                             <i class="fas fa-info-circle"></i>

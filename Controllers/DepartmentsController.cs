@@ -12,6 +12,7 @@ using ClosedXML.Excel;
 using System.Collections.Generic;
 using System.Text;
 using System.Linq;
+using Microsoft.Data.Sqlite;
 
 namespace myapp.Controllers
 {
@@ -30,7 +31,9 @@ namespace myapp.Controllers
         // GET: Departments
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Departments.ToListAsync());
+            return View(await _context.Departments
+                .OrderBy(d => d.DepartmentName)
+                .ToListAsync());
         }
 
         // GET: Departments/Create
@@ -44,10 +47,25 @@ namespace myapp.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("DepartmentId,DepartmentName")] Department department)
         {
+            var normalizedDepartmentName = department.DepartmentName?.Trim() ?? string.Empty;
+            if (string.IsNullOrWhiteSpace(normalizedDepartmentName))
+            {
+                ModelState.AddModelError(nameof(department.DepartmentName), "Department name is required.");
+            }
+
+            var isDuplicate = await _context.Departments
+                .AnyAsync(d => d.DepartmentName.ToLower() == normalizedDepartmentName.ToLower());
+            if (isDuplicate)
+            {
+                ModelState.AddModelError(nameof(department.DepartmentName), "Department name already exists.");
+            }
+
             if (ModelState.IsValid)
             {
                 var actor = User.Identity?.Name ?? "System";
                 var now = DateTime.UtcNow;
+                department.DepartmentName = normalizedDepartmentName;
+                department.IsActive = true;
                 department.CreatedAt = now;
                 department.UpdatedAt = now;
                 department.CreatedBy = actor;
@@ -80,7 +98,7 @@ namespace myapp.Controllers
         // POST: Departments/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("DepartmentId,DepartmentName")] Department department)
+        public async Task<IActionResult> Edit(int id, [Bind("DepartmentId,DepartmentName,IsActive")] Department department)
         {
             if (id != department.DepartmentId)
             {
@@ -120,6 +138,30 @@ namespace myapp.Controllers
             return View(department);
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ToggleActiveStatus(int id)
+        {
+            var department = await _context.Departments.FindAsync(id);
+            if (department == null)
+            {
+                TempData["ErrorMessage"] = "Department not found.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            department.IsActive = !department.IsActive;
+            department.UpdatedAt = DateTime.UtcNow;
+            department.UpdatedBy = User.Identity?.Name ?? "System";
+
+            await _context.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = department.IsActive
+                ? "Department has been activated."
+                : "Department has been deactivated.";
+
+            return RedirectToAction(nameof(Edit), new { id = department.DepartmentId });
+        }
+
         // GET: Departments/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
@@ -146,9 +188,26 @@ namespace myapp.Controllers
             var department = await _context.Departments.FindAsync(id);
             if (department != null)
             {
-                _context.Departments.Remove(department);
-                await _context.SaveChangesAsync();
-                TempData["SuccessMessage"] = "Department deleted successfully!";
+                var hasSections = await _context.Sections.AnyAsync(s => s.DepartmentId == id);
+                var hasPlants = await _context.Plants.AnyAsync(p => p.DepartmentId == id);
+                var hasDocumentRoutings = await _context.DocumentRoutings.AnyAsync(dr => dr.DepartmentId == id);
+
+                if (hasSections || hasPlants || hasDocumentRoutings)
+                {
+                    TempData["ErrorMessage"] = "Cannot delete this department because it is referenced by sections, plants, or document routings.";
+                    return RedirectToAction(nameof(Index));
+                }
+
+                try
+                {
+                    _context.Departments.Remove(department);
+                    await _context.SaveChangesAsync();
+                    TempData["SuccessMessage"] = "Department deleted successfully!";
+                }
+                catch (DbUpdateException ex) when (ex.InnerException is SqliteException)
+                {
+                    TempData["ErrorMessage"] = "Cannot delete this department because it is being used by related data.";
+                }
             }
             else
             {

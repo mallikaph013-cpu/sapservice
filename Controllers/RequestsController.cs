@@ -16,6 +16,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using ClosedXML.Excel;
 using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Hosting;
 
 namespace myapp.Controllers
 {
@@ -25,12 +26,14 @@ namespace myapp.Controllers
         private readonly ApplicationDbContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly ILogger<RequestsController> _logger;
+        private readonly IWebHostEnvironment _environment;
 
-        public RequestsController(ApplicationDbContext context, UserManager<ApplicationUser> userManager, ILogger<RequestsController> logger)
+        public RequestsController(ApplicationDbContext context, UserManager<ApplicationUser> userManager, ILogger<RequestsController> logger, IWebHostEnvironment environment)
         {
             _context = context;
             _userManager = userManager;
             _logger = logger;
+            _environment = environment;
         }
 
         private void SetBomComponentProperty(BomComponent component, string propertyName, string value)
@@ -656,7 +659,8 @@ namespace myapp.Controllers
         private void ValidateRequest(CreateRequestViewModel viewModel)
         {
             if (viewModel.RequestType == RequestType.LicensePermission ||
-                viewModel.RequestType == RequestType.Routing)
+                viewModel.RequestType == RequestType.Routing ||
+                viewModel.RequestType == RequestType.Request)
             {
                 return;
             }
@@ -712,7 +716,7 @@ namespace myapp.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(CreateRequestViewModel viewModel)
+        public async Task<IActionResult> Create(CreateRequestViewModel viewModel, IFormFile? requestAttachment)
         {
             _logger.LogInformation(
                 "Create POST started by {Actor}. RequestType={RequestType}, Requester={Requester}, NextResponsible={NextResponsibleUserId}",
@@ -722,6 +726,22 @@ namespace myapp.Controllers
                 viewModel.NextResponsibleUserId);
 
             ValidateRequest(viewModel);
+
+            if (viewModel.RequestType == RequestType.Request)
+            {
+                // Plant is not required for the generic Request flow.
+                ModelState.Remove(nameof(viewModel.Plant));
+
+                if (requestAttachment == null || requestAttachment.Length == 0)
+                {
+                    ModelState.AddModelError("requestAttachment", "Attachment file is required for this request type.");
+                }
+
+                if (string.IsNullOrWhiteSpace(viewModel.NextResponsibleUserId))
+                {
+                    ModelState.AddModelError(nameof(viewModel.NextResponsibleUserId), "Please select the next responsible user.");
+                }
+            }
 
             if (!ModelState.IsValid)
             {
@@ -735,6 +755,35 @@ namespace myapp.Controllers
 
             if (ModelState.IsValid)
             {
+                string? attachmentFileName = null;
+                string? attachmentPath = null;
+                string? documentNumber = null;
+                var requestDateUtc = DateTime.UtcNow;
+
+                if (requestAttachment is { Length: > 0 } uploadedFile)
+                {
+                    var uploadsRoot = _environment.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+                    var uploadsDirectory = Path.Combine(uploadsRoot, "uploads", "requests");
+                    Directory.CreateDirectory(uploadsDirectory);
+
+                    var extension = Path.GetExtension(uploadedFile.FileName);
+                    var storedFileName = $"{Guid.NewGuid():N}{extension}";
+                    var fullFilePath = Path.Combine(uploadsDirectory, storedFileName);
+
+                    await using (var stream = new FileStream(fullFilePath, FileMode.Create))
+                    {
+                        await uploadedFile.CopyToAsync(stream);
+                    }
+
+                    attachmentFileName = uploadedFile.FileName;
+                    attachmentPath = $"/uploads/requests/{storedFileName}";
+
+                    _logger.LogInformation(
+                        "Create POST received attachment. FileName={FileName}, Size={Size}",
+                        uploadedFile.FileName,
+                        uploadedFile.Length);
+                }
+
                 string? nextApproverId = null;
                 if (!string.IsNullOrEmpty(viewModel.NextResponsibleUserId))
                 {
@@ -745,6 +794,30 @@ namespace myapp.Controllers
                     }
                 }
 
+                if (viewModel.RequestType == RequestType.Request)
+                {
+                    var yearPart = requestDateUtc.ToString("yy", CultureInfo.InvariantCulture);
+                    var prefix = $"SR-{yearPart}-";
+
+                    var existingNumbers = await _context.RequestItems
+                        .AsNoTracking()
+                        .Where(r => r.DocumentNumber != null && r.DocumentNumber.StartsWith(prefix))
+                        .Select(r => r.DocumentNumber!)
+                        .ToListAsync();
+
+                    var maxSequence = 0;
+                    foreach (var existingNumber in existingNumbers)
+                    {
+                        var parts = existingNumber.Split('-', StringSplitOptions.RemoveEmptyEntries);
+                        if (parts.Length == 3 && int.TryParse(parts[2], out var parsedSequence) && parsedSequence > maxSequence)
+                        {
+                            maxSequence = parsedSequence;
+                        }
+                    }
+
+                    documentNumber = $"{prefix}{maxSequence + 1:000}";
+                }
+
                  var requestItem = new RequestItem
                 {
                     RequestType = viewModel.RequestType.ToString(),
@@ -752,8 +825,11 @@ namespace myapp.Controllers
                     Requester = viewModel.RequesterName,
                     Status = User.IsInRole("IT") ? viewModel.Status : "Pending",
                     UsageStatus = 1,
-                    RequestDate = DateTime.UtcNow,
+                    RequestDate = requestDateUtc,
                     NextApproverId = nextApproverId, // Set the next approver
+                    AttachmentFileName = attachmentFileName,
+                    AttachmentPath = attachmentPath,
+                    DocumentNumber = documentNumber,
 
                     // Correctly parse and assign values
                     Plant = viewModel.Plant,
@@ -858,11 +934,12 @@ namespace myapp.Controllers
                     details: $"RequestType={requestItem.RequestType}; Status={requestItem.Status}; NextApproverId={requestItem.NextApproverId}");
 
                 _logger.LogInformation(
-                    "Create POST succeeded. RequestId={RequestId}, RequestType={RequestType}, Requester={Requester}, NextApproverId={NextApproverId}",
+                    "Create POST succeeded. RequestId={RequestId}, RequestType={RequestType}, Requester={Requester}, NextApproverId={NextApproverId}, DocumentNumber={DocumentNumber}",
                     requestItem.Id,
                     requestItem.RequestType,
                     requestItem.Requester,
-                    requestItem.NextApproverId);
+                    requestItem.NextApproverId,
+                    requestItem.DocumentNumber);
 
                 TempData["SuccessMessage"] = "Request created successfully!";
                 return RedirectToAction(nameof(Index));
@@ -1020,6 +1097,8 @@ namespace myapp.Controllers
             ViewBag.CurrentNextApproverName = currentApproverUser != null
                 ? $"{currentApproverUser.FirstName} {currentApproverUser.LastName}"
                 : "Current Responsible User";
+            ViewBag.CurrentAttachmentFileName = requestItem.AttachmentFileName;
+            ViewBag.CurrentAttachmentPath = requestItem.AttachmentPath;
             ViewBag.IsRequesterEditor = isRequesterEditor;
 
             return View("Edit", viewModel); 
@@ -1028,13 +1107,34 @@ namespace myapp.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, CreateRequestViewModel viewModel)
+        public async Task<IActionResult> Edit(int id, CreateRequestViewModel viewModel, IFormFile? requestAttachment)
         {
             _logger.LogInformation("Edit POST called for id={Id}", id);
             try { _logger.LogDebug("Posted viewModel: {@ViewModel}", viewModel); } catch { }
             if (id != viewModel.Id)
             {
                 return NotFound();
+            }
+
+            var existingRequest = await _context.RequestItems
+                .AsNoTracking()
+                .Where(r => r.Id == id)
+                .Select(r => new { r.AttachmentFileName, r.AttachmentPath })
+                .FirstOrDefaultAsync();
+
+            if (existingRequest == null)
+            {
+                return NotFound();
+            }
+
+            if (viewModel.RequestType == RequestType.Request && requestAttachment == null && string.IsNullOrWhiteSpace(existingRequest.AttachmentPath))
+            {
+                ModelState.AddModelError("requestAttachment", "Attachment file is required for this request type.");
+            }
+
+            if (viewModel.RequestType == RequestType.Request && string.IsNullOrWhiteSpace(viewModel.NextResponsibleUserId))
+            {
+                ModelState.AddModelError(nameof(viewModel.NextResponsibleUserId), "Please select the next responsible user.");
             }
 
             if (User.IsInRole("IT")
@@ -1044,6 +1144,8 @@ namespace myapp.Controllers
                 ModelState.AddModelError(nameof(viewModel.Description), "Please provide a remark before rejecting.");
                 ViewBag.IsRequesterEditor = false;
                 ViewBag.CurrentNextApproverName = "Current Responsible User";
+                ViewBag.CurrentAttachmentFileName = existingRequest.AttachmentFileName;
+                ViewBag.CurrentAttachmentPath = existingRequest.AttachmentPath;
                 return View("Edit", viewModel);
             }
 
@@ -1071,6 +1173,49 @@ namespace myapp.Controllers
                     _logger.LogWarning(ex, "Failed to clear ModelState errors for imported record id={Id}", id);
                 }
                 _logger.LogInformation("Edit POST: relaxed validation for imported record id={Id}", id);
+            }
+
+            if (!ModelState.IsValid)
+            {
+                try
+                {
+                    var errors = ModelState.Where(ms => ms.Value.Errors.Any())
+                        .Select(ms => new
+                        {
+                            Key = ms.Key,
+                            Errors = ms.Value.Errors.Select(e => e.ErrorMessage).ToArray()
+                        })
+                        .ToArray();
+                    _logger.LogWarning("ModelState invalid on Edit POST: {@Errors}", errors);
+                }
+                catch
+                {
+                }
+
+                var requestItemForView = await _context.RequestItems
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(r => r.Id == id);
+
+                var currentUser = await _userManager.GetUserAsync(User);
+                var currentUserFullName = currentUser == null
+                    ? string.Empty
+                    : $"{currentUser.FirstName} {currentUser.LastName}".Trim();
+                var isRequesterEditor = requestItemForView != null
+                    && !string.IsNullOrWhiteSpace(currentUserFullName)
+                    && string.Equals(currentUserFullName, requestItemForView.Requester?.Trim(), StringComparison.OrdinalIgnoreCase);
+
+                var currentApproverUser = requestItemForView != null && !string.IsNullOrWhiteSpace(requestItemForView.NextApproverId)
+                    ? await _userManager.Users.FirstOrDefaultAsync(u => u.Id == requestItemForView.NextApproverId)
+                    : null;
+
+                ViewBag.CurrentNextApproverName = currentApproverUser != null
+                    ? $"{currentApproverUser.FirstName} {currentApproverUser.LastName}"
+                    : "Current Responsible User";
+                ViewBag.IsRequesterEditor = isRequesterEditor;
+                ViewBag.CurrentAttachmentFileName = requestItemForView?.AttachmentFileName ?? existingRequest.AttachmentFileName;
+                ViewBag.CurrentAttachmentPath = requestItemForView?.AttachmentPath ?? existingRequest.AttachmentPath;
+
+                return View("Edit", viewModel);
             }
 
            // if (!ModelState.IsValid)
@@ -1122,6 +1267,25 @@ namespace myapp.Controllers
                     requestItemToUpdate.Status = User.IsInRole("IT") ? viewModel.Status : requestItemToUpdate.Status;
                     requestItemToUpdate.UpdatedAt = DateTime.UtcNow;
                     requestItemToUpdate.UpdatedBy = User?.Identity?.Name ?? "Unknown";
+
+                    if (requestAttachment is { Length: > 0 } uploadedFile)
+                    {
+                        var uploadsRoot = _environment.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+                        var uploadsDirectory = Path.Combine(uploadsRoot, "uploads", "requests");
+                        Directory.CreateDirectory(uploadsDirectory);
+
+                        var extension = Path.GetExtension(uploadedFile.FileName);
+                        var storedFileName = $"{Guid.NewGuid():N}{extension}";
+                        var fullFilePath = Path.Combine(uploadsDirectory, storedFileName);
+
+                        await using (var stream = new FileStream(fullFilePath, FileMode.Create))
+                        {
+                            await uploadedFile.CopyToAsync(stream);
+                        }
+
+                        requestItemToUpdate.AttachmentFileName = uploadedFile.FileName;
+                        requestItemToUpdate.AttachmentPath = $"/uploads/requests/{storedFileName}";
+                    }
 
                     if (!string.IsNullOrWhiteSpace(viewModel.NextResponsibleUserId))
                     {

@@ -34,6 +34,7 @@
                 <div>
                     <h2 class="mb-1">Details for Request #@Model.Id</h2>
                     <p class="text-light mb-0">Type: @Model.RequestType</p>
+                    <p class="text-light mb-0">Document No.: @(string.IsNullOrWhiteSpace(Model.DocumentNumber) ? "-" : Model.DocumentNumber)</p>
                 </div>
                 <span class="request-status @GetStatusClass(Model.Status)">@Model.Status</span>
             </div>
@@ -44,7 +45,7 @@
                 <div class="row g-3">
                     <div class="col-md-6"><strong>Requester:</strong> <span class="text-secondary">@Model.Requester</span></div>
                     <div class="col-md-6"><strong>Request Date:</strong> <span class="text-secondary">@Model.RequestDate.ToString("MMMM dd, yyyy")</span></div>
-                    <div class="col-md-6"><strong>Next Responsible User:</strong> <span class="text-secondary">@ViewBag.NextResponsibleUserName</span></div>
+                    <div class="col-md-6"><strong>ผู้รับผิดชอบลำดับถัดไป:</strong> <span class="text-secondary">@ViewBag.NextResponsibleUserName</span></div>
                 </div>
             </div>
 
@@ -56,6 +57,16 @@
                 @if (!string.IsNullOrWhiteSpace(Model.Description))
                 {
                     <p class="description-box">@Html.Raw(Model.Description.Replace("\n", "<br />"))</p>
+                }
+
+                @if ((Model.RequestType == "Request" || Model.RequestType == "ร้องขอ") && !string.IsNullOrWhiteSpace(Model.AttachmentPath))
+                {
+                    <div class="mt-3">
+                        <strong>Attachment:</strong>
+                        <a href="@Model.AttachmentPath" target="_blank" rel="noopener">
+                            @(string.IsNullOrWhiteSpace(Model.AttachmentFileName) ? "Open attachment" : Model.AttachmentFileName)
+                        </a>
+                    </div>
                 }
             </div>
 

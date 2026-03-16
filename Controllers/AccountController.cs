@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using myapp.Models;
 using myapp.Data;
 using System.Threading.Tasks;
@@ -52,6 +53,16 @@ namespace myapp.Controllers
 
                     if (result.Succeeded)
                     {
+                        if (user.MustChangePasswordOnFirstLogin)
+                        {
+                            await AddAuditLogAsync(
+                                action: "LoginFirstTimePasswordChangeRequired",
+                                performedBy: user.UserName,
+                                details: "User login blocked until first password change is completed.");
+
+                            return RedirectToAction(nameof(ChangePasswordFirstLogin));
+                        }
+
                         await AddAuditLogAsync(
                             action: "LoginSuccess",
                             performedBy: user.UserName,
@@ -68,6 +79,55 @@ namespace myapp.Controllers
 
                 ModelState.AddModelError(string.Empty, "Invalid login attempt.");
             }
+            return View(model);
+        }
+
+        [Authorize]
+        [HttpGet]
+        public IActionResult ChangePasswordFirstLogin()
+        {
+            return View(new FirstLoginChangePasswordViewModel());
+        }
+
+        [Authorize]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ChangePasswordFirstLogin(FirstLoginChangePasswordViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return RedirectToAction(nameof(Login));
+            }
+
+            var result = await _userManager.ChangePasswordAsync(user, model.CurrentPassword, model.NewPassword);
+            if (result.Succeeded)
+            {
+                user.MustChangePasswordOnFirstLogin = false;
+                user.UpdatedBy = user.UserName;
+                user.UpdatedAt = DateTime.UtcNow;
+                await _userManager.UpdateAsync(user);
+                await _signInManager.RefreshSignInAsync(user);
+
+                await AddAuditLogAsync(
+                    action: "PasswordChangedFirstLogin",
+                    performedBy: user.UserName,
+                    details: "User completed mandatory first-login password change.");
+
+                TempData["SuccessMessage"] = "Password changed successfully.";
+                return RedirectToAction("Index", "Home");
+            }
+
+            foreach (var error in result.Errors)
+            {
+                ModelState.AddModelError(string.Empty, error.Description);
+            }
+
             return View(model);
         }
 

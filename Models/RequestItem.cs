@@ -35,6 +35,15 @@ namespace myapp.Models
         // ID of the next person responsible for approval
         public string? NextApproverId { get; set; }
 
+        [StringLength(260)]
+        public string? AttachmentFileName { get; set; }
+
+        [StringLength(500)]
+        public string? AttachmentPath { get; set; }
+
+        [StringLength(20)]
+        public string? DocumentNumber { get; set; }
+
         // All fields from CreateRequestViewModel
         public string? Plant { get; set; } // Renamed from PlantFG
         public string? ItemCode { get; set; }
