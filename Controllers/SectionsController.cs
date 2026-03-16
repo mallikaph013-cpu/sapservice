@@ -244,6 +244,26 @@ namespace myapp.Controllers
             return _context.Sections.Any(e => e.SectionId == id);
         }
 
+        [HttpGet]
+        public async Task<IActionResult> CheckDuplicate(string? sectionName, int? departmentId, int? excludeSectionId = null)
+        {
+            var normalizedSectionName = sectionName?.Trim() ?? string.Empty;
+            var departmentIdValue = departmentId.GetValueOrDefault();
+            if (string.IsNullOrWhiteSpace(normalizedSectionName) || departmentIdValue <= 0)
+            {
+                return Json(new { exists = false });
+            }
+
+            var query = _context.Sections.Where(s => s.DepartmentId == departmentIdValue);
+            if (excludeSectionId.HasValue)
+            {
+                query = query.Where(s => s.SectionId != excludeSectionId.Value);
+            }
+
+            var exists = await query.AnyAsync(s => s.SectionName.ToLower() == normalizedSectionName.ToLower());
+            return Json(new { exists });
+        }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Import(IFormFile? importFile)

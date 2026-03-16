@@ -598,6 +598,7 @@
             const licenseAddPermissionFields = document.getElementById('license-add-permission-fields');
             const licensePrimaryUsernameInput = document.getElementById('LicensePrimaryUsername');
             const licenseSecondaryUsernameInput = document.getElementById('LicenseSecondaryUsername');
+            const licenseSecondaryUsernameWrapper = document.getElementById('license-secondary-username-wrapper');
 
             function setSectionEnabled(section, enabled) {
                 if (!section) return;
@@ -621,6 +622,21 @@
                     licenseAddPermissionFields.style.display = isAddPermissionRequest ? 'block' : 'none';
                     setSectionEnabled(licenseAddPermissionFields, isAddPermissionRequest);
                 }
+
+                if (licenseSecondaryUsernameWrapper) {
+                    const showSecondaryUsername = false;
+                    licenseSecondaryUsernameWrapper.style.display = (isAddPermissionRequest && showSecondaryUsername) ? 'block' : 'none';
+                }
+
+                if (licenseSecondaryUsernameInput) {
+                    const enableSecondaryUsername = false;
+                    licenseSecondaryUsernameInput.disabled = !(isAddPermissionRequest && enableSecondaryUsername);
+                    if (!isAddPermissionRequest || !enableSecondaryUsername) {
+                        licenseSecondaryUsernameInput.value = '';
+                    }
+                }
+
+                syncLicensePermissionUsernames();
             }
 
             function getLicenseUsernames() {

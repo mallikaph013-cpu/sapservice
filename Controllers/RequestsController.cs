@@ -1117,6 +1117,7 @@ namespace myapp.Controllers
             ViewBag.CurrentAttachmentFileName = requestItem.AttachmentFileName;
             ViewBag.CurrentAttachmentPath = requestItem.AttachmentPath;
             ViewBag.IsRequesterEditor = isRequesterEditor;
+            ViewBag.CanReject = User.IsInRole("IT");
 
             return View("Edit", viewModel); 
         }
@@ -1154,17 +1155,8 @@ namespace myapp.Controllers
                 ModelState.AddModelError(nameof(viewModel.NextResponsibleUserId), "Please select the next responsible user.");
             }
 
-            if (User.IsInRole("IT")
-                && string.Equals(viewModel.Status, "Rejected", StringComparison.OrdinalIgnoreCase)
-                && string.IsNullOrWhiteSpace(viewModel.Description))
-            {
-                ModelState.AddModelError(nameof(viewModel.Description), "Please provide a remark before rejecting.");
-                ViewBag.IsRequesterEditor = false;
-                ViewBag.CurrentNextApproverName = "Current Responsible User";
-                ViewBag.CurrentAttachmentFileName = existingRequest.AttachmentFileName;
-                ViewBag.CurrentAttachmentPath = existingRequest.AttachmentPath;
-                return View("Edit", viewModel);
-            }
+            var currentUser = await _userManager.GetUserAsync(User);
+            var canReject = User.IsInRole("IT");
 
             // Only validate strictly when not coming from import preview
             if (!viewModel.FromImport)
@@ -1213,10 +1205,10 @@ namespace myapp.Controllers
                     .AsNoTracking()
                     .FirstOrDefaultAsync(r => r.Id == id);
 
-                var currentUser = await _userManager.GetUserAsync(User);
-                var currentUserFullName = currentUser == null
+                var currentUserForView = await _userManager.GetUserAsync(User);
+                var currentUserFullName = currentUserForView == null
                     ? string.Empty
-                    : $"{currentUser.FirstName} {currentUser.LastName}".Trim();
+                    : $"{currentUserForView.FirstName} {currentUserForView.LastName}".Trim();
                 var isRequesterEditor = requestItemForView != null
                     && !string.IsNullOrWhiteSpace(currentUserFullName)
                     && string.Equals(currentUserFullName, requestItemForView.Requester?.Trim(), StringComparison.OrdinalIgnoreCase);
@@ -1229,6 +1221,7 @@ namespace myapp.Controllers
                     ? $"{currentApproverUser.FirstName} {currentApproverUser.LastName}"
                     : "Current Responsible User";
                 ViewBag.IsRequesterEditor = isRequesterEditor;
+                ViewBag.CanReject = User.IsInRole("IT");
                 ViewBag.CurrentAttachmentFileName = requestItemForView?.AttachmentFileName ?? existingRequest.AttachmentFileName;
                 ViewBag.CurrentAttachmentPath = requestItemForView?.AttachmentPath ?? existingRequest.AttachmentPath;
 
@@ -1267,12 +1260,13 @@ namespace myapp.Controllers
                 {
                     var previousStatus = requestItemToUpdate.Status;
                     var previousNextApproverId = requestItemToUpdate.NextApproverId;
-                    var currentUser = await _userManager.GetUserAsync(User);
+                    currentUser ??= await _userManager.GetUserAsync(User);
                     var currentUserFullName = currentUser == null
                         ? string.Empty
                         : $"{currentUser.FirstName} {currentUser.LastName}".Trim();
                     var isRequesterEditor = !string.IsNullOrWhiteSpace(currentUserFullName)
                         && string.Equals(currentUserFullName, requestItemToUpdate.Requester?.Trim(), StringComparison.OrdinalIgnoreCase);
+                    var canUpdateStatus = User.IsInRole("IT");
 
                     // Update scalar properties from the view model
                     if (isRequesterEditor)
@@ -1281,7 +1275,7 @@ namespace myapp.Controllers
                         requestItemToUpdate.Plant = viewModel.Plant;
                     }
                     requestItemToUpdate.Description = viewModel.Description;
-                    requestItemToUpdate.Status = User.IsInRole("IT") ? viewModel.Status : requestItemToUpdate.Status;
+                    requestItemToUpdate.Status = canUpdateStatus ? viewModel.Status : requestItemToUpdate.Status;
                     requestItemToUpdate.UpdatedAt = DateTime.UtcNow;
                     requestItemToUpdate.UpdatedBy = User?.Identity?.Name ?? "Unknown";
 

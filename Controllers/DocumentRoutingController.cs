@@ -46,7 +46,7 @@ namespace myapp.Controllers
             var documentTypes = Enum.GetNames(typeof(RequestType)).ToList();
             var departments = await _context.Departments.OrderBy(d => d.DepartmentName).ToListAsync();
             var sections = await _context.Sections.OrderBy(s => s.SectionName).Select(s => s.SectionName).Distinct().ToListAsync();
-            var plants = await _context.Plants.OrderBy(p => p.PlantName).Select(p => p.PlantName).Distinct().ToListAsync();
+            var plants = await GetAllPlantNamesWithFallbackAsync();
 
             viewModel.DocumentTypeList = new SelectList(documentTypes);
             // Use DepartmentId for value and DepartmentName for text
@@ -55,6 +55,35 @@ namespace myapp.Controllers
             viewModel.PlantList = new SelectList(plants);
 
             return viewModel;
+        }
+
+        private async Task<List<string>> GetAllPlantNamesWithFallbackAsync()
+        {
+            var plants = await _context.Plants
+                .Where(p => !string.IsNullOrWhiteSpace(p.PlantName))
+                .OrderBy(p => p.PlantName)
+                .Select(p => p.PlantName)
+                .Distinct()
+                .ToListAsync();
+
+            if (plants.Count > 0)
+            {
+                return plants;
+            }
+
+            plants = await _context.MasterDataCombinations
+                .Where(m => !string.IsNullOrWhiteSpace(m.PlantName))
+                .OrderBy(m => m.PlantName)
+                .Select(m => m.PlantName)
+                .Distinct()
+                .ToListAsync();
+
+            if (plants.Count > 0)
+            {
+                return plants;
+            }
+
+            return new List<string> { "6021", "6031", "6051", "6081", "6090" };
         }
 
         public async Task<IActionResult> Index()
@@ -106,10 +135,16 @@ namespace myapp.Controllers
                     _context.Sections.Add(section);
                 }
 
-                var plant = await _context.Plants.FirstOrDefaultAsync(p => p.PlantName == createModel.NewPlantName);
+                var plant = await _context.Plants.FirstOrDefaultAsync(p =>
+                    p.PlantName == createModel.NewPlantName &&
+                    p.DepartmentId == department.DepartmentId);
                 if (plant == null)
                 {
-                    plant = new Plant { PlantName = createModel.NewPlantName };
+                    plant = new Plant
+                    {
+                        PlantName = createModel.NewPlantName,
+                        DepartmentId = department.DepartmentId
+                    };
                     _context.Plants.Add(plant);
                 }
 
@@ -256,6 +291,43 @@ namespace myapp.Controllers
             return Json(sections);
         }
 
+        [HttpGet]
+        public async Task<IActionResult> GetPlantsByDepartment(int departmentId)
+        {
+            if (departmentId <= 0)
+            {
+                var allPlants = await GetAllPlantNamesWithFallbackAsync();
+                return Json(allPlants.Select(p => new { name = p }));
+            }
+
+            var plants = await _context.Plants
+                .Where(p => p.DepartmentId == departmentId && !string.IsNullOrWhiteSpace(p.PlantName))
+                .OrderBy(p => p.PlantName)
+                .Select(p => p.PlantName)
+                .Distinct()
+                .ToListAsync();
+
+            if (plants.Count == 0)
+            {
+                var departmentName = await _context.Departments
+                    .Where(d => d.DepartmentId == departmentId)
+                    .Select(d => d.DepartmentName)
+                    .FirstOrDefaultAsync();
+
+                if (!string.IsNullOrWhiteSpace(departmentName))
+                {
+                    plants = await _context.MasterDataCombinations
+                        .Where(m => m.DepartmentName == departmentName && !string.IsNullOrWhiteSpace(m.PlantName))
+                        .OrderBy(m => m.PlantName)
+                        .Select(m => m.PlantName)
+                        .Distinct()
+                        .ToListAsync();
+                }
+            }
+
+            return Json(plants.Select(p => new { name = p }));
+        }
+
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -302,7 +374,7 @@ namespace myapp.Controllers
 
             if (importFile == null || importFile.Length == 0)
             {
-                TempData["ErrorMessage"] = "Please select a CSV file.";
+                TempData["ErrorMessage"] = "Please select a CSV/XLSX file.";
                 return RedirectToAction(nameof(Index));
             }
 
@@ -399,10 +471,16 @@ namespace myapp.Controllers
                         await _context.SaveChangesAsync();
                     }
 
-                    var plant = await _context.Plants.FirstOrDefaultAsync(p => p.PlantName == row.PlantName);
+                    var plant = await _context.Plants.FirstOrDefaultAsync(p =>
+                        p.PlantName == row.PlantName &&
+                        p.DepartmentId == department.DepartmentId);
                     if (plant == null)
                     {
-                        plant = new Plant { PlantName = row.PlantName };
+                        plant = new Plant
+                        {
+                            PlantName = row.PlantName,
+                            DepartmentId = department.DepartmentId
+                        };
                         _context.Plants.Add(plant);
                         await _context.SaveChangesAsync();
                     }

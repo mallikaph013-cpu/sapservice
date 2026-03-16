@@ -18,6 +18,7 @@
                 <div class="form-group mb-3">
                     <label asp-for="SectionName" class="form-label"></label>
                     <input asp-for="SectionName" class="form-control" placeholder="Enter section name" />
+                    <small id="section-duplicate-warning" class="text-danger" style="display:none;">Section name already exists in the selected department.</small>
                     <span asp-validation-for="SectionName" class="text-danger"></span>
                 </div>
                 <div class="form-group mb-3">
@@ -46,4 +47,72 @@
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const form = document.querySelector('form[asp-action="Create"]') || document.querySelector('form');
+            const sectionNameInput = document.getElementById('SectionName');
+            const departmentSelect = document.getElementById('DepartmentId');
+            const duplicateWarning = document.getElementById('section-duplicate-warning');
+            const checkUrl = '@Url.Action("CheckDuplicate", "Sections")';
+
+            async function validateDuplicate() {
+                if (!sectionNameInput || !departmentSelect) return true;
+
+                const sectionName = (sectionNameInput.value || '').trim();
+                const departmentId = departmentSelect.value;
+
+                if (!sectionName || !departmentId) {
+                    sectionNameInput.setCustomValidity('');
+                    if (duplicateWarning) duplicateWarning.style.display = 'none';
+                    return true;
+                }
+
+                try {
+                    const url = `${checkUrl}?sectionName=${encodeURIComponent(sectionName)}&departmentId=${encodeURIComponent(departmentId)}`;
+                    const response = await fetch(url, { method: 'GET' });
+                    const data = await response.json();
+                    const exists = !!(data && data.exists);
+
+                    if (exists) {
+                        sectionNameInput.setCustomValidity('Section name already exists in the selected department.');
+                        if (duplicateWarning) duplicateWarning.style.display = 'inline';
+                        return false;
+                    }
+
+                    sectionNameInput.setCustomValidity('');
+                    if (duplicateWarning) duplicateWarning.style.display = 'none';
+                    return true;
+                } catch {
+                    // Do not block users on network/intermittent errors; server-side validation still protects data.
+                    sectionNameInput.setCustomValidity('');
+                    if (duplicateWarning) duplicateWarning.style.display = 'none';
+                    return true;
+                }
+            }
+
+            if (sectionNameInput) {
+                sectionNameInput.addEventListener('blur', validateDuplicate);
+                sectionNameInput.addEventListener('input', () => {
+                    sectionNameInput.setCustomValidity('');
+                    if (duplicateWarning) duplicateWarning.style.display = 'none';
+                });
+            }
+
+            if (departmentSelect) {
+                departmentSelect.addEventListener('change', validateDuplicate);
+            }
+
+            if (form) {
+                form.addEventListener('submit', async function (event) {
+                    const isUnique = await validateDuplicate();
+                    if (!isUnique || !form.checkValidity()) {
+                        event.preventDefault();
+                        if (typeof form.reportValidity === 'function') {
+                            form.reportValidity();
+                        }
+                    }
+                });
+            }
+        });
+    </script>
 }

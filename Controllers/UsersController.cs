@@ -355,9 +355,9 @@ namespace myapp.Controllers
                         var department = await _context.Departments.FirstOrDefaultAsync(d => d.DepartmentName == row.DepartmentName);
                         if (department == null)
                         {
-                            department = new Department { DepartmentName = row.DepartmentName };
-                            _context.Departments.Add(department);
-                            await _context.SaveChangesAsync();
+                            skipped++;
+                            reports.Add($"Row {row.RowNumber}: Department '{row.DepartmentName}' does not exist.");
+                            continue;
                         }
 
                         if (!string.IsNullOrWhiteSpace(row.SectionName))
@@ -365,9 +365,9 @@ namespace myapp.Controllers
                             var section = await _context.Sections.FirstOrDefaultAsync(s => s.SectionName == row.SectionName && s.DepartmentId == department.DepartmentId);
                             if (section == null)
                             {
-                                section = new Section { SectionName = row.SectionName, DepartmentId = department.DepartmentId };
-                                _context.Sections.Add(section);
-                                await _context.SaveChangesAsync();
+                                skipped++;
+                                reports.Add($"Row {row.RowNumber}: Section '{row.SectionName}' does not exist in department '{row.DepartmentName}'.");
+                                continue;
                             }
                         }
                     }

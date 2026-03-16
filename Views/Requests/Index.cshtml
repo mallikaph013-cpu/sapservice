@@ -46,7 +46,6 @@
                         <tr>
                             <th class="py-3 ps-4">Document No.</th>
                             <th class="py-3 ps-4">Request</th>
-                            <th class="py-3">Description</th>
                             <th class="py-3">Requester</th>
                             <th class="py-3">Next Approver</th>
                             <th class="py-3">Request Date</th>
@@ -60,7 +59,6 @@
                             <tr>
                                 <td class="ps-4">@(string.IsNullOrWhiteSpace(item.DocumentNumber) ? "-" : item.DocumentNumber)</td>
                                 <td class="ps-4">@Html.DisplayFor(modelItem => item.RequestType)</td>
-                                <td>@Html.DisplayFor(modelItem => item.Description)</td>
                                 <td>@Html.DisplayFor(modelItem => item.Requester)</td>
                                 <td>@(nextApproverNameByRequestId.TryGetValue(item.Id, out var nextApproverName) ? nextApproverName : "-")</td>
                                 <td>@item.RequestDate.ToString("MMM dd, yyyy")</td>

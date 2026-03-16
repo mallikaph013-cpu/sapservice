@@ -5,107 +5,305 @@
 
 <style>
     body {
-        background-color: #f0f2f5;
+        background:
+            radial-gradient(circle at top left, rgba(249, 115, 22, 0.2), transparent 30%),
+            radial-gradient(circle at top right, rgba(251, 191, 36, 0.16), transparent 24%),
+            linear-gradient(180deg, #fff7ed 0%, #fffaf5 48%, #ffffff 100%);
     }
 
     .news-container {
-        max-width: 900px;
-        margin: 2rem auto;
+        max-width: 1120px;
+        margin: 2.5rem auto 3rem;
+        padding: 0 1rem;
+    }
+
+    .news-hero {
+        position: relative;
+        overflow: hidden;
+        background: linear-gradient(135deg, #ea580c 0%, #fb923c 58%, #ffedd5 170%);
+        color: #fff8f1;
+        border-radius: 28px;
+        padding: 2.5rem;
+        box-shadow: 0 24px 60px rgba(234, 88, 12, 0.22);
+        margin-bottom: 1.75rem;
+    }
+
+    .news-hero::after {
+        content: "";
+        position: absolute;
+        right: -80px;
+        top: -110px;
+        width: 280px;
+        height: 280px;
+        background: rgba(255, 255, 255, 0.08);
+        border-radius: 50%;
     }
 
     .page-title {
-        font-size: 2.5rem;
-        font-weight: 700;
-        color: #1a2c50;
-        text-align: center;
-        margin-bottom: 2rem;
+        font-size: clamp(2.2rem, 4vw, 3.6rem);
+        font-weight: 800;
+        line-height: 1.02;
+        margin-bottom: 0.8rem;
+        color: #fff;
+    }
+
+    .page-subtitle {
+        max-width: 620px;
+        font-size: 1rem;
+        line-height: 1.7;
+        color: rgba(255, 247, 237, 0.92);
+        margin: 0;
     }
 
     .news-list-container {
-        background-color: #ffffff;
-        border-radius: 12px;
-        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.07);
-        overflow: hidden;
+        display: grid;
+        gap: 1rem;
     }
 
-    .news-list-item {
-        display: flex;
-        align-items: flex-start;
-        padding: 1.5rem;
-        border-bottom: 1px solid #e9ecef;
-        text-decoration: none;
-        color: inherit;
-        transition: background-color 0.2s ease-in-out;
+    .news-card {
+        background: rgba(255, 255, 255, 0.92);
+        border: 1px solid rgba(251, 146, 60, 0.16);
+        border-radius: 24px;
+        padding: 1.35rem;
+        box-shadow: 0 18px 42px rgba(194, 65, 12, 0.08);
+        backdrop-filter: blur(10px);
+        transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
     }
 
-    .news-list-item:last-child {
-        border-bottom: none;
+    .news-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 24px 52px rgba(194, 65, 12, 0.12);
+        border-color: rgba(249, 115, 22, 0.3);
     }
 
-    .news-list-item:hover {
-        background-color: #f8f9fa;
+    .news-card-inner {
+        display: grid;
+        grid-template-columns: 72px minmax(0, 1fr);
+        gap: 1.15rem;
+        align-items: start;
     }
 
     .news-item-icon {
-        font-size: 1.5rem;
-        color: #F97316;
-        margin-right: 1.5rem;
-        padding-top: 5px;
+        width: 72px;
+        height: 72px;
+        border-radius: 22px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.55rem;
+        color: #fff;
+        background: linear-gradient(135deg, #f97316 0%, #ef4444 100%);
+        box-shadow: inset 0 1px 0 rgba(255,255,255,0.28);
     }
 
-    .news-item-content {
-        flex-grow: 1;
+    .news-card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 1rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .news-title-link {
+        color: #9a3412;
+        text-decoration: none;
+    }
+
+    .news-title-link:hover {
+        color: #c2410c;
     }
 
     .news-item-title {
         font-size: 1.2rem;
-        font-weight: 600;
-        color: #2c3e50;
-        margin-bottom: 0.3rem;
+        font-weight: 700;
+        line-height: 1.35;
+        margin: 0;
+    }
+
+    .news-badges {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        gap: 0.45rem;
+        min-width: 140px;
+    }
+
+    .news-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.42rem 0.72rem;
+        border-radius: 999px;
+        font-size: 0.76rem;
+        font-weight: 700;
+        letter-spacing: 0.02em;
+    }
+
+    .news-badge-featured {
+        background: rgba(249, 115, 22, 0.14);
+        color: #c2410c;
+    }
+
+    .news-badge-attachment {
+        background: rgba(255, 237, 213, 1);
+        color: #c2410c;
     }
 
     .news-item-excerpt {
-        font-size: 0.95rem;
-        color: #5a6a7a;
-        margin-bottom: 0.75rem;
-        line-height: 1.6;
+        font-size: 0.97rem;
+        color: #6b4f3a;
+        margin: 0 0 1rem;
+        line-height: 1.75;
     }
 
     .news-item-meta {
-        font-size: 0.85rem;
-        color: #8895a7;
         display: flex;
         justify-content: space-between;
         align-items: center;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .news-meta-text {
+        color: #9a6b47;
+        font-size: 0.87rem;
+        font-weight: 600;
+    }
+
+    .news-item-actions {
+        display: inline-flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+    }
+
+    .news-action-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        min-height: 40px;
+        padding: 0.62rem 0.95rem;
+        border-radius: 999px;
+        text-decoration: none;
+        font-weight: 700;
+        font-size: 0.9rem;
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .news-action-link:hover {
+        transform: translateY(-1px);
+        text-decoration: none;
+    }
+
+    .news-action-primary {
+        background: linear-gradient(135deg, #ea580c 0%, #f97316 100%);
+        color: #fff;
+        box-shadow: 0 10px 22px rgba(234, 88, 12, 0.22);
+    }
+
+    .news-action-secondary {
+        background: rgba(255, 237, 213, 1);
+        color: #c2410c;
+    }
+
+    .empty-news {
+        background: rgba(255, 255, 255, 0.9);
+        border-radius: 24px;
+        box-shadow: 0 18px 42px rgba(194, 65, 12, 0.08);
+        padding: 3rem 1.5rem;
+        text-align: center;
+    }
+
+    @@media (max-width: 767.98px) {
+        .news-hero {
+            padding: 1.75rem;
+            border-radius: 22px;
+        }
+
+        .news-card-inner {
+            grid-template-columns: 1fr;
+        }
+
+        .news-item-icon {
+            width: 58px;
+            height: 58px;
+            border-radius: 18px;
+        }
+
+        .news-card-header {
+            flex-direction: column;
+        }
+
+        .news-badges {
+            justify-content: flex-start;
+            min-width: 0;
+        }
     }
 </style>
 
 <div class="news-container">
-    <h1 class="page-title"><i class="fas fa-newspaper me-2"></i>SAP News</h1>
+    <section class="news-hero">
+        <h1 class="page-title">SAP News</h1>
+        <p class="page-subtitle">ติดตามประกาศ ข่าวสาร และไฟล์แนบสำคัญของทีมในหน้าที่อ่านง่ายขึ้น พร้อมปุ่มอ่านต่อและดาวน์โหลดเอกสารจากรายการข่าวได้ทันที</p>
+    </section>
 
     <div class="news-list-container">
         @if (Model.Any())
         {
             foreach (var article in Model)
             {
-                <a asp-controller="News" asp-action="Details" asp-route-id="@article.Id" class="news-list-item">
-                    <div class="news-item-icon">
-                        <i class="fas fa-desktop"></i>
-                    </div>
-                    <div class="news-item-content">
-                        <h5 class="news-item-title">@article.Title</h5>
-                        <p class="news-item-excerpt">@article.Excerpt</p>
-                        <div class="news-item-meta">
-                            <span>By @article.Author</span>
-                            <span>@article.PublishedDate.ToString("MMMM dd, yyyy")</span>
+                var hasAttachment = !string.IsNullOrWhiteSpace(article.ImageUrl);
+                var isImageAttachment = hasAttachment &&
+                    (article.ImageUrl!.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase)
+                    || article.ImageUrl.EndsWith(".jpeg", StringComparison.OrdinalIgnoreCase)
+                    || article.ImageUrl.EndsWith(".png", StringComparison.OrdinalIgnoreCase)
+                    || article.ImageUrl.EndsWith(".gif", StringComparison.OrdinalIgnoreCase)
+                    || article.ImageUrl.EndsWith(".webp", StringComparison.OrdinalIgnoreCase));
+
+                <article class="news-card">
+                    <div class="news-card-inner">
+                        <div class="news-item-icon">
+                            <i class="fas @(hasAttachment && !isImageAttachment ? "fa-paperclip" : "fa-newspaper")"></i>
+                        </div>
+                        <div class="news-item-content">
+                            <div class="news-card-header">
+                                <h5 class="news-item-title">
+                                    <a asp-controller="News" asp-action="Details" asp-route-id="@article.Id" class="news-title-link">@article.Title</a>
+                                </h5>
+                                <div class="news-badges">
+                                    @if (article.IsFeatured)
+                                    {
+                                        <span class="news-badge news-badge-featured"><i class="fas fa-star"></i>Featured</span>
+                                    }
+                                    @if (hasAttachment)
+                                    {
+                                        <span class="news-badge news-badge-attachment"><i class="fas fa-paperclip"></i>@(isImageAttachment ? "Image attached" : "File attached")</span>
+                                    }
+                                </div>
+                            </div>
+                            <p class="news-item-excerpt">@article.Excerpt</p>
+                            <div class="news-item-meta">
+                                <span class="news-meta-text">By @article.Author | @article.PublishedDate.ToString("MMMM dd, yyyy")</span>
+                                <span class="news-item-actions">
+                                    <a asp-controller="News" asp-action="Details" asp-route-id="@article.Id" class="news-action-link news-action-primary">
+                                        <i class="fas fa-arrow-right"></i>Read more
+                                    </a>
+                                    @if (hasAttachment && !isImageAttachment)
+                                    {
+                                        <a href="@article.ImageUrl" download class="news-action-link news-action-secondary">
+                                            <i class="fas fa-download"></i>Download file
+                                        </a>
+                                    }
+                                </span>
+                            </div>
                         </div>
                     </div>
-                </a>
+                </article>
             }
         }
         else
         {
-            <div class="text-center p-5">
+            <div class="empty-news">
                 <p class="text-muted">No news articles found.</p>
             </div>
         }

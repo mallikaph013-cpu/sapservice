@@ -4,14 +4,168 @@
     ViewData["Title"] = "Edit Article";
 }
 
-<div class="container mt-5">
-    <h1 class="display-5">@ViewData["Title"]</h1>
-   @* <p class="text-muted">Update the details of the news article.</p>*@
+<style>
+    body {
+        background:
+            radial-gradient(circle at top left, rgba(249, 115, 22, 0.16), transparent 26%),
+            radial-gradient(circle at top right, rgba(251, 191, 36, 0.14), transparent 20%),
+            linear-gradient(180deg, #fff7ed 0%, #fffaf5 46%, #ffffff 100%);
+    }
 
-    <div class="card shadow-sm mt-4">
-        <div class="card-body">
-            <form asp-action="Edit">
+    .news-editor-shell {
+        max-width: 1040px;
+        margin: 2.5rem auto 3rem;
+        padding: 0 1rem;
+    }
+
+    .news-editor-hero {
+        position: relative;
+        overflow: hidden;
+        background: linear-gradient(135deg, #ea580c 0%, #fb923c 58%, #ffedd5 170%);
+        color: #fff7ed;
+        border-radius: 30px;
+        padding: 2.5rem;
+        box-shadow: 0 28px 65px rgba(234, 88, 12, 0.2);
+        margin-bottom: 1.5rem;
+    }
+
+    .news-editor-hero::after {
+        content: "";
+        position: absolute;
+        right: -70px;
+        top: -100px;
+        width: 260px;
+        height: 260px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.08);
+    }
+
+    .news-editor-title {
+        font-size: clamp(2.1rem, 4vw, 3.2rem);
+        font-weight: 800;
+        margin: 0 0 0.65rem;
+        color: #fff;
+    }
+
+    .news-editor-subtitle {
+        max-width: 640px;
+        margin: 0;
+        color: rgba(255, 247, 237, 0.92);
+        line-height: 1.7;
+    }
+
+    .news-editor-card {
+        background: rgba(255, 255, 255, 0.92);
+        border: 1px solid rgba(251, 146, 60, 0.16);
+        border-radius: 28px;
+        padding: 1.5rem;
+        box-shadow: 0 20px 48px rgba(194, 65, 12, 0.08);
+        backdrop-filter: blur(10px);
+    }
+
+    .news-editor-card .form-label,
+    .news-editor-card .form-check-label {
+        color: #9a3412;
+        font-weight: 700;
+    }
+
+    .news-editor-card .form-control,
+    .news-editor-card .form-select {
+        border-radius: 16px;
+        border: 1px solid rgba(251, 146, 60, 0.24);
+        padding: 0.85rem 1rem;
+        background: #fff;
+        box-shadow: none;
+    }
+
+    .news-editor-card textarea.form-control {
+        min-height: 240px;
+    }
+
+    .news-editor-card .form-control:focus,
+    .news-editor-card .form-select:focus {
+        border-color: rgba(249, 115, 22, 0.6);
+        box-shadow: 0 0 0 0.25rem rgba(249, 115, 22, 0.14);
+    }
+
+    .attachment-help {
+        color: #9a6b47;
+    }
+
+    .current-attachment-link {
+        color: #c2410c;
+        font-weight: 700;
+        text-decoration: none;
+    }
+
+    .current-attachment-link:hover {
+        color: #9a3412;
+        text-decoration: underline;
+    }
+
+    .news-action-row {
+        display: flex;
+        justify-content: flex-end;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+    }
+
+    .btn-news-secondary {
+        background: #fff;
+        color: #c2410c;
+        border: 1px solid rgba(249, 115, 22, 0.24);
+        border-radius: 999px;
+        padding: 0.72rem 1.15rem;
+        font-weight: 700;
+    }
+
+    .btn-news-primary {
+        background: linear-gradient(135deg, #ea580c 0%, #f97316 100%);
+        color: #fff;
+        border: none;
+        border-radius: 999px;
+        padding: 0.72rem 1.2rem;
+        font-weight: 700;
+        box-shadow: 0 12px 22px rgba(234, 88, 12, 0.2);
+    }
+
+    .btn-news-secondary:hover,
+    .btn-news-primary:hover {
+        color: inherit;
+    }
+
+    @@media (max-width: 767.98px) {
+        .news-editor-hero {
+            padding: 2rem 1.5rem;
+            border-radius: 24px;
+        }
+
+        .news-editor-card {
+            padding: 1rem;
+            border-radius: 22px;
+        }
+
+        .news-action-row {
+            justify-content: stretch;
+        }
+
+        .news-action-row .btn {
+            width: 100%;
+        }
+    }
+</style>
+
+<div class="news-editor-shell">
+    <section class="news-editor-hero">
+        <h1 class="news-editor-title">@ViewData["Title"]</h1>
+        <p class="news-editor-subtitle">แก้ไขข่าวและไฟล์แนบในมุมมองเดียวกับหน้า Home และ Read More เพื่อให้ประสบการณ์จัดการเนื้อหากลมกลืนทั้งระบบ</p>
+    </section>
+
+    <div class="news-editor-card">
+        <div>
+            <form asp-action="Edit" enctype="multipart/form-data">
                 <input type="hidden" asp-for="Id" />
+                <input type="hidden" asp-for="ImageUrl" />
                 <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
                 <div class="mb-3">
@@ -44,9 +198,15 @@
                 </div>
                 
                 <div class="mb-3">
-                    <label asp-for="ImageUrl" class="form-label"></label>
-                    <input asp-for="ImageUrl" class="form-control" />
-                    <span asp-validation-for="ImageUrl" class="text-danger"></span>
+                    <label for="imageFile" class="form-label">Attachment</label>
+                    <input id="imageFile" name="imageFile" class="form-control" type="file" accept=".jpg,.jpeg,.png,.gif,.webp,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt" />
+                    <small class="attachment-help">Upload new file to replace current attachment (optional). Maximum 10 MB.</small>
+                    @if (!string.IsNullOrWhiteSpace(Model.ImageUrl))
+                    {
+                        <div class="mt-2">
+                            <a href="@Model.ImageUrl" target="_blank" rel="noopener" class="current-attachment-link">Current attachment</a>
+                        </div>
+                    }
                 </div>
 
                 <div class="form-check mb-4">
@@ -56,9 +216,9 @@
                     </label>
                 </div>
                 
-                <div class="d-flex justify-content-end">
-                    <a asp-action="Index" class="btn btn-secondary me-2">Cancel</a>
-                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                <div class="news-action-row">
+                    <a asp-action="Index" class="btn btn-news-secondary">Cancel</a>
+                    <button type="submit" class="btn btn-news-primary">Save Changes</button>
                 </div>
             </form>
         </div>

@@ -12,8 +12,8 @@
                 <p class="text-light mb-0">Create a user account and assign role information.</p>
             </div>
 
-                <form asp-action="Create">
-                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                <form asp-action="Create" id="createUserForm">
+                    <div asp-validation-summary="All" class="text-danger mb-3"></div>
                     
                     <div class="row">
                         <div class="col-md-6">
@@ -132,7 +132,6 @@
             departmentDropdown.change(function () {
                 const departmentId = $(this).val();
                 sectionDropdown.empty().append($('<option></option>').val('').text('-- Select Section --'));
-                sectionDropdown.prop('disabled', true);
 
                 if (departmentId) {
                     $.ajax({
@@ -145,23 +144,79 @@
                                 $.each(data, function (index, item) {
                                     sectionDropdown.append($('<option></option>').val(item.value).text(item.text));
                                 });
-                                sectionDropdown.prop('disabled', false);
-                            } else {
-                                sectionDropdown.append($('<option></option>').val('').text('No sections available'));
                             }
                         },
                         error: function () {
-                            // SweetAlert2 for error notification can be added here
                             sectionDropdown.append($('<option></option>').val('').text('Error loading sections'));
                         }
                     });
                 }
             });
 
-            // Initial state
-            if (!departmentDropdown.val()) {
-                sectionDropdown.prop('disabled', true);
+            const createForm = $('#createUserForm');
+            const hasUnobtrusiveValidation = $.validator && $.validator.unobtrusive;
+            const requiredFields = [
+                { id: 'UserName', name: 'UserName', label: 'Username' },
+                { id: 'FirstName', name: 'FirstName', label: 'First Name' },
+                { id: 'LastName', name: 'LastName', label: 'Last Name' },
+                { id: 'Plant', name: 'Plant', label: 'Plant' },
+                { id: 'Email', name: 'Email', label: 'Email Address' },
+                { id: 'Password', name: 'Password', label: 'Password' },
+                { id: 'ConfirmPassword', name: 'ConfirmPassword', label: 'Confirm Password' },
+                { id: 'DepartmentId', name: 'DepartmentId', label: 'Department' },
+                { id: 'SectionId', name: 'SectionId', label: 'Section' }
+            ];
+
+            function clearFallbackErrors() {
+                requiredFields.forEach(function (field) {
+                    const input = $('#' + field.id);
+                    const message = $('[data-valmsg-for="' + field.name + '"]');
+                    input.removeClass('input-validation-error');
+                    message.removeClass('field-validation-error').addClass('field-validation-valid').text('');
+                });
             }
+
+            function runFallbackRequiredValidation() {
+                let hasError = false;
+                clearFallbackErrors();
+
+                requiredFields.forEach(function (field) {
+                    const input = $('#' + field.id);
+                    const value = (input.val() || '').toString().trim();
+                    if (!value) {
+                        hasError = true;
+                        const message = $('[data-valmsg-for="' + field.name + '"]');
+                        input.addClass('input-validation-error');
+                        message.removeClass('field-validation-valid').addClass('field-validation-error').text('The ' + field.label + ' field is required.');
+                    }
+                });
+
+                return !hasError;
+            }
+
+            // Ensure unobtrusive validation is bound to this form
+            if (hasUnobtrusiveValidation) {
+                $.validator.unobtrusive.parse(createForm);
+            }
+
+            createForm.on('submit', function (e) {
+                const requiredFieldsValid = runFallbackRequiredValidation();
+                const unobtrusiveValid = hasUnobtrusiveValidation && typeof createForm.valid === 'function'
+                    ? createForm.valid()
+                    : true;
+                const isValid = requiredFieldsValid && unobtrusiveValid;
+
+                if (!isValid) {
+                    e.preventDefault();
+
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'กรุณากรอกข้อมูลให้ครบถ้วน',
+                        text: 'โปรดตรวจสอบและกรอกข้อมูลที่จำเป็นให้ครบก่อนบันทึก',
+                        confirmButtonText: 'ตกลง'
+                    });
+                }
+            });
         });
     </script>
 }

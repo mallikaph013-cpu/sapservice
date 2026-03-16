@@ -156,13 +156,16 @@
         document.addEventListener('DOMContentLoaded', function () {
             const departmentSelect = document.getElementById('CreateForm_DepartmentId');
             const sectionSelect = document.getElementById('CreateForm_NewSectionName');
+            const plantSelect = document.getElementById('CreateForm_NewPlantName');
             const sectionUrl = '@Url.Action("GetSectionsByDepartment", "DocumentRouting")';
+            const plantUrl = '@Url.Action("GetPlantsByDepartment", "DocumentRouting")';
 
-            if (!departmentSelect || !sectionSelect) {
+            if (!departmentSelect || !sectionSelect || !plantSelect) {
                 return;
             }
 
             const selectedSectionOnLoad = sectionSelect.value;
+            const selectedPlantOnLoad = plantSelect.value;
 
             const loadSections = async (departmentId, selectedSection = '') => {
                 sectionSelect.innerHTML = '<option value="">-- Select Section --</option>';
@@ -192,14 +195,42 @@
                 }
             };
 
+            const loadPlants = async (departmentId, selectedPlant = '') => {
+                plantSelect.innerHTML = '<option value="">-- Select Plant --</option>';
+
+                try {
+                    const query = departmentId ? `?departmentId=${encodeURIComponent(departmentId)}` : '';
+                    const response = await fetch(`${plantUrl}${query}`);
+                    if (!response.ok) {
+                        return;
+                    }
+
+                    const plants = await response.json();
+                    plants.forEach((plant) => {
+                        const option = document.createElement('option');
+                        option.value = plant.name;
+                        option.textContent = plant.name;
+                        if (selectedPlant && selectedPlant === plant.name) {
+                            option.selected = true;
+                        }
+                        plantSelect.appendChild(option);
+                    });
+                } catch (error) {
+                    console.error('Failed to load plants by department', error);
+                }
+            };
+
             departmentSelect.addEventListener('change', function () {
                 loadSections(this.value);
+                loadPlants(this.value);
             });
 
             if (departmentSelect.value) {
                 loadSections(departmentSelect.value, selectedSectionOnLoad);
+                loadPlants(departmentSelect.value, selectedPlantOnLoad);
             } else {
                 sectionSelect.innerHTML = '<option value="">-- Select Section --</option>';
+                loadPlants('', selectedPlantOnLoad);
             }
         });
     </script>

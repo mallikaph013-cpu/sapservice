@@ -2,89 +2,265 @@
 
 @{
     ViewData["Title"] = Model.Title;
+    var isImageAttachment = !string.IsNullOrEmpty(Model.ImageUrl)
+        && (Model.ImageUrl.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase)
+            || Model.ImageUrl.EndsWith(".jpeg", StringComparison.OrdinalIgnoreCase)
+            || Model.ImageUrl.EndsWith(".png", StringComparison.OrdinalIgnoreCase)
+            || Model.ImageUrl.EndsWith(".gif", StringComparison.OrdinalIgnoreCase)
+            || Model.ImageUrl.EndsWith(".webp", StringComparison.OrdinalIgnoreCase));
 }
 
 <style>
+    body {
+        background:
+            radial-gradient(circle at top left, rgba(249, 115, 22, 0.16), transparent 26%),
+            radial-gradient(circle at top right, rgba(251, 191, 36, 0.14), transparent 20%),
+            linear-gradient(180deg, #fff7ed 0%, #fffaf5 46%, #ffffff 100%);
+    }
+
     .article-container {
-        max-width: 900px;
-        margin: 2rem auto;
-        background: #fff;
-        padding: 2.5rem;
-        border-radius: 12px;
-        box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+        max-width: 1040px;
+        margin: 2.5rem auto 3rem;
+        padding: 0 1rem;
     }
 
     .article-header {
-        text-align: center;
-        margin-bottom: 2rem;
+        position: relative;
+        overflow: hidden;
+        background: linear-gradient(135deg, #ea580c 0%, #fb923c 58%, #ffedd5 170%);
+        color: #fff7ed;
+        border-radius: 30px;
+        padding: 2.75rem;
+        box-shadow: 0 28px 65px rgba(234, 88, 12, 0.2);
+        margin-bottom: 1.5rem;
+    }
+
+    .article-header::after {
+        content: "";
+        position: absolute;
+        right: -60px;
+        top: -90px;
+        width: 260px;
+        height: 260px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.08);
+    }
+
+    .article-eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.42rem 0.8rem;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.12);
+        color: rgba(255, 247, 237, 0.9);
+        font-size: 0.8rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        margin-bottom: 1rem;
     }
 
     .article-title {
-        font-size: 2.8rem;
-        font-weight: 700;
-        color: #2c3e50;
-        line-height: 1.2;
+        font-size: clamp(2.2rem, 4vw, 3.6rem);
+        font-weight: 800;
+        color: #fff;
+        line-height: 1.05;
+        margin: 0 0 1rem;
     }
 
     .article-meta {
-        font-size: 0.95rem;
-        color: #7f8c8d;
-        margin-top: 1rem;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        margin-top: 1.1rem;
     }
 
     .article-meta span {
-        margin: 0 10px;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.55rem 0.85rem;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.12);
+        color: rgba(255, 247, 237, 0.92);
+        font-size: 0.9rem;
+        font-weight: 600;
     }
 
     .article-image {
         width: 100%;
-        height: 400px;
+        max-height: 480px;
         object-fit: cover;
-        border-radius: 8px;
-        margin-bottom: 2rem;
+        border-radius: 24px;
+        display: block;
+        box-shadow: 0 22px 44px rgba(194, 65, 12, 0.12);
+    }
+
+    .article-body {
+        background: rgba(255, 255, 255, 0.92);
+        border: 1px solid rgba(251, 146, 60, 0.16);
+        border-radius: 28px;
+        padding: 1.4rem;
+        box-shadow: 0 20px 48px rgba(194, 65, 12, 0.08);
+        backdrop-filter: blur(12px);
+    }
+
+    .article-media {
+        margin-bottom: 1.25rem;
+    }
+
+    .article-attachment {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+        flex-wrap: wrap;
+        padding: 1.2rem 1.25rem;
+        border-radius: 22px;
+        background: linear-gradient(135deg, rgba(249, 115, 22, 0.14) 0%, rgba(255, 237, 213, 0.9) 100%);
+        border: 1px solid rgba(249, 115, 22, 0.18);
+    }
+
+    .article-attachment-title {
+        color: #9a3412;
+        font-size: 1rem;
+        font-weight: 700;
+        margin: 0 0 0.25rem;
+    }
+
+    .article-attachment-copy {
+        color: #8a6242;
+        margin: 0;
     }
 
     .article-content {
-        font-size: 1.1rem;
-        line-height: 1.8;
-        color: #34495e;
-        white-space: pre-wrap; /* This will respect newlines and spaces */
+        font-size: 1.08rem;
+        line-height: 1.95;
+        color: #6b4f3a;
+        white-space: pre-wrap;
+        padding: 1.75rem 1.5rem;
+        background: #fff;
+        border-radius: 22px;
+        min-height: 160px;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
+    }
+
+    .article-content:empty::before {
+        content: "No content provided.";
+        color: #b08968;
+        font-style: italic;
+    }
+
+    .article-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+        flex-wrap: wrap;
+        margin-top: 1.35rem;
     }
 
     .back-link {
-        display: inline-block;
-        margin-top: 2rem;
-        color: #007bff;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.55rem;
+        min-height: 42px;
+        padding: 0.7rem 1rem;
+        border-radius: 999px;
+        background: linear-gradient(135deg, #ea580c 0%, #f97316 100%);
+        color: #fff;
         text-decoration: none;
-        font-weight: 600;
+        font-weight: 700;
+        box-shadow: 0 12px 22px rgba(234, 88, 12, 0.2);
     }
 
     .back-link:hover {
-        text-decoration: underline;
+        color: #fff;
+        text-decoration: none;
+    }
+
+    .download-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.55rem;
+        min-height: 42px;
+        padding: 0.7rem 1rem;
+        border-radius: 999px;
+        background: rgba(255, 237, 213, 1);
+        color: #c2410c;
+        text-decoration: none;
+        font-weight: 700;
+    }
+
+    .download-link:hover {
+        color: #9a3412;
+        text-decoration: none;
+    }
+
+    @@media (max-width: 767.98px) {
+        .article-header {
+            padding: 2rem 1.5rem;
+            border-radius: 24px;
+        }
+
+        .article-body {
+            padding: 1rem;
+            border-radius: 22px;
+        }
+
+        .article-content {
+            padding: 1.2rem 1rem;
+        }
     }
 </style>
 
 <div class="article-container">
     <div class="article-header">
+        <div class="article-eyebrow"><i class="fas fa-newspaper"></i>News Detail</div>
         <h1 class="article-title">@Model.Title</h1>
         <div class="article-meta">
-            <span>By <strong>@Model.Author</strong></span> | 
-            <span>Published on @Model.PublishedDate.ToString("MMMM dd, yyyy")</span>
+            <span><i class="fas fa-user"></i>@(string.IsNullOrWhiteSpace(Model.Author) ? "Unknown author" : Model.Author)</span>
+            <span><i class="fas fa-calendar-alt"></i>@Model.PublishedDate.ToString("MMMM dd, yyyy")</span>
+            @if (Model.IsFeatured)
+            {
+                <span><i class="fas fa-star"></i>Featured</span>
+            }
         </div>
     </div>
 
-    @if (!string.IsNullOrEmpty(Model.ImageUrl))
-    {
-        <img src="@Model.ImageUrl" class="article-image" alt="@Model.Title">
-    }
+    <div class="article-body">
+        @if (isImageAttachment)
+        {
+            <div class="article-media">
+                <img src="@Model.ImageUrl" class="article-image" alt="@Model.Title">
+            </div>
+        }
+        else if (!string.IsNullOrEmpty(Model.ImageUrl))
+        {
+            <div class="article-media article-attachment">
+                <div>
+                    <p class="article-attachment-title">Attachment available</p>
+                    <p class="article-attachment-copy">Open or download the attached file directly from this article.</p>
+                </div>
+                <a href="@Model.ImageUrl" target="_blank" rel="noopener" class="download-link">
+                    <i class="fas fa-download"></i>Download Attachment
+                </a>
+            </div>
+        }
 
-    <div class="article-content">
-        @Model.Content
+        <div class="article-content">@Model.Content</div>
+
+        <div class="article-footer">
+            <a asp-action="Index" asp-controller="Home" class="back-link">
+                <i class="fas fa-arrow-left"></i>Back to News
+            </a>
+            @if (!string.IsNullOrEmpty(Model.ImageUrl))
+            {
+                <a href="@Model.ImageUrl" target="_blank" rel="noopener" class="download-link">
+                    <i class="fas fa-paperclip"></i>Open Attachment
+                </a>
+            }
+        </div>
     </div>
-
-    <hr class="my-4">
-
-    <a asp-action="Index" asp-controller="Home" class="back-link">
-        <i class="fas fa-arrow-left"></i> Back to News
-    </a>
 </div>

@@ -12,7 +12,6 @@ namespace myapp.Models
         [StringLength(200, ErrorMessage = "The title must be less than 200 characters.")]
         public string Title { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "Content is required.")]
         public string Content { get; set; } = string.Empty;
 
         [Display(Name = "Image URL")]
@@ -23,7 +22,6 @@ namespace myapp.Models
         [DataType(DataType.Date)]
         public DateTime PublishedDate { get; set; } = DateTime.UtcNow;
 
-        [Required]
         [StringLength(100)]
         public string Author { get; set; } = string.Empty;
         

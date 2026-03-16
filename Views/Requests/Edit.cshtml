@@ -227,7 +227,6 @@
                 </div>
             </div>
         }
-
         <div class="form-group text-center mt-5">
 
             @if (SignInManager.IsSignedIn(User) && User.IsInRole("IT"))
@@ -282,6 +281,7 @@
         const licenseAddPermissionFields = document.getElementById('license-add-permission-fields');
         const licensePrimaryUsernameInput = document.getElementById('LicensePrimaryUsername');
         const licenseSecondaryUsernameInput = document.getElementById('LicenseSecondaryUsername');
+        const licenseSecondaryUsernameWrapper = document.getElementById('license-secondary-username-wrapper');
         const currentNextApproverId = '@(Model.NextResponsibleUserId ?? "")';
         const currentNextApproverName = @Html.Raw(System.Text.Json.JsonSerializer.Serialize((string)(ViewBag.CurrentNextApproverName ?? "Current Responsible User")));
 
@@ -400,6 +400,21 @@
                 licenseAddPermissionFields.style.display = isAddPermissionRequest ? 'block' : 'none';
                 setSectionEnabled(licenseAddPermissionFields, isAddPermissionRequest);
             }
+
+            if (licenseSecondaryUsernameWrapper) {
+                const showSecondaryUsername = false;
+                licenseSecondaryUsernameWrapper.style.display = (isAddPermissionRequest && showSecondaryUsername) ? 'block' : 'none';
+            }
+
+            if (licenseSecondaryUsernameInput) {
+                const enableSecondaryUsername = false;
+                licenseSecondaryUsernameInput.disabled = !(isAddPermissionRequest && enableSecondaryUsername);
+                if (!isAddPermissionRequest || !enableSecondaryUsername) {
+                    licenseSecondaryUsernameInput.value = '';
+                }
+            }
+
+            syncLicensePermissionUsernames();
         }
 
         function fetchNextApprovers() {
@@ -689,17 +704,6 @@
             const form = document.getElementById('editForm');
             if (!form) return;
             const statusSelect = document.getElementById('EditStatus');
-            const descriptionInput = document.getElementById('Description');
-            const isRejected = statusSelect && statusSelect.value === 'Rejected';
-            const hasRemark = descriptionInput && descriptionInput.value && descriptionInput.value.trim().length > 0;
-
-            if (isRejected && !hasRemark) {
-                alert('กรุณากรอกหมายเหตุก่อนตีกลับ (Reject)');
-                if (descriptionInput) {
-                    descriptionInput.focus();
-                }
-                return;
-            }
 
             // If this edit was opened from import, bypass client-side HTML5 validation
             const fromImportInput = form.querySelector('input[name="FromImport"]');

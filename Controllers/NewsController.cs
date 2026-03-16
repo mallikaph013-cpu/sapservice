@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using System.IO;
+using System.Linq;
 
 namespace myapp.Controllers
 {
@@ -68,10 +69,25 @@ namespace myapp.Controllers
 
                 if (imageFile != null && imageFile.Length > 0)
                 {
+                    const long maxFileSize = 10 * 1024 * 1024; // 10 MB
+                    var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp", ".pdf", ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx", ".txt" };
+                    var extension = Path.GetExtension(imageFile.FileName).ToLowerInvariant();
+
+                    if (imageFile.Length > maxFileSize)
+                    {
+                        ModelState.AddModelError("", "Attached file size must not exceed 10 MB.");
+                        return View(article);
+                    }
+
+                    if (!allowedExtensions.Contains(extension))
+                    {
+                        ModelState.AddModelError("", "File type is not supported.");
+                        return View(article);
+                    }
+
                     var uploadsDirectory = Path.Combine(_environment.WebRootPath, "uploads", "news");
                     Directory.CreateDirectory(uploadsDirectory);
 
-                    var extension = Path.GetExtension(imageFile.FileName);
                     var fileName = $"{Guid.NewGuid():N}{extension}";
                     var filePath = Path.Combine(uploadsDirectory, fileName);
 
@@ -117,7 +133,7 @@ namespace myapp.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "IT")]
-        public async Task<IActionResult> Edit(int id, NewsArticle article)
+        public async Task<IActionResult> Edit(int id, NewsArticle article, IFormFile? imageFile)
         {
             if (id != article.Id)
             {
@@ -134,9 +150,40 @@ namespace myapp.Controllers
                         return NotFound();
                     }
 
+                    if (imageFile != null && imageFile.Length > 0)
+                    {
+                        const long maxFileSize = 10 * 1024 * 1024; // 10 MB
+                        var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp", ".pdf", ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx", ".txt" };
+                        var extension = Path.GetExtension(imageFile.FileName).ToLowerInvariant();
+
+                        if (imageFile.Length > maxFileSize)
+                        {
+                            ModelState.AddModelError("", "Attached file size must not exceed 10 MB.");
+                            return View(article);
+                        }
+
+                        if (!allowedExtensions.Contains(extension))
+                        {
+                            ModelState.AddModelError("", "File type is not supported.");
+                            return View(article);
+                        }
+
+                        var uploadsDirectory = Path.Combine(_environment.WebRootPath, "uploads", "news");
+                        Directory.CreateDirectory(uploadsDirectory);
+
+                        var fileName = $"{Guid.NewGuid():N}{extension}";
+                        var filePath = Path.Combine(uploadsDirectory, fileName);
+
+                        await using (var stream = new FileStream(filePath, FileMode.Create))
+                        {
+                            await imageFile.CopyToAsync(stream);
+                        }
+
+                        existing.ImageUrl = $"/uploads/news/{fileName}";
+                    }
+
                     existing.Title = article.Title;
                     existing.Content = article.Content;
-                    existing.ImageUrl = article.ImageUrl;
                     existing.PublishedDate = article.PublishedDate;
                     existing.Author = article.Author;
                     existing.IsFeatured = article.IsFeatured;

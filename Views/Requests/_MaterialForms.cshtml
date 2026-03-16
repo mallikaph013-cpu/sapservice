@@ -7,7 +7,7 @@
     <div class="row g-3 mb-3">
         <div class="col-md-4" data-types="FG,SM,RM,ToolingB,ToolingBFG,ToolingBPU,DistributionChanel,AddStorage,IPO,Passthrough,CrossPlantPurchase">
             <div class="form-group">
-                <label asp-for="ItemCode" class="control-label"></label>
+                <label asp-for="ItemCode" class="control-label">ICS Code</label>
                 <input asp-for="ItemCode" class="form-control" />
                 <span asp-validation-for="ItemCode" class="text-danger"></span>
             </div>
@@ -31,14 +31,14 @@
         </div>
          <div class="col-md-4" data-types="FG,SM,RM,ToolingB,ToolingBFG,ToolingBPU,IPO,Passthrough,CrossPlantPurchase">
             <div class="form-group">
-                <label asp-for="BaseUnit" class="control-label"></label>
+                <label asp-for="BaseUnit" class="control-label">Base Unit</label>
                 <input asp-for="BaseUnit" class="form-control" />
                 <span asp-validation-for="BaseUnit" class="text-danger"></span>
             </div>
         </div>
         <div class="col-md-4" data-types="FG,SM,RM,ToolingB,ToolingBFG,ToolingBPU,IPO,Passthrough,CrossPlantPurchase">
             <div class="form-group">
-                <label asp-for="MaterialGroup" class="control-label"></label>
+                <label asp-for="MaterialGroup" class="control-label">Material Group</label>
                 <input asp-for="MaterialGroup" class="form-control" />
                 <span asp-validation-for="MaterialGroup" class="text-danger"></span>
             </div>
@@ -48,24 +48,23 @@
     <div class="row g-3 mb-3">
         <div class="col-md-4" data-types="FG,SM,RM,ToolingB,ToolingBFG,ToolingBPU,IPO,Passthrough,CrossPlantPurchase,DistributionChanel">
             <div class="form-group">
-                <label asp-for="Plant" class="control-label"></label>
+                <label asp-for="Plant" class="control-label">Plant</label>
                   <input type="text" id="MaterialSectionPlant" class="form-control"
                       value="@Model.Plant"
                       placeholder="(Synced from Plant dropdown above)"
                       disabled />
-                  <small class="text-muted">ค่าจาก Plant ที่เลือกด้านบน</small>
             </div>
         </div>
         <div class="col-md-4" data-types="FG,SM,RM,ToolingB,ToolingBFG,ToolingBPU,DistributionChanel,IPO,Passthrough,CrossPlantPurchase">
             <div class="form-group">
-                <label asp-for="DivisionCode" class="control-label"></label>
+                <label asp-for="DivisionCode" class="control-label">Division Code</label>
                 <input asp-for="DivisionCode" class="form-control" />
                 <span asp-validation-for="DivisionCode" class="text-danger"></span>
             </div>
         </div>
         <div class="col-md-4" data-types="FG,SM,RM,ToolingB,ToolingBFG,ToolingBPU,DistributionChanel,IPO,Passthrough,CrossPlantPurchase">
             <div class="form-group">
-                <label asp-for="ProfitCenter" class="control-label"></label>
+                <label asp-for="ProfitCenter" class="control-label">Profit Center</label>
                 <input asp-for="ProfitCenter" class="form-control" />
                 <span asp-validation-for="ProfitCenter" class="text-danger"></span>
             </div>
@@ -75,7 +74,7 @@
     <div class="row g-3 mb-3">
         <div class="col-md-4" data-types="FG,DistributionChanel,IPO">
            <div class="form-group">
-               <label asp-for="DistributionChannel" class="control-label"></label>
+               <label asp-for="DistributionChannel" class="control-label">Distribution Channel</label>
                <select asp-for="DistributionChannel" id="DistributionChannel" class="form-control" asp-items="Html.GetEnumSelectList<myapp.Models.DistributionChannel>()"><option value="">-- Select Channel --</option></select>
                <span asp-validation-for="DistributionChannel" class="text-danger"></span>
            </div>
@@ -89,14 +88,14 @@
        </div>
        <div class="col-md-4" data-types="RM,Passthrough,CrossPlantPurchase">
             <div class="form-group">
-                <label asp-for="BoiDescription" class="control-label"></label>
+                <label asp-for="BoiDescription" class="control-label">BOI Description</label>
                 <input asp-for="BoiDescription" class="form-control" />
                 <span asp-validation-for="BoiDescription" class="text-danger"></span>
             </div>
         </div>
          <div class="col-md-4" data-types="DistributionChanel">
             <div class="form-group">
-                <label asp-for="AccountAssignment" class="control-label"></label>
+                <label asp-for="AccountAssignment" class="control-label">Account Assignment</label>
                 <input asp-for="AccountAssignment" class="form-control" />
                 <span asp-validation-for="AccountAssignment" class="text-danger"></span>
             </div>
@@ -106,7 +105,7 @@
     <div class="row g-3 mb-3">
         <div class="col-md-4" data-types="FG,SM,RM,IPO,Passthrough,CrossPlantPurchase">
              <div class="form-group">
-                <label asp-for="MrpController" class="control-label"></label>
+                <label asp-for="MrpController" class="control-label">MRP Controller</label>
                 <input asp-for="MrpController" class="form-control" />
                 <span asp-validation-for="MrpController" class="text-danger"></span>
             </div>
@@ -120,7 +119,7 @@
         </div>
         <div class="col-md-4" data-types="FG,RM,IPO,Passthrough,CrossPlantPurchase">
             <div class="form-group">
-                <label asp-for="ValClass" class="control-label"></label>
+                <label asp-for="ValClass" class="control-label">Val Class</label>
                 <input asp-for="ValClass" class="form-control" />
                 <span asp-validation-for="ValClass" class="text-danger"></span>
             </div>
@@ -137,7 +136,7 @@
         </div>
         <div class="col-md-4" data-types="FG,RM,IPO">
             <div class="form-group">
-                <label asp-for="CostingLotSize" class="control-label"></label>
+                <label asp-for="CostingLotSize" class="control-label">Costing Lot Size</label>
                 <input asp-for="CostingLotSize" class="form-control" />
                 <span asp-validation-for="CostingLotSize" class="text-danger"></span>
             </div>
@@ -154,14 +153,14 @@
         </div>
         <div class="col-md-4" data-types="RM,ToolingB,IPO,Passthrough,CrossPlantPurchase">
              <div class="form-group">
-                <label asp-for="PurchasingGroup" class="control-label"></label>
+                <label asp-for="PurchasingGroup" class="control-label">Purchasing Group</label>
                 <input asp-for="PurchasingGroup" class="form-control" />
                 <span asp-validation-for="PurchasingGroup" class="text-danger"></span>
             </div>
         </div>
         <div class="col-md-4" data-types="RM,Passthrough,CrossPlantPurchase">
             <div class="form-group">
-                <label asp-for="MakerMfrPartNumber" class="control-label"></label>
+                <label asp-for="MakerMfrPartNumber" class="control-label">Maker Mfr Part Number</label>
                 <input asp-for="MakerMfrPartNumber" class="form-control" />
                 <span asp-validation-for="MakerMfrPartNumber" class="text-danger"></span>
             </div>
@@ -185,7 +184,7 @@
         </div>
         <div class="col-md-4" data-types="RM,Passthrough,CrossPlantPurchase">
             <div class="form-group">
-                <label asp-for="PriceControl" class="control-label"></label>
+                <label asp-for="PriceControl" class="control-label">Price Control</label>
                 <input asp-for="PriceControl" class="form-control" />
                 <span asp-validation-for="PriceControl" class="text-danger"></span>
             </div>
@@ -194,7 +193,7 @@
     <div class="row g-3 mb-3">
     <div class="col-md-4" data-types="RM,Passthrough,CrossPlantPurchase">
             <div class="form-group">
-                <label asp-for="SupplierCode" class="control-label"></label>
+                <label asp-for="SupplierCode" class="control-label">Supplier Code</label>
                 <input asp-for="SupplierCode" class="form-control" />
                 <span asp-validation-for="SupplierCode" class="text-danger"></span>
             </div>
@@ -205,14 +204,14 @@
     <div class="row g-3 mb-3">
         <div class="col-md-4" data-types="IPO">
             <div class="form-group">
-                <label asp-for="TariffCode" class="control-label"></label>
+                <label asp-for="TariffCode" class="control-label">Tariff Code</label>
                 <input asp-for="TariffCode" class="form-control" />
                  <span asp-validation-for="TariffCode" class="text-danger"></span>
             </div>
         </div>
          <div class="col-md-4" data-types="IPO">
             <div class="form-group">
-                <label asp-for="Planner" class="control-label"></label>
+                <label asp-for="Planner" class="control-label">Planner</label>
                 <input asp-for="Planner" class="form-control" />
                 <span asp-validation-for="Planner" class="text-danger"></span>
             </div>
@@ -512,11 +511,11 @@
         <div class="row g-3 mb-3">
             <div class="col-md-6">
                 <div class="form-group">
-                    <label for="LicensePrimaryUsername" class="control-label">Username SAP 1</label>
+                    <label for="LicensePrimaryUsername" class="control-label">Username SAP</label>
                     <input type="text" id="LicensePrimaryUsername" class="form-control" autocomplete="off" />
                 </div>
             </div>
-            <div class="col-md-6">
+            <div class="col-md-6" id="license-secondary-username-wrapper">
                 <div class="form-group">
                     <label for="LicenseSecondaryUsername" class="control-label">Username SAP 2</label>
                     <input type="text" id="LicenseSecondaryUsername" class="form-control" autocomplete="off" />
